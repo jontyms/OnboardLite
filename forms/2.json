@@ -1,0 +1,79 @@
+[
+    {
+        "label": "We need a few more things.",
+        "input": "h1",
+        "elements": [
+            {
+                "label": "Preferred Email",
+                "caption": "We’ll use this to reach out to you if we need to.",
+                "input": "email",
+                "prefill": true,
+                "key": "email"
+            },
+            {
+                "label": "Knights Email",
+                "caption": "We need this to make sure you are a UCF student.",
+                "input": "email",
+                "prefill": true,
+                "key": "knights_email"
+            },
+            {
+                "label": "Are You Returning?",
+                "caption": "If so, welcome back! If not, welcome to Hack@UCF!",
+                "input": "radio",
+                "options": ["Yes", "No"],
+                "prefill": true,
+                "key": "is_returning"
+            }
+        ]
+    },
+    {
+        "label": "The following are used to get an idea of our demographics:",
+        "input": "h2",
+        "elements": [
+            {
+                "label": "Gender",
+                "input": "radio",
+                "options": ["Male", "Female", "Other / Prefer Not To Answer"],
+                "key": "gender"
+            },
+            {
+                "label": "Major",
+                "input": "dropdown",
+                "other": true,
+                "options": [
+                    "Computer Science",
+                    "Information Technology",
+                    "Computer Engineering",
+                    "Electrical Engineering",
+                    "Digital Forensics",
+                    "Cybersecurity and Privacy"
+                ],
+                "key": "major"
+            },
+            {
+                "label": "Class Standing",
+                "caption": "(by credit hours)",
+                "input": "dropdown",
+                "other": true,
+                "options": [
+                    "Freshman (0-29 credits)",
+                    "Sophomore (30-59 credits)",
+                    "Junior (60-89 credits)",
+                    "Senior (> 90 credits)",
+                    "Post-Bacc (secondary Bachelors)",
+                    "Master’s",
+                    "PhD"
+                ],
+                "key": "class_standing"
+            },
+            {
+                "label": "Shirt Size",
+                "caption": "(just in case)",
+                "input": "radio",
+                "options": ["S", "M", "L", "XL", "2XL", "3XL"],
+                "key": "shirt_size"
+            }
+        ]
+    }
+]
