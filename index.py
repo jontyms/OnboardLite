@@ -37,7 +37,7 @@ options = Options.fetch()
 from models.user import UserModel
 
 # Import routes
-from routes import api 
+from routes import api, admin
 
 ### TEMP
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
@@ -51,13 +51,20 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Import endpoints from ./routes
 app.include_router(api.router)
+app.include_router(admin.router)
 
 
+"""
+Render the Onboard home page.
+"""
 @app.get("/")
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
+"""
+Redirects to Discord for OAuth.
+"""
 @app.get("/discord/new/")
 async def oauth_transformer():
     # 
@@ -70,6 +77,9 @@ async def oauth_transformer():
     )
 
 
+"""
+Logs the user into Onboard via Discord OAuth and updates their Discord metadata.
+"""
 @app.get("/api/oauth/")
 async def oauth_transformer_new(request: Request, response: Response, code: str = None, redir: str = "/join/2"):
     # AWS dependencies
@@ -78,7 +88,7 @@ async def oauth_transformer_new(request: Request, response: Response, code: str 
 
     # Open redirect check
     hostname = urlparse(redir).netloc
-    if hostname is not "" or hostname is not "my.hackucf.org" or hostname is not "hackucf.org":
+    if hostname != "" or hostname != "my.hackucf.org" or hostname != "hackucf.org":
         redir = "/join/2"
 
     if code is None:
@@ -122,7 +132,6 @@ async def oauth_transformer_new(request: Request, response: Response, code: str 
     data = {
         "id": member_id,
         "discord_id": int(discordData['id']),
-        "sudo": False,
         "discord": {
             "email": discordData['email'],
             "mfa": discordData['mfa_enabled'],
@@ -217,14 +226,14 @@ async def oauth_transformer_new(request: Request, response: Response, code: str 
         table.put_item(Item=full_data)
     else:
         table.update_item(
-        Key={
-            'id': member_id
-        },
-        UpdateExpression='SET discord = :discord',
-        ExpressionAttributeValues={
-            ':discord': full_data['discord']
-        }
-    )
+            Key={
+                'id': member_id
+            },
+            UpdateExpression='SET discord = :discord',
+            ExpressionAttributeValues={
+                ':discord': full_data['discord']
+            }
+        )
 
     # Create JWT. This should be the only way to issue JWTs.
     jwtData = {
@@ -244,11 +253,20 @@ async def oauth_transformer_new(request: Request, response: Response, code: str 
     return rr
     
 
+"""
+Renders the landing page for the sign-up flow.
+"""
 @app.get("/join/")
-async def index(request: Request):
-    return templates.TemplateResponse("signup.html", {"request": request})
+async def index(request: Request, token: Optional[str] = Cookie(None)):
+    if token == None:
+        return templates.TemplateResponse("signup.html", {"request": request})
+    else:
+        return RedirectResponse("/join/2/", status_code=status.HTTP_302_FOUND)
 
 
+"""
+Renders a Kennelish form page, complete with stylings and UI controls.
+"""
 @app.get("/join/{num}/")
 @Authentication.member
 async def forms(request: Request, token: Optional[str] = Cookie(None), payload: Optional[object] = {}, num: str = 1):
@@ -273,12 +291,6 @@ async def forms(request: Request, token: Optional[str] = Cookie(None), payload: 
 
     # return num
     return templates.TemplateResponse("form.html", {"request": request, "icon": payload['pfp'], "name": payload['name'], "id": payload['id'], "body": body})
-
-
-@app.get("/admin/")
-@Authentication.admin
-async def admin(request: Request, token: Optional[str] = Cookie(None)):
-    return "admin w00t"
 
 
 if __name__ == "__main__":

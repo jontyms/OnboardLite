@@ -1,0 +1,38 @@
+[
+    {
+        "label": "Interests and Experience",
+        "input": "h1"
+    },
+    {
+        "label": "This page begins the optional stuff. These questions help us keep presentations relevant - we have a whole spectrum of content in computer and physical security to pull from, and we want to know what will benefit the most people.",
+        "input": "p"
+    },
+    {
+        "label": "These questions concentrate on what experience people have with computers, computer security, and generally breaking (into) things.",
+        "input": "p"
+    },
+    {
+        "label": "We'll try to keep this as fun as possible.",
+        "input": "p"
+    },
+    {
+        "label": "Security Experience",
+        "input": "h2",
+        "elements": [
+            {
+                "label": "\"Hacking\" Experience",
+                "caption": "How much do you know about computer security?",
+                "input": "slider",
+                "novice_label": "whats a computer",
+                "expert_label": "I plead the 5th",
+                "key": "experience.hacking"
+            },
+            {
+                "input": "navigation",
+                "next": "/join/4",
+                "prev": "/join/2",
+                "prev_label": "Back"
+            }
+        ]
+    }
+]

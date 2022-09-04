@@ -1,29 +1,34 @@
 [
     {
-        "label": "We need a few more things.",
+        "label": "About You",
         "input": "h1",
         "elements": [
+            {
+                "label": "We need to know who you are and to see if you are a Knight.",
+                "input": "p"
+            },
             {
                 "label": "Preferred Email",
                 "caption": "We’ll use this to reach out to you if we need to.",
                 "input": "email",
-                "prefill": true,
-                "key": "email"
+                "key": "email",
+                "required": true
             },
             {
                 "label": "Knights Email",
                 "caption": "We need this to make sure you are a UCF student.",
                 "input": "email",
-                "prefill": true,
-                "key": "knights_email"
+                "key": "knights_email",
+                "domain": "knights.ucf.edu",
+                "required": true
             },
             {
                 "label": "Are You Returning?",
                 "caption": "If so, welcome back! If not, welcome to Hack@UCF!",
                 "input": "radio",
                 "options": ["Yes", "No"],
-                "prefill": true,
-                "key": "is_returning"
+                "key": "is_returning",
+                "required": true
             }
         ]
     },
@@ -35,7 +40,8 @@
                 "label": "Gender",
                 "input": "radio",
                 "options": ["Male", "Female", "Other / Prefer Not To Answer"],
-                "key": "gender"
+                "key": "gender",
+                "required": true
             },
             {
                 "label": "Major",
@@ -49,7 +55,8 @@
                     "Digital Forensics",
                     "Cybersecurity and Privacy"
                 ],
-                "key": "major"
+                "key": "major",
+                "required": true
             },
             {
                 "label": "Class Standing",
@@ -65,14 +72,22 @@
                     "Master’s",
                     "PhD"
                 ],
-                "key": "class_standing"
+                "key": "class_standing",
+                "required": true
             },
             {
                 "label": "Shirt Size",
                 "caption": "(just in case)",
                 "input": "radio",
                 "options": ["S", "M", "L", "XL", "2XL", "3XL"],
-                "key": "shirt_size"
+                "key": "shirt_size",
+                "required": true
+            },
+            {
+                "input": "navigation",
+                "next": "/join/3",
+                "prev": "/",
+                "prev_label": "Cancel"
             }
         ]
     }

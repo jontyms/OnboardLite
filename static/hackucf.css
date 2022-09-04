@@ -1,7 +1,10 @@
 :root {
     --hackucf-gold: #D2990B;
+    --hackucf-light-grey: #434343;
     --hackucf-grey: #1C1C1C;
     --hackucf-off-white: #F9F9F9;
+    --hackucf-error: #cc575d;
+    --hackucf-error-transparent: #cc575daa;
     --text: #ffffff;
     --radius: 10px;
 }
@@ -15,6 +18,10 @@ html {
     color: var(--text);
     font-family: Roboto;
     padding: 25px;
+}
+
+a {
+    color: var(--hackucf-gold);
 }
 
 h1, h2, h3, h4, h5 {
@@ -58,6 +65,9 @@ h6 {
     float: right;
     background-position: right;
     text-align: right;
+}
+
+.logo .right {
     font-size: 30px;
 }
 
@@ -70,8 +80,22 @@ h6 {
     border-radius: var(--radius);
     padding: 12px;
     margin: 15px 0;
+    border: none;
     display: inline-block;
     transition: opacity 0.15s ease-in-out;
+}
+
+.btn.grey {
+    background: var(--hackucf-light-grey);
+}
+
+.btn.wide {
+    width: calc(100% - 10px);
+    text-align: center;
+}
+
+.unfocus {
+    opacity: 0.5;
 }
 
 .btn:hover {
@@ -160,6 +184,7 @@ input[type=text], input[type=email], input[type=password], select {
     background: var(--hackucf-off-white);
     font-size: 16px;
     width: 100%;
+    color: black;
 }
 
 select {
@@ -203,6 +228,32 @@ h4 {
 
 fieldset {
     border: none;
+}
+
+.radio.gridded {
+    display: grid;
+    grid-template-columns: auto auto auto auto auto;
+}
+
+.radio.gridded > div > label {
+    transform: translate(-40px, 30px);
+    width: 30px;
+    text-align: center;
+}
+
+.banner_vanishing {
+    display: static;
+    position: fixed;
+    width: 50vw;
+    background: var(--hackucf-error-transparent);
+    margin: 10px;
+    padding: 10px;
+    font-size: 18px;
+    border-radius: var(--radius);
+    filter: drop-shadow(0 0 5px black);
+    backdrop-filter: blur(5px);
+    z-index: 999;
+    transition: opacity 0.15s ease-in-out;
 }
 
 @media screen and (max-width: 619px) {

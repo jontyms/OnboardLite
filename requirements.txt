@@ -1,5 +1,9 @@
+requests
 fastapi
 pydantic
-jose
+python-jose
 requests_oauthlib
 gspread
+boto3
+botocore
+uvicorn
