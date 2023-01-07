@@ -8,6 +8,19 @@
                 "input": "p"
             },
             {
+                "label": "First Name",
+                "caption": "Your (preferred) first name.",
+                "input": "text",
+                "key": "first_name",
+                "required": true
+            },
+            {
+                "label": "Surname",
+                "caption": "The rest of your name, including middle name if you have one.",
+                "input": "text",
+                "key": "surname"
+            },
+            {
                 "label": "Preferred Email",
                 "caption": "We’ll use this to reach out to you if we need to.",
                 "input": "email",

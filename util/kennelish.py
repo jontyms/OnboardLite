@@ -33,10 +33,14 @@ class Kennelish:
                     output += Kennelish.text(entry, user_data)
                 elif entry['input'] == 'radio':
                     output += Kennelish.radio(entry, user_data)
+                elif entry['input'] == 'checkbox':
+                    output += Kennelish.checkbox(entry, user_data)
                 elif entry['input'] == 'dropdown':
                     output += Kennelish.dropdown(entry, user_data)
                 elif entry['input'] == 'slider':
                     output += Kennelish.slider(entry, user_data)
+                elif entry['input'] == 'signature':
+                    output += Kennelish.signature(entry, user_data)
                 elif entry['input'] == 'navigation':
                     output += Kennelish.navigation(entry)
                 else:
@@ -56,6 +60,10 @@ class Kennelish:
     def header(entry, user_data=None, tag="h1"):
         output = f"<{tag}>{entry.get('label', '')}</{tag}>"
         output += Kennelish.parse(entry.get('elements', []), user_data)
+        return output
+
+    def signature(entry, user_data=None):
+        output = f"<div name='{entry.get('key')}' class='signature'>By submitting this form, you, {user_data.get('first_name', 'HackUCF Member #' + user_data.get('id'))} {user_data.get('surname', '')}, agree to the above terms. This form will be time-stamped.</div>"
         return output
 
     def text(entry, user_data=None, inp_type="text"):
@@ -81,7 +89,7 @@ class Kennelish:
         elif inp_type == 'email':
             regex_pattern = ' pattern="([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\\.[A-Z|a-z]{2,})+"'
 
-        output = f"<input class='kennelish_input'{' required' if entry.get('required') else ' '}{regex_pattern} name='{entry['key']}' type='{inp_type}' value='{prefill}' placeholder='{entry.get('label', '')}' '/>"
+        output = f"<input class='kennelish_input'{' required' if entry.get('required') else ' '}{regex_pattern} name='{entry.get('key', '')}' type='{inp_type}' value='{prefill}' placeholder='{entry.get('label', '')}' '/>"
         return Kennelish.label(entry, output)
 
     def radio(entry, user_data=None):
@@ -96,10 +104,23 @@ class Kennelish:
             prefill = ""
         
         
-        output = f"<fieldset name='{entry['key']}'{' required' if entry.get('required') else ' '} class='kennelish_input radio'>"
+        output = f"<fieldset name='{entry.get('key', '')}'{' required' if entry.get('required') else ' '} class='kennelish_input radio'>"
         for option in entry['options']:
             selected = "" if option != prefill else "checked"
-            output += f"<div><input type='radio' {selected} name='{entry['key']}' id='radio_{entry['key']}_{option}' value='{option}'><label for='radio_{entry['key']}_{option}'>{option}</label></div>"
+            output += f"<div><input type='radio' {selected} name='{entry.get('key', '')}' id='radio_{entry.get('key', '').replace('.', '_').replace(' ', '_')}_{option}' value='{option}'><label for='radio_{entry.get('key', '').replace('.', '_').replace(' ', '_')}_{option}'>{option}</label></div>"
+        output += "</fieldset>"
+        return Kennelish.label(entry, output)
+
+    def checkbox(entry, user_data=None):
+        # Checkboxes do not support pre-filling!
+        
+        output = f"<fieldset name='{entry.get('key', '')}'{' required' if entry.get('required') else ' '} class='kennelish_input checkbox'>"
+        for option in entry.get('options'):
+            output += f"<div><input type='checkbox' name='{entry.get('key', '')}' id='checkbox_{entry.get('key', '').replace('.', '_').replace(' ', '_')}_{option}' value='{option}'><label for='checkbox_{entry.get('key', '').replace('.', '_').replace(' ', '_')}_{option}'>{option}</label></div>"
+        
+        # Other
+        output += f"<div><input type='checkbox' name='{entry.get('key', '')}' id='checkbox_{entry.get('key', '').replace('.', '_').replace(' ', '_')}_OTHER' value='_other'><label for='checkbox_{entry.get('key', '').replace('.', '_').replace(' ', '_')}_OTHER'>Other</label></div>"
+        output += f"<input id='{entry.get('key', '').replace('.', '_').replace(' ', '_')}' class='other_checkbox' type='text' placeholder='{entry.get('label', 'Other')}...'>"
         output += "</fieldset>"
         return Kennelish.label(entry, output)
 
@@ -112,12 +133,12 @@ class Kennelish:
         else:
             prefill = "_default"        
         
-        output = f"<select class='kennelish_input'{' required' if entry.get('required') else ' '} name='{entry['key']}'><option disabled {'selected ' if prefill == '_default' else ''}value='_default'>Select...</option>"
-        for option in entry['options']:
+        output = f"<select class='kennelish_input'{' required' if entry.get('required') else ' '} name='{entry.get('key', '')}'><option disabled {'selected ' if prefill == '_default' else ''}value='_default'>Select...</option>"
+        for option in entry.get('options'):
             output += f"<option {'selected ' if prefill == option else ''}value='{option}'>{option}</option>"
 
         if entry.get("other"):
-            output += f"<option value='_other'>Other</option></select><input id='{entry['key']}' class='other_dropdown' type='text' placeholder='{entry.get('label', 'Other')}...'>"
+            output += f"<option value='_other'>Other</option></select><input id='{entry.get('key', '').replace('.', '_').replace(' ', '_')}' class='other_dropdown' type='text' placeholder='{entry.get('label', 'Other')}...'>"
         else:
             output += "</select>"
         return Kennelish.label(entry, output)
@@ -136,11 +157,11 @@ class Kennelish:
         expert_label = entry.get('expert_label', "Expert")
         
         
-        output = f"<span>{novice_label}</span><span class='right'>{expert_label}</span><br>"
-        output += f"<fieldset name='{entry['key']}'{' required' if entry.get('required') else ' '} class='kennelish_input radio gridded'>"
+        output = f"<span class='caption'>{novice_label}</span><span class='right caption'>{expert_label}</span><br>"
+        output += f"<fieldset name='{entry.get('key', '')}'{' required' if entry.get('required') else ' '} class='kennelish_input radio gridded'>"
         for option in range(1, 6):
             selected = "" if option != prefill else "checked"
-            output += f"<div><input type='radio' {selected} name='{entry['key']}' id='radio_{entry['key']}_{option}' value='{option}'><label for='radio_{entry['key']}_{option}'>{option}</label></div>"
+            output += f"<div><input type='radio' {selected} name='{entry.get('key', '')}' id='radio_{entry.get('key', '').replace('.', '_').replace(' ', '_')}_{option}' value='{option}'><label for='radio_{entry.get('key', '').replace('.', '_').replace(' ', '_')}_{option}'>{option}</label></div>"
         output += "</fieldset>"
         return Kennelish.label(entry, output)
 
@@ -194,7 +215,7 @@ class Transformer:
                 obj = {**obj, **Transformer.kennelish_to_form(el.get("elements"))}
 
             # For when a choice is REQUIRED.
-            elif element_type == "radio" or (element_type == "dropdown" and el.get("other", False)):
+            elif element_type == "radio" or (element_type == "dropdown" and not el.get("other", True)):
                 obj[el.get("key")] = (Literal[tuple(el.get("options"))], None)
             
             # For emails (specified domain)
@@ -207,10 +228,16 @@ class Transformer:
                 regex_constr = constr(regex="([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\\.[A-Z|a-z]{2,})+")
                 obj[el.get("key")] = (regex_constr, None)
 
+            # For numbers
+            elif element_type == "slider":
+                obj[el.get("key")] = (int, None)
+
             # For arbitrary strings.
             elif el.get("key") != None:
                 obj[el.get("key")] = (str, None)
 
+
+        print(obj)
         return obj
 
 

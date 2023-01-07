@@ -202,7 +202,6 @@ input[type=text]:focus, input[type=email]:focus, input[type=password]:focus {
 label {
     font-size: 18px;
     display: inline-block;
-    transform: translateY(-7px);
 }
 
 .entry {
@@ -221,7 +220,7 @@ h4 {
     font-weight: normal;
 }
 
-.other_dropdown {
+.other_dropdown, .other_checkbox {
     display: none;
     margin-top: 10px;
 }
@@ -236,9 +235,10 @@ fieldset {
 }
 
 .radio.gridded > div > label {
-    transform: translate(-40px, 30px);
     width: 30px;
     text-align: center;
+    display: block;
+    transform: translateX(-5px);
 }
 
 .banner_vanishing {
@@ -254,6 +254,17 @@ fieldset {
     backdrop-filter: blur(5px);
     z-index: 999;
     transition: opacity 0.15s ease-in-out;
+}
+
+.caption {
+    color: var(--hackucf-light-grey);
+    font-style: italic;
+}
+
+.signature {
+    color: var(--hackucf-gold);
+    font-style: italic;
+    text-align: center;
 }
 
 @media screen and (max-width: 619px) {

@@ -1,6 +1,7 @@
 // Other dropdown logic
 
 let dropdowns = document.querySelectorAll("select");
+let checkboxes = document.querySelectorAll("fieldset.checkbox");
 
 for (let i = 0; i < dropdowns.length; i++) {
     dropdowns[i].onchange = evt => {
@@ -9,6 +10,17 @@ for (let i = 0; i < dropdowns.length; i++) {
             el.parentElement.querySelector(".other_dropdown").style.display = "block";
         } else {
             el.parentElement.querySelector(".other_dropdown").style.display = "none";
+        }
+    }
+}
+
+for (let i = 0; i < checkboxes.length; i++) {
+    checkboxes[i].onchange = evt => {
+        let el = evt.target;
+        if (el.value == "_other" && el.checked) {
+            el.parentElement.parentElement.querySelector(".other_checkbox").style.display = "block";
+        } else if (el.value == "_other") {
+            el.parentElement.parentElement.querySelector(".other_checkbox").style.display = "none";
         }
     }
 }
@@ -46,7 +58,7 @@ function banner(str, trusted) {
 
 // Gets the value of an element.
 function get_value(el) {
-    let key = el.name;
+    let key = el.getAttribute("name");
     let value;
 
     if (el.nodeName == "INPUT") {
@@ -56,7 +68,7 @@ function get_value(el) {
         // this is a dropdown
         if (el.value == "_other") {
             // Take value from Other text box
-            value = document.querySelector(`.other_dropdown#${key}`).value;
+            value = document.querySelector(`.other_dropdown#${key.replaceAll(".", "_").replaceAll(" ", "_")}`).value;
         } else if (el.value == "_default") {
             value = undefined;
         } else {
@@ -64,11 +76,20 @@ function get_value(el) {
             value = el.value;
         }
     } else if (el.nodeName == "FIELDSET") {
-        // this is a radio
+        // this is a radio or a checkbox
+        value = "";
         let options = el.querySelectorAll("div > input");
         for (let j = 0; j < options.length; j++) {
             if (options[j].checked) {
-                value = options[j].value;
+                if (value != "")
+                    value += ", "
+
+                if (options[j].value == "_other") {
+                    // Take value from Other text box
+                    value += document.querySelector(`.other_checkbox#${key.replaceAll(".", "_").replaceAll(" ", "_")}`).value;
+                } else {
+                    value += options[j].value;
+                }
             }
         }
     }
@@ -94,7 +115,7 @@ function get_body() {
      */
     
     for (let i = 0; i < els.length; i++) {
-        let key = els[i].name;
+        let key = els[i].getAttribute("name");
         let value = get_value(els[i]);
 
         body[key] = value;
@@ -110,6 +131,13 @@ function get_body() {
         // body[key] = value;
         // }
 
+    }
+
+    if (document.querySelector(".signature")) {
+        const timestamp = Date.now();
+        let sign_key = document.querySelector(".signature").getAttribute("name");
+
+        body[sign_key] = timestamp;
     }
 
     return body;
@@ -193,8 +221,7 @@ function submit_and_nav(target_url) {
             "Content-Type": "application/json",
         },
         body: JSON.stringify(body)
-    }).then(data => {
-        console.log(data)
-        // window.location.href = target_url;
+    }).then(_ => {
+        window.location.href = target_url;
     })
 }

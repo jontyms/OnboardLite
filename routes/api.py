@@ -60,8 +60,6 @@ async def get_form_html(request: Request, token: Optional[str] = Cookie(None), p
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
 
-    print(payload)
-
     # Get form object
     data = Options.get_form_body(num)
 
@@ -101,9 +99,9 @@ async def post_form(request: Request, token: Optional[str] = Cookie(None), paylo
     for item in items_to_update:
         if item[1] != None:
             # English -> Boolean
-            if item[1] == "Yes":
+            if item[1] == "Yes" or item[1] == "I promise not to do this.":
                 item = (item[0], True)
-            elif item[1] == "No":
+            elif item[1] == "No" or item[1] == "I disagree with this and do not wish to be part of Hack@UCF":
                 item = (item[0], False)
 
             items_to_keep.append(item)
@@ -111,6 +109,10 @@ async def post_form(request: Request, token: Optional[str] = Cookie(None), paylo
     update_expression = "SET "
     expression_attribute_values = {}
 
+    # Here, the variable 'items_to_keep' is validated input. We can update the user's profile from here.
+    
+    print(items_to_keep)
+    
     # Prepare to update to DynamoDB
     for item in items_to_keep:
         update_expression += f"{item[0]} = :{item[0].replace('.', '_')}, "
@@ -118,8 +120,6 @@ async def post_form(request: Request, token: Optional[str] = Cookie(None), paylo
 
     # Strip last comma for update_expression
     update_expression = update_expression[:-2]
-
-    # Here, the variable 'validated' is validated input. We can update the user's profile from here.
 
     # AWS dependencies
     dynamodb = boto3.resource('dynamodb')

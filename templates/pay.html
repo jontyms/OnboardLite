@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, user-scalable=0">
+
+    <title>Pay Dues - HackUCF</title>
+    <link rel="stylesheet" type="text/css" href="/static/hackucf.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@900&family=Roboto:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://use.fontawesome.com/releases/v6.1.1/css/all.css" rel="stylesheet">
+
+    <!-- Stripe -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?version=3.52.1&features=fetch"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+    <div class="app" id="{{id}}">
+        <div class="header">
+            <span class="logo right big">Hack@UCF</span>
+            <div class="user">
+                <div class="icon" style="background-image: url({{icon}})"></div>
+                <h2>{{name}}</h2>
+                <h3>via Discord</h3><br>
+            </div>
+        </div>
+        <div class="form">
+            <h1>Pay Dues</h1>
+            <p>Hack@UCF members get access to some very nice perks, some of which are pretty unique. With the help of membership dues and our sponsors, we are able to provide exclusive access to some cool resources and other benefits:</p>
+            <ul>
+                <li>Eligibility to vote in annual executive election as well as hold office (pending active participation and attendance).</li>
+                <li>Food and drinks at select events at no cost.</li>
+                <li>Access to members-only workshops and training material.</li>
+                <li>Access to members-only hardware and resources, when available, including CyberLab workstations.</li>
+                <li>Access to extended benefits such as Operations, Alumni networks, and hands-on infrastructure development.</li>
+            </ul>
+            <p>While we highly recommend paying dues, they are not required for most of our events.</p>
+            <div class="entry">
+                <div>
+                    <button type="button" class="btn wide grey" onclick="submit_and_nav('/join/4')">Skip</button>
+                </div>
+                <div>
+                    <form action="/pay/checkout/" method="POST">
+                        <button type="submit" id="checkout-button" class="btn wide">Pay Dues</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="/static/form.js"></script>
+</html>

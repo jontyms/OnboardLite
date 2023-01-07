@@ -16,21 +16,72 @@
         "input": "p"
     },
     {
-        "label": "Security Experience",
+        "label": "",
         "input": "h2",
         "elements": [
             {
-                "label": "\"Hacking\" Experience",
+                "label": "Cybersecurity Experience",
                 "caption": "How much do you know about computer security?",
                 "input": "slider",
-                "novice_label": "whats a computer",
+                "novice_label": "whats a computer?",
                 "expert_label": "I plead the 5th",
-                "key": "experience.hacking"
+                "key": "experience"
+            },
+            {
+                "label": "Interests",
+                "caption": "What do you want to learn from the club?",
+                "input": "checkbox",
+                "key": "curiosity",
+                "options": [
+                    "How to set up a homelab/personal server",
+                    "How to protect yourself online",
+                    "How to develop good, secure software",
+                    "How to get any job",
+                    "How to compete in CTF competitions",
+                    "Lock Picking",
+                    "Electronic entry systems (HID, RFID, CAC cards, biometrics)",
+                    "Network security",
+                    "Web application security",
+                    "Binary exploitation or reverse engineering (finding out how binary programs work)",
+                    "Car hacking (messing with the CAN bus)",
+                    "Internet of Things (hack a fridge, IP camera, lightbulb, etc)",
+                    "Cryptography",
+                    "Incident response"
+                ]
+            },
+            {
+                "label": "I would go to the following events:",
+                "caption": "",
+                "input": "checkbox",
+                "key": "attending",
+                "other": true,
+                "options": [
+                    "Weekly Meetings",
+                    "Workshops",
+                    "Beginner Seminars",
+                    "Tailgating",
+                    "CTF Competitions",
+                    "Social events"
+                ]
+            },
+            {
+                "label": "I am interested in the Collegiate Cybersecurity Competition (C3) Team",
+                "caption": "Represent UCF in national-level competitions like CCDC, CPTC, and CyberForce. <a href='https://bit.ly/UCF_C3Team'>bit.ly/UCF_C3Team</a>",
+                "input": "radio",
+                "options": ["Yes", "No"],
+                "key": "c3_interest"
+            },
+            {
+                "label": "Any additional comments?",
+                "caption": "Anything you want to ask to tell the club leadership? The executives do read this, we promise.",
+                "input": "text",
+                "key": "comments"
             },
             {
                 "input": "navigation",
-                "next": "/join/4",
+                "next": "/join/ethics_form_midway",
                 "prev": "/join/2",
+                "next_label": "Ethics Form",
                 "prev_label": "Back"
             }
         ]

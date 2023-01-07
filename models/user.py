@@ -29,33 +29,27 @@ class DiscordModel(BaseModel):
     servers:            DiscordServersModel
 
 
-class ExperienceModel(BaseModel):
-    hacking:            Optional[int] = None
-    phys_sec:           Optional[int] = None
-    languages:          Optional[int] = None
+class EthicsFormModel(BaseModel):
+    hack_others:        Optional[bool] = False
+    hack_ucf:           Optional[bool] = False
+    interrupt_ucf:      Optional[bool] = False
+    manip_traffic:      Optional[bool] = False
+    bypass_dhcp:        Optional[bool] = False
+    pirate:             Optional[bool] = False
+    host_at_ucf:        Optional[bool] = False
+    signtime:           Optional[int] = 0
 
 
-class CuriosityModel(BaseModel):
-    hacking:            Optional[int] = None
-    phys_sec:           Optional[int] = None
-    general:            Optional[int] = None
+class CyberLabModel(BaseModel):
+    resource:           Optional[bool] = False
+    clean:              Optional[bool] = False
+    no_profane:         Optional[bool] = False
+    access_control:     Optional[bool] = False
+    report_damage:      Optional[bool] = False
+    be_nice:            Optional[bool] = False
+    can_revoke:         Optional[bool] = False
+    signtime:           Optional[int] = 0
 
-
-class InterestModel(BaseModel):
-    gbm:                Optional[int] = None
-    ctf_practice:       Optional[int] = None
-    ctf_competitions:   Optional[int] = None
-    bbq:                Optional[int] = None
-    tailgating:         Optional[int] = None
-    movies:             Optional[int] = None
-    other:              Optional[int] = None
-    ops:                Optional[int] = None
-    knightsec:          Optional[int] = None
-    ccdc:               Optional[int] = None
-    cptc:               Optional[int] = None
-    infra:              Optional[int] = None
-    present:            Optional[int] = None
-    research:           Optional[int] = None
 
 class UserModel(BaseModel):
     # Identifiers
@@ -76,18 +70,27 @@ class UserModel(BaseModel):
     major:              Optional[str] = ""
     class_standing:     Optional[str] = ""
     shirt_size:         Optional[str] = ""
-    time_availability:  Optional[int] = 0
+    time_availability:  Optional[str] = ""
+    phone_number:       Optional[int] = 0
 
     # Permissions and Member Status
     sudo:               Optional[bool] = False
     did_pay_dues:       Optional[bool] = False
     join_date:          Optional[int] = None
 
+    # Paperwork Signed
+    ethics_form:        Optional[EthicsFormModel] = EthicsFormModel()
+    cyberlab_monitor:   Optional[CyberLabModel] = CyberLabModel()
+
     # Other models
     discord:            DiscordModel
-    experience:         Optional[ExperienceModel] = ExperienceModel()
-    curiosity:          Optional[CuriosityModel] = CuriosityModel()
-    interest:           Optional[InterestModel] = InterestModel()
+    experience:         Optional[int] = None
+    curiosity:          Optional[str] = None
+    c3_interest:        Optional[bool] = False
+
+    # Other things
+    attending:          Optional[str] = ""
+    comments:           Optional[str] = ""
 
 
 class PublicContact(BaseModel):

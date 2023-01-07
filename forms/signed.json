@@ -1,0 +1,17 @@
+[
+    {
+        "label": "Form signed!",
+        "input": "h2",
+        "elements": [
+            {
+                "label": "Form signed successfully!",
+                "input": "p"
+            },
+            {
+                "input": "navigation",
+                "next": "/",
+                "next_label": "Go Home"
+            }
+        ]
+    }
+]
