@@ -14,7 +14,7 @@ from models.info import InfoModel
 from util.authentication import Authentication
 from util.errors import Errors
 from util.options import Options
-from util.kennelish import Kennelish, Transformer
+from util.approve import Approve
 
 import stripe
 
@@ -61,7 +61,7 @@ async def create_checkout_session(request: Request, token: Optional[str] = Cooki
                     'quantity': 1,
                 },
             ],
-            customer_email=user_data.get('knights_email'),
+            customer_email=user_data.get('nid') + "@ucf.edu",
             mode='payment',
             success_url=options.get('stripe').get('url').get('success'),
             cancel_url=options.get('stripe').get('url').get('failure'),
@@ -117,6 +117,7 @@ async def webhook(request: Request):
 
 def pay_dues(session):
     customer_email = session.get('customer_email')
+    nid = customer_email.replace("@ucf.edu", "")
 
     print(customer_email)
 
@@ -126,18 +127,21 @@ def pay_dues(session):
 
     # Get data from DynamoDB
     response = table.scan(
-        FilterExpression=Attr('knights_email').eq(customer_email)
+        FilterExpression=Attr('nid').eq(nid)
     ).get("Items", None)[0]
 
-    print(response)
+    member_id = response.get('id')
 
     # Set PAID.
     table.update_item(
         Key={
-            'id': response.get('id')
+            'id': member_id
         },
         UpdateExpression='SET did_pay_dues = :val',
         ExpressionAttributeValues={
             ':val': True
         }
     )
+
+    # Do checks to 
+    Approve.approve_member(member_id)

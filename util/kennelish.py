@@ -89,7 +89,7 @@ class Kennelish:
         elif inp_type == 'email':
             regex_pattern = ' pattern="([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\\.[A-Z|a-z]{2,})+"'
 
-        output = f"<input class='kennelish_input'{' required' if entry.get('required') else ' '}{regex_pattern} name='{entry.get('key', '')}' type='{inp_type}' value='{prefill}' placeholder='{entry.get('label', '')}' '/>"
+        output = f"<input class='kennelish_input'{' required' if entry.get('required') else ' '}{regex_pattern} name='{entry.get('key', '')}' type='{inp_type}' value='{prefill}' placeholder='{entry.get('label', '')}' />"
         return Kennelish.label(entry, output)
 
     def radio(entry, user_data=None):
@@ -236,8 +236,6 @@ class Transformer:
             elif el.get("key") != None:
                 obj[el.get("key")] = (str, None)
 
-
-        print(obj)
         return obj
 
 

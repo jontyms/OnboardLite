@@ -1,6 +1,6 @@
 requests
 fastapi
-pydantic
+pydantic==1.10.10
 python-jose
 requests_oauthlib
 gspread

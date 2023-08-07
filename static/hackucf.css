@@ -267,6 +267,34 @@ fieldset {
     text-align: center;
 }
 
+.ico {
+    font-size: 100px;
+    font-weight: bold;
+    font-family: math, monospace, serif;
+}
+
+.red {
+    color: #CC575D;
+}
+
+.green {
+    color: #57CC7F;
+}
+
+.blue {
+    color: #0B8AD2;
+}
+
+.gold {
+    color: #D2990B;
+}
+
+.qr {
+    height: 250px;
+    margin-left: 250px;
+    margin-bottom: 20px;
+}
+
 @media screen and (max-width: 619px) {
     .entry {
         grid-template-columns: auto;

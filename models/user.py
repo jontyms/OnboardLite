@@ -1,23 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
 
-class DiscordServersModel(BaseModel):
-    ucf_hub:            Optional[bool] = False
-    ucf_cecs:           Optional[bool] = False
-    ucf_it:             Optional[bool] = False
-    knight_hacks:       Optional[bool] = False
-    ai_ucf:             Optional[bool] = False
-    ncae_cybergames:    Optional[bool] = False
-    honors_congress:    Optional[bool] = False
-    nsa_codebreakers:   Optional[bool] = False
-    sunshinectf:        Optional[bool] = False
-    htb:                Optional[bool] = False
-    metactf:            Optional[bool] = False
-    cptc:               Optional[bool] = False
-    acm:                Optional[bool] = False
-    google_dev_ucf:     Optional[bool] = False
-
-
 class DiscordModel(BaseModel):
     email:              str
     mfa:                bool
@@ -26,7 +9,7 @@ class DiscordModel(BaseModel):
     color:              int
     nitro:              int
     locale:             str
-    servers:            DiscordServersModel
+    username:           str
 
 
 class EthicsFormModel(BaseModel):
@@ -60,16 +43,18 @@ class UserModel(BaseModel):
     ops_email:          Optional[str] = None
     infra_email:        Optional[str] = None
 
+    minecraft:          Optional[str] = ""
+
     # PII
     first_name:         Optional[str] = ""
     surname:            Optional[str] = ""
     email:              Optional[str] = ""
-    knights_email:      Optional[str] = ""
     is_returning:       Optional[bool] = False
     gender:             Optional[str] = ""
     major:              Optional[str] = ""
     class_standing:     Optional[str] = ""
     shirt_size:         Optional[str] = ""
+    did_get_shirt:      Optional[bool] = False
     time_availability:  Optional[str] = ""
     phone_number:       Optional[int] = 0
 
@@ -81,6 +66,8 @@ class UserModel(BaseModel):
     # Paperwork Signed
     ethics_form:        Optional[EthicsFormModel] = EthicsFormModel()
     cyberlab_monitor:   Optional[CyberLabModel] = CyberLabModel()
+    
+    is_full_member:     Optional[bool] = False
 
     # Other models
     discord:            DiscordModel

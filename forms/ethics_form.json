@@ -24,7 +24,7 @@
                 "key": "ethics_form.hack_others"
             },
             {
-                "caption": "Deliberately perform an act which will seriously impact the operation of UCF computers, peripherals, or networks. This includes, but is not limited to, tampering with components of a network or otherwise blocking communication lines (Denial of Service attacks), or interfering with the operational readiness of a computer without permission.",
+                "caption": "Deliberately perform an act which will seriously impact the operation of computers, peripherals, or networks that I do not own (including UCF's). This includes, but is not limited to, tampering with components of a network or otherwise blocking communication lines (Denial of Service attacks), or interfering with the operational readiness of a computer without permission.",
                 "input": "radio",
                 "required": true,
                 "options": ["I promise not to do this."],

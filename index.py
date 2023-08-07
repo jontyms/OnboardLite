@@ -65,11 +65,17 @@ async def index(request: Request):
 
 """
 Redirects to Discord for OAuth.
+This is what is linked to by Onboard.
 """
 @app.get("/discord/new/")
-async def oauth_transformer():
-    # 
-    oauth = OAuth2Session(options.get("discord").get("client_id"), redirect_uri=options.get("discord").get("redirect"), scope=options.get("discord").get("scope"))
+async def oauth_transformer(redir: str = "/join/2"):
+    # Open redirect check
+    hostname = urlparse(redir).netloc
+    print(hostname)
+    if hostname != "" and hostname != "my.hackucf.org" and hostname != "hackucf.org":
+        redir = "/join/2"
+
+    oauth = OAuth2Session(options.get("discord").get("client_id"), redirect_uri=options.get("discord").get("redirect_base") + redir, scope=options.get("discord").get("scope"))
     authorization_url, state = oauth.authorization_url('https://discord.com/api/oauth2/authorize')
 
     return RedirectResponse(
@@ -80,6 +86,7 @@ async def oauth_transformer():
 
 """
 Logs the user into Onboard via Discord OAuth and updates their Discord metadata.
+This is what Discord will redirect to.
 """
 @app.get("/api/oauth/")
 async def oauth_transformer_new(request: Request, response: Response, code: str = None, redir: str = "/join/2"):
@@ -89,14 +96,14 @@ async def oauth_transformer_new(request: Request, response: Response, code: str 
 
     # Open redirect check
     hostname = urlparse(redir).netloc
-    if hostname != "" or hostname != "my.hackucf.org" or hostname != "hackucf.org":
+    if hostname != "" and hostname != "my.hackucf.org" and hostname != "hackucf.org":
         redir = "/join/2"
 
     if code is None:
-        return Errors.generate(request, 401, "You declined Discord log-in", essay="We need your Discord account to log into Hack@UCF Onboard.")
+        return Errors.generate(request, 401, "You declined Discord log-in", essay="We need your Discord account to log into myHack@UCF.")
 
     # Get data from Discord
-    oauth = OAuth2Session(options.get("discord").get("client_id"), redirect_uri=options.get("discord").get("redirect"), scope=options.get("discord")['scope'])
+    oauth = OAuth2Session(options.get("discord").get("client_id"), redirect_uri=options.get("discord").get("redirect_base") + redir, scope=options.get("discord")['scope'])
 
     token = oauth.fetch_token(
         'https://discord.com/api/oauth2/token',
@@ -108,9 +115,6 @@ async def oauth_transformer_new(request: Request, response: Response, code: str 
 
     r = oauth.get('https://discord.com/api/users/@me')
     discordData = r.json()
-
-    r2 = oauth.get('https://discord.com/api/users/@me/guilds')
-    discordServers = r2.json()
 
     # Generate a new user ID or reuse an existing one.
     query_for_id = table.scan(
@@ -141,22 +145,7 @@ async def oauth_transformer_new(request: Request, response: Response, code: str 
             "color": discordData['accent_color'],
             "nitro": discordData['public_flags'],
             "locale": discordData['locale'],
-            "servers": {
-                "ucf_hub": False,
-                "ucf_cecs": False,
-                "ucf_it": False,
-                "knight_hacks": False,
-                "ai_ucf": False,
-                "ncae_cybergames": False,
-                "honors_congress": False,
-                "nsa_codebreakers": False,
-                "sunshinectf": False,
-                "htb": False,
-                "metactf": False,
-                "cptc": False,
-                "acm": False,
-                "google_dev_ucf": False
-            }
+            "username": discordData['username']
         }
         ## Consider making this a separate table.
         # "attendance": None # t/f based on dict/object keyed on iso-8601 date.
@@ -164,63 +153,6 @@ async def oauth_transformer_new(request: Request, response: Response, code: str 
 
     # Populate the full table.
     full_data = UserModel(**data).dict()
-    
-    for server in discordServers:
-        # UCF Hub
-        if server['id'] == "882703788807430226":
-            full_data['discord']['servers']['ucf_hub'] = True
-        # CECS
-        elif server['id'] == "384834085752930305":
-            full_data['discord']['servers']['ucf_cecs'] = True
-            full_data['major'] = "Computer Science"
-        # IT
-        elif server['id'] == "715245556477329408":
-            full_data['discord']['servers']['ucf_it'] = True
-            full_data['major'] = "Information Technology"
-        # Knight Hacks
-        elif server['id'] == "486628710443778071":
-            full_data['discord']['servers']['knight_hacks'] = True
-        # AI@UCF
-        elif server['id'] == "363524680851914752":
-            full_data['discord']['servers']['ai_ucf'] = True
-            major = "Computer Science"
-        # NCAE CyberGames
-        elif server['id'] == "624969095292518401":
-            full_data['discord']['servers']['ncae_cybergames'] = True
-            full_data['interest']['ccdc'] = True
-        # HonCon
-        elif server['id'] == "806750429919576126":
-            full_data['discord']['servers']['honors_congress'] = True
-        # CodeBreakers
-        elif server['id'] == "770394594558869515":
-            full_data['discord']['servers']['nsa_codebreakers'] = True
-            full_data['interest']['ctf_competitions'] = True
-            full_data['interest']['knightsec'] = True
-        # SunshineCTF
-        elif server['id'] == "554296798106353689":
-            full_data['discord']['servers']['sunshinectf'] = True
-            full_data['interest']['ctf_competitions'] = True
-            full_data['interest']['knightsec'] = True
-        # HTB
-        elif server['id'] == "473760315293696010":
-            full_data['discord']['servers']['htb'] = True
-            full_data['interest']['cptc'] = True
-        # MetaCTF
-        elif server['id'] == "753394274728673310":
-            full_data['discord']['servers']['metactf'] = True
-            full_data['interest']['ctf_competitions'] = True
-            full_data['interest']['knightsec'] = True
-        # CPTC
-        elif server['id'] == "769602712652218399":
-            full_data['discord']['servers']['cptc'] = True
-            full_data['interest']['cptc'] = True
-        # ACM
-        elif server['id'] == "595440381944922112":
-            full_data['discord']['servers']['acm'] = True
-        # GDSC
-        elif server['id'] == "753408218998374450":
-            full_data['discord']['servers']['google_dev_ucf'] = True
-            major = "Computer Science"
 
     # Push data back to DynamoDB
     if is_new:
@@ -258,11 +190,38 @@ async def oauth_transformer_new(request: Request, response: Response, code: str 
 Renders the landing page for the sign-up flow.
 """
 @app.get("/join/")
-async def index(request: Request, token: Optional[str] = Cookie(None)):
+async def join(request: Request, token: Optional[str] = Cookie(None)):
     if token == None:
         return templates.TemplateResponse("signup.html", {"request": request})
     else:
         return RedirectResponse("/join/2/", status_code=status.HTTP_302_FOUND)
+
+
+"""
+Renders a basic "my membership" page
+"""
+@app.get("/profile/")
+async def profile(request: Request, token: Optional[str] = Cookie(None)):
+    if token == None:
+        return RedirectResponse("/discord/new/?redir=/profile", status_code=status.HTTP_302_FOUND)
+    else:
+        return RedirectResponse("/profile/user", status_code=status.HTTP_302_FOUND)
+
+@app.get("/profile/user")
+@Authentication.member
+async def profile(request: Request, token: Optional[str] = Cookie(None), payload: Optional[object] = {}):
+    # Get data from DynamoDB
+    dynamodb = boto3.resource('dynamodb')
+    table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
+    print(token)
+
+    user_data = table.get_item(
+        Key={
+            'id': payload.get('id')
+        }
+    ).get("Item", None)
+
+    return templates.TemplateResponse("profile.html", {"request": request, "user_data": user_data})
 
 
 """
@@ -292,6 +251,11 @@ async def forms(request: Request, token: Optional[str] = Cookie(None), payload: 
 
     # return num
     return templates.TemplateResponse("form.html", {"request": request, "icon": payload['pfp'], "name": payload['name'], "id": payload['id'], "body": body})
+
+
+@app.get("/final")
+async def final(request: Request):
+    return templates.TemplateResponse("done.html", {"request": request})
 
 
 if __name__ == "__main__":

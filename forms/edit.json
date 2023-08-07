@@ -1,12 +1,8 @@
 [
     {
-        "label": "About You",
+        "label": "Your Personal Information",
         "input": "h1",
         "elements": [
-            {
-                "label": "We need to know who you are and to see if you are a Knight.",
-                "input": "p"
-            },
             {
                 "label": "First Name",
                 "caption": "Your (preferred) first name.",
@@ -52,7 +48,7 @@
         ]
     },
     {
-        "label": "The following are used to get an idea of our demographics:",
+        "label": "Demography",
         "input": "h2",
         "elements": [
             {
@@ -103,10 +99,17 @@
                 "required": true
             },
             {
+                "label": "Cybersecurity Experience",
+                "caption": "How much do you know about computer security?",
+                "input": "slider",
+                "novice_label": "whats a computer?",
+                "expert_label": "I plead the 5th",
+                "key": "experience"
+            },
+            {
                 "input": "navigation",
-                "next": "/join/3",
-                "prev": "/",
-                "prev_label": "Cancel"
+                "next": "/profile/user",
+                "next_label": "Save"
             }
         ]
     }

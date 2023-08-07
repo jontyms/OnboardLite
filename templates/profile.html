@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, user-scalable=0">
+
+    <title>Your Profile - Hack@UCF</title>
+    <link rel="stylesheet" type="text/css" href="/static/hackucf.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@900&family=Roboto:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://use.fontawesome.com/releases/v6.1.1/css/all.css" rel="stylesheet">
+</head>
+<body>
+    <div class="app" id="{{id}}">
+        <div class="header">
+            <span class="logo right big">Hack@UCF</span>
+            <div class="user">
+                <div class="icon" style="background-image: url({{user_data.get('discord', {}).get('avatar')}})"></div>
+                <h2>{{user_data.get('discord', {}).get('username')}}</h2>
+                <h3>via Discord</h3><br>
+            </div>
+        </div>
+        <div class="form">
+            <h1>Your Hack@UCF Information</h1>
+            <img src="{{ 'https://api.awoo.dev/qr_gen?color=ffffff&logo=true&q=' + user_data.get('id') }}" class="qr" title="Loading Membership ID..."/>
+            <div class="entry">
+                <h3>Membership ID</h3>
+                <div>{{ user_data.get('id', 'Not Issued (report to Execs!)') }}</div>
+            </div>
+            <div class="entry">
+                <h3>Hack@UCF Private Cloud Username</h3>
+                <div>{{ user_data.get('infra_email', 'Account Not Issued') }}</div>
+            </div>
+            {% if user_data.get('ops_email', False) %}
+                <div class="entry">
+                    <h3>Operations Email</h3>
+                    <div>{{ user_data.get('ops_email', 'ops@hackucf.org') }}</div>
+                </div>
+            {% endif %}
+
+            <a class="btn" href="/join/edit"><i class="fa-solid fa-pencil"></i> Edit</a>
+            {% if user_data.get('sudo', False) %}
+                <a class="btn" href="/admin/"><i class="fa-solid fa-lock"></i> Admin</a>
+            {% endif %}
+
+            <h1>Your Personal Information</h1>
+            <div class="entry">
+                <h3>First Name</h3>
+                <div>{{ user_data.get('first_name', 'Unknown') }}</div>
+            </div>
+            <div class="entry">
+                <h3>Surname</h3>
+                <div>{{ user_data.get('surname', 'Unknown') }}</div>
+            </div>
+            <div class="entry">
+                <h3>Preferred Email</h3>
+                <div>{{ user_data.get('email', 'Unknown') }}</div>
+            </div>
+            <div class="entry">
+                <h3>NID</h3>
+                <div>{{ user_data.get('nid', 'Unknown') }}</div>
+            </div>
+            <div class="entry">
+                <h3>UCF ID</h3>
+                <div>{{ user_data.get('ucf_id') if user_data.get('ucf_id', False) else 'Not Collected' }}</div>
+            </div>
+            <div class="entry">
+                <h3>Minecraft Username</h3>
+                <div>{{ user_data.get('minecraft', 'Unknown') }}</div>
+            </div>
+
+            <h1>Membership Status</h1>
+            <div class="entry">
+                <div>
+                    <h3>Ethics Form</h3>
+                    <span>Did you promise not to break the law? If not, sign the form <a href="/join/ethics_form" target="_blank">here</a>.</span>
+                </div>
+                <div>{{ "Signed" if user_data.get('ethics_form', {}).get('signtime', 0) != 0 else "Not Signed" }}</div>
+            </div>
+            <div class="entry">
+                <div>
+                    <h3>Dues Payment</h3>
+                    <span>$10 was sent to Hack@UCF as annual dues payment. Can be made online <a href="/pay" target="_blank">here</a> or in-person at any Hack@UCF event.</span>
+                </div>
+                <div>{{ "Paid" if user_data.get('did_pay_dues', False) else "Not Paid" }}</div>
+            </div>
+            <div class="entry">
+                <div>
+                    <h3>Membership Status?</h3>
+                    <span>Dues-paying members are those who have completed all the neccesary steps to join Hack@UCF.</span>
+                </div>
+                <div>{{ "Dues-Paying Member" if user_data.get('is_full_member', False) else "Inactive" }}</div>
+            </div>
+            <div class="entry">
+                <div>
+                    <h3>Did Receive T-Shirt?</h3>
+                    <span>If you are a dues-paying member, you are elgible to claim a free t-shirt.</span>
+                </div>
+                <div>{{ "Yes" if user_data.get('did_get_shirt', False) else "No" }}</div>
+            </div>
+
+            {% if user_data.get('ops_email', False) %}
+            <div class="entry">
+                <div>
+                    <h3>Is CyberLab Monitor?</h3>
+                    <span>CyberLab Monitors are trusted Ops members that have keycard access to the CyberLab.</span>
+                </div>
+                <div>{{ "Signed Agreement" if user_data.get('cyberlab_monitor', {}).get('signtime', 0) != 0 else "No" }}</div>
+            </div>
+            {% endif %}
+
+            {% if user_data.get('sudo', False) %}
+                <div class="entry">
+                    <div>
+                        <h3>Is Onboard Admin?</h3>
+                        <div>You have access to sensitive Hack@UCF membership data. With great power comes great responsibility!</div>
+                    </div>
+                    <div>Yes</div>
+                </div>
+            {% endif %}
+
+            <h1>Demography</h1>
+            <div class="entry">
+                <h3>Gender</h3>
+                <div>{{ user_data.get('gender', 'Unknown') }}</div>
+            </div>
+            <div class="entry">
+                <h3>Major</h3>
+                <div>{{ user_data.get('major', 'Unknown') }}</div>
+            </div>
+            <div class="entry">
+                <h3>Class Standing</h3>
+                <div>{{ user_data.get('class_standing', 'Unknown') }}</div>
+            </div>
+            <div class="entry">
+                <h3>Shirt Size</h3>
+                <div>{{ user_data.get('shirt_size', 'Unknown') }}</div>
+            </div>
+            <div class="entry">
+                <h3>Experience Level</h3>
+                <div>{{ user_data.get('experience', 'Unknown') }}</div>
+            </div>
+        </div>
+        
+        <details>
+            <summary>See Machine-Readable Data (Advanced)</summary>
+            <code>{{user_data}}</code>
+        </details>
+    </div>
+</body>
+<script type="text/javascript" src="/static/form.js"></script>
+</html>
