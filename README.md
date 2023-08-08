@@ -1,26 +1,52 @@
-# Onboard
+# OnboardLite
 
-*Onboard* is a web application for managing school organizations at the Univeristy of Central Florida. It was created as a part of a mission to improve analytics, promote DEI and accessibility, and to make signing in as easy as possible ~~because I am sick and tired of writing my name and Knights Email over and over again at meetings~~.
+OnboardLite is the result of the Influx Initiative, our vision for an improved student organization lifecycle at the University of Central Florida
 
-## Goals
-
-Onboard was designed to meet the following goals:
-
-- **Reliable:** Onboard should be able to still work under load, and should be secure.
-- **Understandable:** The source code should be self-documenting. All APIs are also auto-documented by FastAPI, the repository structure should be organized and the code should be thouroughly commented, making reading the code a pleasant experience.
-- **Usable:** End users should not have to think to use the web UI. Tasks should be automated or slimmed-down when possible while not losing functionality.
-	- Creating an account (joining the club) should be done in *one* workflow
-	- Prefer cookies, then WebAuthn, then Discord for authenticating users.
-	- If possible, adopt Apple Pay, Google Pay, and similar technologies via Stripe/Square.
-- **Frugal:** Onboard is built to be a native AWS application, allowing us to reduce costs while preserving scalability and ease of deployment (via CloudFormation)
+This is to be replaced by Influx in the future, a more fleshed-out approach with increased scope.
 
 ## Getting Started (local)
 ```py
 # Requires >= Python3.8
-pip3 install -r requirements.txt
+python3 -m pip install -r requirements.txt
 python3 index.py
 ```
 
 ## Deploying
 
-(coming soon to a `us-east-1` near you!)
+1. Make sure the AWS CLI is set up and that `~/.aws` is populated.
+2. Make sure Stripe is configured to work with a webhook at `$URL/pay/webhook/validate` and the account is activated.
+3. Request a configuration file with all the neccesary secrets/configurations for AWS, Stripe, Discord, and others.
+4. Install `uwsgi` and `python3.8`.
+5. Drop the following `systemd` service, replacing values as appropiate:
+```conf
+[Unit]
+Description=uWSGI instance to serve OnboardLite
+After=network.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/OnboardLite/
+Environment="PATH=/home/ubuntu/OnboardLite/"
+ExecStart=/usr/bin/uwsgi --ini api.ini --plugin python38
+
+[Install]
+WantedBy=multi-user.target
+```
+6. Start and enable the service.
+7. Put the service behind Cloudflare.
+8. Profit!
+
+## Editing Form Data
+
+To edit questions on a form, edit the JSON files in the `forms/` folder. Each JSON is a separate page that acts as a discrete form, with each value correlated to a database entry. OnboardLite uses a file format based on a simplified [Sileo Native Depiction](https://developer.getsileo.app/native-depictions) and achieves the same goal: render a UI from a JSON schema. The schema is, honestly, poorly documented, but is rendered by `util/kennelish.py`. In short, each object in an array is a discrete element that is rendered.
+
+Database entries must be defined in `models/user.py` before being called in a form. Data type valdiation is enforced by Pydantic.
+
+## Sudo Mode
+
+Administrators are classified as trusted Operations members and are *not* the same thing as Executives. These are people who can view roster logs, and should be FERPA-trained by UCF (either using the RSO training or the general TA training). The initial administrator has to be set via DynamoDB's user interface.
+
+## Security Concerns
+
+Please report security vulnerabilities to `execs@hackucf.org`.
