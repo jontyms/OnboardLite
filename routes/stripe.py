@@ -36,7 +36,21 @@ Get API information.
 @router.get("/")
 @Authentication.member
 async def get_root(request: Request, token: Optional[str] = Cookie(None), payload: Optional[object] = {}):
-    return templates.TemplateResponse("pay.html", {"request": request, "icon": payload['pfp'], "name": payload['name'], "id": payload['id']})
+
+    # AWS dependencies
+    dynamodb = boto3.resource('dynamodb')
+    table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
+
+    # Get data from DynamoDB
+    user_data = table.get_item(
+        Key={
+            'id': payload.get('id')
+        }
+    ).get("Item", None)
+
+    did_pay_dues = user_data.get('did_pay_dues', False)
+
+    return templates.TemplateResponse("pay.html", {"request": request, "icon": payload['pfp'], "name": payload['name'], "id": payload['id'], "did_pay_dues": did_pay_dues})
 
 @router.post('/checkout')
 @Authentication.member
@@ -143,5 +157,5 @@ def pay_dues(session):
         }
     )
 
-    # Do checks to 
+    # Do checks to approve membership status.
     Approve.approve_member(member_id)

@@ -22,6 +22,7 @@ class Approve:
 
     # !TODO finish the post-sign-up stuff + testing
     def approve_member(member_id):
+        print(f"Re-running approval for {member_id}")
         dynamodb = boto3.resource('dynamodb')
         table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
 
@@ -33,6 +34,7 @@ class Approve:
 
         # If a member was already approved, kill process.
         if user_data.get("is_full_member", False):
+            print("\tAlready full member.")
             return True
 
         # Make user join the Hack@UCF Discord
@@ -58,24 +60,24 @@ class Approve:
         # - They paid dues
         # - They signed their ethics form
         if user_data.get("first_name") and user_data.get("nid") and user_data.get("discord_id") and user_data.get("did_pay_dues") and user_data.get("ethics_form", {}).get("signtime", 0) != 0:
+            print("\tNewly-promoted full member!")
             # Create an Infra account.
             username = user_data.get("discord", {}).get("username").replace("_", "").replace(".", "").replace("-", "") + "@infra.hackucf.org"
             password = HorsePass.gen()
 
-            # Add username to Onboard database
-            table.update_item(
-                Key={
-                    'id': member_id
-                },
-                UpdateExpression='SET infra_email = :val',
-                ExpressionAttributeValues={
-                    ':val': username
-                }
-            )
+            # # Add username to Onboard database
+            # table.update_item(
+            #     Key={
+            #         'id': member_id
+            #     },
+            #     UpdateExpression='SET infra_email = :val',
+            #     ExpressionAttributeValues={
+            #         ':val': username
+            #     }
+            # )
             
             # Push account to OpenStack via Terraform magics
             # <TODO!!>
-            
             
             # Minecraft server
             if user_data.get("minecraft", False):
@@ -83,27 +85,38 @@ class Approve:
                 # <whitelist logic>
             
             # Assign the Dues-Paying Member role
-            requests.post(f"https://discord.com/api/guilds/{options.get('discord', {}).get('guild_id')}/members/{discord_id}/roles/{options.get('discord', {}).get('member_role')}")
+            req_dues = requests.put(f"https://discord.com/api/guilds/{options.get('discord', {}).get('guild_id')}/members/{discord_id}/roles/{options.get('discord', {}).get('member_role')}", headers=headers)
+            print(req_dues)
             
             # Send Discord message saying they are a member 
             welcome_msg = f"""Hello {user_data.get('first_name')}, and welcome to Hack@UCF!
 
-This message is to confirm that your membership has processed successfully, and to give you your temporary Hack@UCF credentials.
-
-These credentials can be used to the Hack@UCF Private Cloud, one of our many benefits of paying dues.
-
-```yaml
-Username: {username}
-Password: {password}
-```
-
-When connected to the `Cyberlab` WiFi, you can access the Hack@UCF Private Cloud at https://keystone.hackucf.org.
+This message is to confirm that your membership has processed successfully. You can access and edit your membership ID at https://{options.get('http', {}).get('domain')}/profile.
 
 The password for the `Cyberlab` WiFi is currently `cyberlab`, but this is subject to change (and we'll let you know when that happens).
 
 Happy Hacking,
   - Hack@UCF Bot
-"""
+            """
+
+#             welcome_msg = f"""Hello {user_data.get('first_name')}, and welcome to Hack@UCF!
+
+# This message is to confirm that your membership has processed successfully, and to give you your temporary Hack@UCF credentials.
+
+# These credentials can be used to the Hack@UCF Private Cloud, one of our many benefits of paying dues.
+
+# ```yaml
+# Username: {username}
+# Password: {password}
+# ```
+
+# When connected to the `Cyberlab` WiFi, you can access the Hack@UCF Private Cloud at https://keystone.hackucf.org.
+
+# The password for the `Cyberlab` WiFi is currently `cyberlab`, but this is subject to change (and we'll let you know when that happens).
+
+# Happy Hacking,
+#   - Hack@UCF Bot
+# """
 
             send_message_body = {
                 "content": welcome_msg
@@ -122,6 +135,7 @@ Happy Hacking,
             )
 
         elif user_data.get('did_pay_dues'):
+            print("\tPaid dues but did not do other step!")
             # Send a message on why this check failed.
             fail_msg = f"""Hello {user_data.get('first_name')},
 
@@ -132,7 +146,7 @@ We wanted to let you know that you did not complete all of the steps for being a
 - Signed Ethics Form: {'✅' if user_data.get('ethics_form', {}).get('signtime', 0) != 0 else '❌'}
 - Paid $10 dues: ✅
 
-Please complete all of these to become a full member.
+Please complete all of these to become a full member. Once you do, visit https://{options.get('http', {}).get('domain')}/profile to re-run this check.
 
 If you think you have completed all of these, please reach out to an Exec on the Hack@UCF Discord.
 
@@ -144,6 +158,8 @@ We hope to see you soon,
             }
             requests.post(f"https://discord.com/api/channels/{resp.get('id')}/messages", headers=headers, data=json.dumps(send_message_body))
 
+        else:
+            print("\tDid not pay dues yet.")
         # is_dues_paying
 
         return False

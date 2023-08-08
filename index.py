@@ -28,6 +28,7 @@ from util.authentication import Authentication
 
 # Import error handling
 from util.errors import Errors
+from util.approve import Approve
 
 # Import options
 from util.options import Options
@@ -39,7 +40,7 @@ from models.user import UserModel
 # Import routes
 from routes import api, stripe, admin
 
-### TEMP
+### TODO: TEMP
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 ###
 
@@ -220,6 +221,9 @@ async def profile(request: Request, token: Optional[str] = Cookie(None), payload
             'id': payload.get('id')
         }
     ).get("Item", None)
+
+    # Re-run approval workflow.
+    Approve.approve_member(payload.get('id'))
 
     return templates.TemplateResponse("profile.html", {"request": request, "user_data": user_data})
 
