@@ -225,3 +225,8 @@ function submit_and_nav(target_url) {
         window.location.href = target_url;
     })
 }
+
+function logoff() {
+    document.cookie = 'token=; Max-Age=0; path=/; domain=' + location.hostname;
+    window.location.href = "/";
+}

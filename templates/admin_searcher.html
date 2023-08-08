@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, user-scalable=0">
+
+    <title>Member Roster - Hack@UCF</title>
+    <link rel="stylesheet" type="text/css" href="/static/hackucf.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@900&family=Roboto:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap" rel="stylesheet">
+
+    <!-- List library -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
+
+    <!-- Font Awesome -->
+    <link href="https://use.fontawesome.com/releases/v6.1.1/css/all.css" rel="stylesheet">
+</head>
+<body>
+    <div class="nav">
+        <div class="nav_inner">
+            <img src="/static/admin_logo.svg">
+            <div class="right">
+                Signed in as @{{name}}
+            </div>
+        </div>
+    </div>
+    <div class="admin">
+        <div id="users">
+            <input type="text" class="search" placeholder="Search" />
+            <button class="btn searchbtn sort" data-sort="name">Sort Name</button>
+            <button class="btn searchbtn sort" data-sort="status">Sort Status</button>
+            <!-- <a class="btn searchbtn sort" href="">Scanner</a> -->
+            <table>
+                <thead></thead>
+                <tbody class="list"></tbody>
+            </table>
+        </div>
+        <div class="hide_default" id="user">
+            <div><button class="btn searchbtn" onclick="showTable()">Back</button></div>
+            <img id="pfp"/>
+            <h1 id="name"></h1>
+            <h2 id="discord"></h2>
+            <br>
+            <table class="data_table">
+                <tbody>
+                    <tr><td><h2>Statuses</h2></td></tr>
+
+                    <tr>
+                        <td>Membership Status</td>
+                        <td id="status">Value</td>
+                    </tr>
+                    <tr>
+                        <td>Was Dues Paid?</td>
+                        <td id="did_pay_dues">Value</td>
+                    </tr>
+                    <tr>
+                        <td>Ethics Form Completion</td>
+                        <td id="ethics_form">Value</td>
+                    </tr>
+                    <tr>
+                        <td>Is Dues-Paying Member?</td>
+                        <td id="is_full_member">Value</td>
+                    </tr>
+                    <tr>
+                        <td>T-Shirt Status</td>
+                        <td id="shirt_status">Value</td>
+                    </tr>
+
+                    <tr><td><h2>Identifiers</h2></td></tr>
+
+                    <tr>
+                        <td>Hack@UCF ID</td>
+                        <td id="id">Value</td>
+                    </tr>
+                    <tr>
+                        <td>NID</td>
+                        <td id="nid">Value</td>
+                    </tr>
+                    <tr>
+                        <td>UCF ID</td>
+                        <td id="ucfid">Value</td>
+                    </tr>
+                    <tr>
+                        <td>Preferred Email</td>
+                        <td id="email">Value</td>
+                    </tr>
+                    <tr>
+                        <td>Infra Username</td>
+                        <td id="infra_email">Value</td>
+                    </tr>
+                    <tr>
+                        <td>Minecraft Username</td>
+                        <td id="minecraft">Value</td>
+                    </tr>
+                    <tr>
+                        <td>Phone Number</td>
+                        <td id="phone_number">Value</td>
+                    </tr>
+
+                    <tr><td><h2>Demography</h2></td></tr>
+
+                    <tr>
+                        <td>Class Standing</td>
+                        <td id="class_standing">Value</td>
+                    </tr>
+                    <tr>
+                        <td>Experience (out of 5)</td>
+                        <td id="experience">Value</td>
+                    </tr>
+                    <tr>
+                        <td>Meeting Interest</td>
+                        <td id="attending">Value</td>
+                    </tr>
+                    <tr>
+                        <td>Topic Interest</td>
+                        <td id="curiosity">Value</td>
+                    </tr>
+                    <tr>
+                        <td>Major</td>
+                        <td id="major">Value</td>
+                    </tr>
+                    <tr>
+                        <td>Gender</td>
+                        <td id="gender">Value</td>
+                    </tr>
+                    <tr>
+                        <td>Interested in C3?</td>
+                        <td id="c3_interest">Value</td>
+                    </tr>
+                    <tr>
+                        <td>Returning Member?</td>
+                        <td id="is_returning">Value</td>
+                    </tr>
+                    <tr>
+                        <td>Comments</td>
+                        <td id="comments">Value</td>
+                    </tr>
+                </tbody>
+            </table>
+            <details>
+                <summary><h2>Actions</h2></summary>
+                <button class="btn"><i class="fa-solid fa-dollar"></i> Pay Dues</button>
+                <button class="btn"><i class="fa-solid fa-shirt"></i> Claim T-Shirt</button>
+                <button class="btn"><i class="fa-solid fa-lock"></i> Promote to Admin</button>
+            </details>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="/static/admin.js"></script>
+</html>

@@ -13,6 +13,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@900&family=Roboto:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap" rel="stylesheet">
 
+    <!-- QR Code library -->
+    <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+
     <!-- Font Awesome -->
     <link href="https://use.fontawesome.com/releases/v6.1.1/css/all.css" rel="stylesheet">
 </head>
@@ -28,10 +31,10 @@
         </div>
         <div class="form">
             <h1>Your Hack@UCF Information</h1>
-            <img src="{{ 'https://api.awoo.dev/qr_gen?color=ffffff&logo=true&q=' + user_data.get('id') }}" class="qr" title="Loading Membership ID..."/>
+            <div id="qr" class="qr"></div>
             <div class="entry">
                 <h3>Membership ID</h3>
-                <div>{{ user_data.get('id', 'Not Issued (report to Execs!)') }}</div>
+                <div id="membership_id">{{ user_data.get('id', 'Not Issued (report to Execs!)') }}</div>
             </div>
             <div class="entry">
                 <h3>Hack@UCF Private Cloud Username</h3>
@@ -48,6 +51,7 @@
             {% if user_data.get('sudo', False) %}
                 <a class="btn" href="/admin/"><i class="fa-solid fa-lock"></i> Admin</a>
             {% endif %}
+            <a class="btn" href="#logoff" onclick="logoff()"><i class="fa-solid fa-key"></i> Log Out</a>
 
             <h1>Your Personal Information</h1>
             <div class="entry">
@@ -155,4 +159,26 @@
     </div>
 </body>
 <script type="text/javascript" src="/static/form.js"></script>
+<script type="text/javascript">
+    const qrCode = new QRCodeStyling({
+            width: 260,
+            height: 260,
+            type: "svg",
+            data: document.getElementById("membership_id").innerText,
+            image: "/static/qr_hack_dark.svg",
+            dotsOptions: {
+                color: "#ffffff",
+                type: "rounded"
+            },
+            backgroundOptions: {
+                color: "transparent",
+            },
+            imageOptions: {
+                crossOrigin: "anonymous",
+                margin: 5,
+                imageSize: 0.5
+            }
+        });
+    qrCode.append(document.getElementById("qr"));
+</script>
 </html>

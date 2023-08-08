@@ -34,21 +34,28 @@
             <h1>Pay Dues</h1>
             <p>Hack@UCF members get access to some very nice perks, some of which are pretty unique. With the help of membership dues and our sponsors, we are able to provide exclusive access to some cool resources and other benefits:</p>
             <ul>
+                <li>Access to the Hack@UCF Private Cloud.</li>
                 <li>Eligibility to vote in annual executive election as well as hold office (pending active participation and attendance).</li>
                 <li>Food and drinks at select events at no cost.</li>
                 <li>Access to members-only workshops and training material.</li>
                 <li>Access to members-only hardware and resources, when available, including CyberLab workstations.</li>
                 <li>Access to extended benefits such as Operations, Alumni networks, and hands-on infrastructure development.</li>
+                <li>Access to the member-exclusive Minecraft server.</li>
             </ul>
             <p>While we highly recommend paying dues, they are not required for most of our events.</p>
+            <p><i>Want to pay dues in person?</i> Press Skip and contact an Executive at our next event.</p>
             <div class="entry">
                 <div>
-                    <button type="button" class="btn wide grey" onclick="submit_and_nav('/join/4')">Skip</button>
+                    <button type="button" class="btn wide grey" onclick="submit_and_nav('/final')">Skip</button>
                 </div>
                 <div>
+                    {% if not did_pay_dues %}
                     <form action="/pay/checkout/" method="POST">
                         <button type="submit" id="checkout-button" class="btn wide">Pay Dues</button>
                     </form>
+                    {% else %}
+                        <h1>Dues Already Paid</h1>
+                    {% endif %}
                 </div>
             </div>
         </div>
