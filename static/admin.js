@@ -1,5 +1,6 @@
 let userDict = {};
 let userList;
+let qrScanner;
 
 function load() {
     let valueNames = ["Name", "Status", "NID", "Discord", "Email", "Experience", "Major", "Details"];
@@ -98,8 +99,19 @@ const sanitizeHTML = (data) => {
 };
 
 function showTable() {
+    qrScanner.stop();
+    
     document.getElementById("user").style.display = "none";
+    document.getElementById("scanner").style.display = "none";
     document.getElementById("users").style.display = "block";
+}
+
+function showQR() {
+    qrScanner.start();
+    
+    document.getElementById("user").style.display = "none";
+    document.getElementById("users").style.display = "none";
+    document.getElementById("scanner").style.display = "block";
 }
 
 function showUser(userId) {
@@ -137,9 +149,60 @@ function showUser(userId) {
     document.getElementById("is_returning").innerText = user.is_returning ? "✔️" : "❌";
     document.getElementById("comments").innerText = user.comments ? user.comments : "(none)";
 
-    // Set visibilities
+    // Set buttons up
+    document.getElementById("payDues").onclick = (evt) => {
+        editUser({
+            "id": user.id,
+            "did_pay_dues": true
+        })
+    };
+    document.getElementById("payDues").style.display = user.did_pay_dues ? "none" : "inline-block";
+
+    document.getElementById("claimShirt").onclick = (evt) => {
+        editUser({
+            "id": user.id,
+            "did_get_shirt": true
+        })
+    };
+    document.getElementById("claimShirt").style.display = user.did_get_shirt ? "none" : "inline-block";
+
+    document.getElementById("setAdmin").onclick = (evt) => {
+        editUser({
+            "id": user.id,
+            "sudo": !user.sudo
+        })
+    };
+    document.getElementById("adminLabel").innerText = user.sudo ? "Revoke Admin" : "Promote to Admin";
+
+    // Set page visibilities
     document.getElementById("users").style.display = "none";
+    document.getElementById("scanner").style.display = "none";
     document.getElementById("user").style.display = "block";
+}
+
+function editUser(payload) {
+    const options = {
+        method: "POST",
+        body: JSON.stringify(payload),
+        headers: {
+            "Content-Type": "application/json"
+        }
+    }
+    const user_id = payload.id;
+    fetch("/admin/get", options).then(data => {
+        return data.json();
+    }).then(data2 => {
+        // Update user data.
+        let member = data2.data;
+
+        member.name = member.first_name + " " + member.surname;
+        member.username = "@" + member.discord.username;
+        member.pfp = member.discord.avatar;
+        member.status = userStatusString(member);
+
+        userDict[user_id] = member;
+        showUser(user_id);
+    })
 }
 
 function logoff() {
@@ -147,6 +210,47 @@ function logoff() {
     window.location.href = "/";
 }
 
+function scannedCode(result) {
+    // Enter load mode...
+    qrScanner.stop();
+
+    showUser(result.data);
+}
+
 window.onload = evt => {
     load();
+
+    // Prep QR library
+    const videoElem = document.querySelector("video");
+    qrScanner = new QrScanner(
+        videoElem,
+        scannedCode,
+        {
+            maxScansPerSecond: 10,
+            highlightScanRegion: true,
+            returnDetailedScanResult: true 
+        },
+    );
+
+    // Default behavior
+    document.getElementById("goBackBtn").onclick = (evt) => {
+        showTable();
+    }
+
+    // Turn ON the QR Scanner mode.
+    document.getElementById("scannerOn").onclick = (evt) => {
+        showQR();
+
+        document.getElementById("goBackBtn").onclick = (evt) => {
+            showQR();
+        }
+    }
+
+    document.getElementById("scannerOff").onclick = (evt) => {
+        showTable();
+
+        document.getElementById("goBackBtn").onclick = (evt) => {
+            showTable();
+        }
+    }
 }

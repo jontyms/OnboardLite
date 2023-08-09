@@ -16,6 +16,9 @@
     <!-- List library -->
     <script src="//cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
 
+    <!-- QR library -->
+    <script src="/static/lib/qr-scanner.umd.min.js"></script>
+
     <!-- Font Awesome -->
     <link href="https://use.fontawesome.com/releases/v6.1.1/css/all.css" rel="stylesheet">
 </head>
@@ -33,14 +36,14 @@
             <input type="text" class="search" placeholder="Search" />
             <button class="btn searchbtn sort" data-sort="name">Sort Name</button>
             <button class="btn searchbtn sort" data-sort="status">Sort Status</button>
-            <!-- <a class="btn searchbtn sort" href="">Scanner</a> -->
+            <button id="scannerOn" class="btn searchbtn">Scanner</button>
             <table>
                 <thead></thead>
                 <tbody class="list"></tbody>
             </table>
         </div>
         <div class="hide_default" id="user">
-            <div><button class="btn searchbtn" onclick="showTable()">Back</button></div>
+            <div><button id="goBackBtn" class="btn searchbtn">Back</button></div>
             <img id="pfp"/>
             <h1 id="name"></h1>
             <h2 id="discord"></h2>
@@ -143,10 +146,15 @@
             </table>
             <details>
                 <summary><h2>Actions</h2></summary>
-                <button class="btn"><i class="fa-solid fa-dollar"></i> Pay Dues</button>
-                <button class="btn"><i class="fa-solid fa-shirt"></i> Claim T-Shirt</button>
-                <button class="btn"><i class="fa-solid fa-lock"></i> Promote to Admin</button>
+                <button class="hide_default btn" id="payDues"><i class="fa-solid fa-dollar"></i> Pay Dues</button>
+                <button class="hide_default btn" id="claimShirt"><i class="fa-solid fa-shirt"></i> Claim T-Shirt</button>
+                <button class="btn" id="setAdmin"><i class="fa-solid fa-lock"></i> <span id="adminLabel">Toggle Admin</span></button>
             </details>
+        </div>
+        <div class="hide_default" id="scanner">
+            <h2>Present Hack@UCF ID Below</h2>
+            <button id="scannerOff" class="btn">Search Manually</button>
+            <video></video>
         </div>
     </div>
 </body>

@@ -230,3 +230,29 @@ function logoff() {
     document.cookie = 'token=; Max-Age=0; path=/; domain=' + location.hostname;
     window.location.href = "/";
 }
+
+
+window.onload = (evt) => {
+    if (QRCodeStyling && document.getElementById("membership_id")) {
+        const qrCode = new QRCodeStyling({
+                width: 260,
+                height: 260,
+                type: "svg",
+                data: document.getElementById("membership_id").innerText,
+                image: "/static/qr_hack_dark.svg",
+                dotsOptions: {
+                    color: "#fff",
+                    type: "rounded"
+                },
+                backgroundOptions: {
+                    color: "transparent"
+                },
+                imageOptions: {
+                    crossOrigin: "anonymous",
+                    margin: 5,
+                    imageSize: 0.5
+                }
+            });
+        qrCode.append(document.getElementById("qr"));
+    }
+}

@@ -193,7 +193,7 @@ input[type=text], input[type=email], input[type=password], select {
 }
 
 input[type=text].search {
-    width: calc(100% - (2 * 116px));
+    width: calc(100% - (3 * 116px));
     display: inline-block;
     border-radius: 5px;
 }
@@ -385,6 +385,17 @@ details > summary > * {
 .data_table > tbody > tr > td:nth-child(1) {
     min-width: 250px;
     font-weight: bold;
+}
+
+video, .scan-region-highlight {
+    object-fit: cover;
+    width: 100%;
+    height: auto;
+    border-radius: 25px;
+}
+
+video {
+    margin: 20px 0;
 }
 
 @media screen and (max-width: 619px) {
