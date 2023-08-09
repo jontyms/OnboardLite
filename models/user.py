@@ -80,6 +80,45 @@ class UserModel(BaseModel):
     comments:           Optional[str] = ""
 
 
+class UserModelMutable(BaseModel):
+    # Identifiers
+    id:                 str
+    discord_id:         Optional[int]
+    ucf_id:             Optional[int]
+    nid:                Optional[str]
+    ops_email:          Optional[str]
+    infra_email:        Optional[str]
+
+    minecraft:          Optional[str]
+
+    # PII
+    first_name:         Optional[str]
+    surname:            Optional[str]
+    email:              Optional[str]
+    is_returning:       Optional[bool]
+    gender:             Optional[str]
+    major:              Optional[str]
+    class_standing:     Optional[str]
+    shirt_size:         Optional[str]
+    did_get_shirt:      Optional[bool]
+    phone_number:       Optional[int]
+
+    # Permissions and Member Status
+    sudo:               Optional[bool]
+    did_pay_dues:       Optional[bool]
+    
+    is_full_member:     Optional[bool]
+
+    # Other models
+    experience:         Optional[int]
+    curiosity:          Optional[str]
+    c3_interest:        Optional[bool]
+
+    # Other things
+    attending:          Optional[str]
+    comments:           Optional[str]
+
+
 class PublicContact(BaseModel):
     first_name: str
     surname: str

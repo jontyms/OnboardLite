@@ -6,11 +6,12 @@ from jose import JWTError, jwt
 from fastapi import APIRouter, Cookie, Request, Response
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
+from fastapi.encoders import jsonable_encoder
 
 from pydantic import validator, error_wrappers
 
 from typing import Optional
-from models.user import PublicContact
+from models.user import UserModelMutable
 from models.info import InfoModel
 
 from util.authentication import Authentication
@@ -58,34 +59,53 @@ async def admin_get_single(request: Request, token: Optional[str] = Cookie(None)
             'id': member_id
         }
     ).get("Item", None)
+
+    if not data:
+        return Errors.generate(request, 404, "User Not Found")
+
     return {
         "data": data
     }
 
 
-# <TODO!>
-# """
-# API endpoint that modifies a given user's data
-# """
-# @router.post("/get/")
-# @Authentication.admin
-# async def admin_edit(request: Request, token: Optional[str] = Cookie(None), member_id: Optional[str] = "FAIL"):
-#     if member_id == "FAIL":
-#         return {
-#             "data": {},
-#             "error": "Missing ?member_id"
-#         }
+"""
+API endpoint that modifies a given user's data
+"""
+@router.post("/get/")
+@Authentication.admin
+async def admin_edit(request: Request, token: Optional[str] = Cookie(None), input_data: Optional[UserModelMutable] = {}):
 
-#     dynamodb = boto3.resource('dynamodb')
-#     table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
-#     data = table.get_item(
-#         Key={
-#             'id': member_id
-#         }
-#     ).get("Item", None)
-#     return {
-#         "data": data
-#     }
+    member_id = input_data.id
+
+    dynamodb = boto3.resource('dynamodb')
+    table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
+    old_data = table.get_item(
+        Key={
+            'id': member_id
+        }
+    ).get("Item", None)
+
+    if not old_data:
+        return Errors.generate(request, 404, "User Not Found")
+
+    # Take Pydantic data -> dict -> strip null values
+    new_data = {k: v for k, v in jsonable_encoder(input_data).items() if v is not None}
+
+    # Existing  U  Provided
+    union = {**old_data, **new_data}
+
+    # This is how this works:
+    # 1. Get old data
+    # 2. Get new data (pydantic-validated)
+    # 3. Union the two
+    # 4. Put back as one giant entry
+    
+    table.put_item(Item=union)
+
+    return {
+        "data": union,
+        "msg": "Updated successfully!"
+    }
 
 
 """
