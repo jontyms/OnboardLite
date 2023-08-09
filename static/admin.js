@@ -123,6 +123,8 @@ function showUser(userId) {
     document.getElementById("discord").innerText = user.username;
 
     // Statuses
+    document.getElementById("statusColor").style.color = user.is_full_member ? "#51cd7f" : "#cf565f";
+    
     document.getElementById("status").innerText = user.status;
     document.getElementById("did_pay_dues").innerText = user.did_pay_dues ? "✔️" : "❌";
     document.getElementById("ethics_form").innerText = user.ethics_form.signtime !== -1 ? (new Date(Number.parseInt(user.ethics_form.signtime))).toLocaleString() : "❌"; 
