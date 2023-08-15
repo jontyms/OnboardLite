@@ -13,11 +13,19 @@ python3 index.py
 
 ## Deploying
 
-1. Make sure the AWS CLI is set up and that `~/.aws` is populated.
-2. Make sure Stripe is configured to work with a webhook at `$URL/pay/webhook/validate` and the account is activated.
-3. Request a configuration file with all the neccesary secrets/configurations for AWS, Stripe, Discord, and others.
-4. Install `uwsgi` and `python3.8`.
-5. Drop the following `systemd` service, replacing values as appropiate:
+1. Deploy a box.
+2. Make sure the AWS CLI is set up and that `~/.aws` is populated.
+- Create a new AWS user with the policies `AmazonDynamoDBFullAccess` and `PowerUserAccess` (or preferrably, a policy that includes the actions `dynamodb:*`, `sso:account:access`, and `sso:GetSSOStatus`)
+- [Install the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+- Run `aws configure sso` on the host machine.
+3. Make sure Stripe is configured to work with a webhook at `$URL/pay/webhook/validate` and the account is activated.
+- Create the webhook at the desired domain. Include the events `checkout.session.*`.
+- Create a product to represent dues payments in the dashboard. This should be $10 + $0.60 to account for Stripe fees.
+4. Request a configuration file with all the neccesary secrets/configurations for AWS, Stripe, Discord, and others.
+5. Install `uwsgi`, `nginx`, `certbot`, and `python3.8`.
+6. Configure `nginx` (recommended) to proxy to port 80/443 + enable HTTPS. Set headers like `Content-Security-Policy`.
+- If you use nginx, PLEASE use HTTPS (if you can; Cloudflare will probably disagree and want to use its own cert).
+7. Drop the following `systemd` service, replacing values as appropiate:
 ```conf
 [Unit]
 Description=uWSGI instance to serve OnboardLite
@@ -33,9 +41,9 @@ ExecStart=/usr/bin/uwsgi --ini api.ini --plugin python38
 [Install]
 WantedBy=multi-user.target
 ```
-6. Start and enable the service.
-7. Put the service behind Cloudflare.
-8. Profit!
+8. Start and enable the service using `systemctl`. Do the same for `nginx` if installed.
+9. Put the service behind Cloudflare.
+10. Profit!
 
 ## Editing Form Data
 
