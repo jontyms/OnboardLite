@@ -1,0 +1,27 @@
+[
+    {
+        "label": "Ops",
+        "input": "h2",
+        "elements": [
+            {
+                "label": "If you are an Operations member, enter your @hackucf.org email below. If you do not have one, close this page.",
+                "input": "p"
+            },
+            {
+                "label": "Ops Email",
+                "caption": "Ends with @hackucf.org",
+                "input": "email",
+                "key": "ops_email",
+                "required": true
+            }
+            
+            {
+                "input": "navigation",
+                "next": "/join/signed",
+                "prev": "https://hackucf.org/",
+                "prev_label": "Cancel",
+                "next_label": "Submit"
+            }
+        ]
+    }
+]

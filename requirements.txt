@@ -6,5 +6,7 @@ requests_oauthlib
 gspread
 boto3
 botocore
-uvicorn
 stripe
+uvicorn[standard]
+passwordgenerator
+python-terraform

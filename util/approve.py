@@ -62,7 +62,7 @@ class Approve:
         if user_data.get("first_name") and user_data.get("nid") and user_data.get("discord_id") and user_data.get("did_pay_dues") and user_data.get("ethics_form", {}).get("signtime", 0) != 0:
             print("\tNewly-promoted full member!")
             # Create an Infra account.
-            username = user_data.get("discord", {}).get("username").replace("_", "").replace(".", "").replace("-", "") + "@infra.hackucf.org"
+            username = user_data.get("discord", {}).get("username") + "@infra.hackucf.org"
             password = HorsePass.gen()
 
             # # Add username to Onboard database
@@ -93,7 +93,14 @@ class Approve:
 
 This message is to confirm that your membership has processed successfully. You can access and edit your membership ID at https://{options.get('http', {}).get('domain')}/profile.
 
-The password for the `Cyberlab` WiFi is currently `cyberlab`, but this is subject to change (and we'll let you know when that happens).
+These credentials can be used to the Hack@UCF Private Cloud, one of our many benefits of paying dues. This can be accessed at {options.get('infra', {}).get('horizon')}.
+
+```yaml
+Username: {username}
+Password: {password}
+```
+
+The password for the `Cyberlab` WiFi is currently `{options.get('infra', {}).get('wifi')}`, but this is subject to change (and we'll let you know when that happens).
 
 Happy Hacking,
   - Hack@UCF Bot
@@ -110,7 +117,7 @@ Happy Hacking,
 # Password: {password}
 # ```
 
-# When connected to the `Cyberlab` WiFi, you can access the Hack@UCF Private Cloud at https://keystone.hackucf.org.
+# When connected to the `Cyberlab` WiFi, you can access the Hack@UCF Private Cloud at {config_option}.
 
 # The password for the `Cyberlab` WiFi is currently `cyberlab`, but this is subject to change (and we'll let you know when that happens).
 

@@ -92,10 +92,14 @@ function sickoModeSanitize(val) {
  * @return {String} str  The sanitized string
  */
 const sanitizeHTML = (data) => {
-    data = data.toString();
-    return data.replace(/[^\w. ]/gi, function (c) {
-        return '&#' + c.charCodeAt(0) + ';';
-    });
+    if (data) {
+        data = data.toString();
+        return data.replace(/[^\w. ]/gi, function (c) {
+            return '&#' + c.charCodeAt(0) + ';';
+        });
+    } else {
+        return "";
+    }
 };
 
 function showTable() {
