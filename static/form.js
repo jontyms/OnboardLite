@@ -233,7 +233,7 @@ function logoff() {
 
 
 window.onload = (evt) => {
-    if (QRCodeStyling && document.getElementById("membership_id")) {
+    if (typeof QRCodeStyling !== "undefined" && document.getElementById("membership_id")) {
         const qrCode = new QRCodeStyling({
                 width: 260,
                 height: 260,

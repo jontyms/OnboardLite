@@ -86,7 +86,10 @@ async def post_form(request: Request, token: Optional[str] = Cookie(None), paylo
     kennelish_data = Options.get_form_body(num)
     model = Transformer.kennelish_to_pydantic(kennelish_data)
 
-    inp = await request.json()
+    try:
+        inp = await request.json()
+    except:
+        return {"description": "Malformed JSON input."}
 
     try:
         validated = model(**inp)

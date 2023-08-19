@@ -67,15 +67,16 @@ async def create_checkout_session(request: Request, token: Optional[str] = Cooki
     ).get("Item", None)
 
     try:
+        stripe_email = user_data.get('nid') + "@ucf.edu" if user_data.get('nid', False), else user_data.get('email')
         checkout_session = stripe.checkout.Session.create(
             line_items=[
                 {
                     # Provide the exact Price ID (for example, pr_1234) of the product you want to sell
-                    'price': options.get('stripe').get('price_id'),
+                    'price': email,
                     'quantity': 1,
                 },
             ],
-            customer_email=user_data.get('nid') + "@ucf.edu",
+            customer_email=stripe_email,
             mode='payment',
             success_url=options.get('stripe').get('url').get('success'),
             cancel_url=options.get('stripe').get('url').get('failure'),

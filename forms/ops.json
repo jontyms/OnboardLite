@@ -10,6 +10,7 @@
             {
                 "label": "Ops Email",
                 "caption": "Ends with @hackucf.org",
+                "domain": "hackucf.org",
                 "input": "email",
                 "key": "ops_email",
                 "required": true

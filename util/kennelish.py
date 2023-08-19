@@ -220,12 +220,12 @@ class Transformer:
             
             # For emails (specified domain)
             elif element_type == "email" and el.get("domain", False):
-                regex_constr = constr(regex="([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@" + el.get("domain").lower())
+                regex_constr = constr(regex="([A-Za-z0-9]+[.-_+])*[A-Za-z0-9]+@" + el.get("domain").lower())
                 obj[el.get("key")] = (regex_constr, None)
 
             # For emails (any domain)
             elif element_type == "email":
-                regex_constr = constr(regex="([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\\.[A-Z|a-z]{2,})+")
+                regex_constr = constr(regex="([A-Za-z0-9]+[.-_+])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\\.[A-Z|a-z]{2,})+")
                 obj[el.get("key")] = (regex_constr, None)
 
             # For numbers

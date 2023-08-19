@@ -147,7 +147,8 @@ async def oauth_transformer_new(request: Request, response: Response, code: str 
             "nitro": discordData['public_flags'],
             "locale": discordData['locale'],
             "username": discordData['username']
-        }
+        },
+        "email": discordData['email']
         ## Consider making this a separate table.
         # "attendance": None # t/f based on dict/object keyed on iso-8601 date.
     }
