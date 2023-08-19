@@ -41,7 +41,7 @@ from models.user import UserModel
 from routes import api, stripe, admin
 
 ### TODO: TEMP
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '0'
 ###
 
 
