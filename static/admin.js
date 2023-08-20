@@ -131,7 +131,7 @@ function showUser(userId) {
     
     document.getElementById("status").innerText = user.status;
     document.getElementById("did_pay_dues").innerText = user.did_pay_dues ? "✔️" : "❌";
-    document.getElementById("ethics_form").innerText = (user.ethics_form.signtime && (Number.parseInt(user.ethics_form.signtime) !== -1) ? (new Date(Number.parseInt(user.ethics_form.signtime))).toLocaleString() : "❌"; 
+    document.getElementById("ethics_form").innerText = (user.ethics_form.signtime && (Number.parseInt(user.ethics_form.signtime) !== -1)) ? (new Date(Number.parseInt(user.ethics_form.signtime))).toLocaleString() : "❌";
     document.getElementById("is_full_member").innerText = user.is_full_member ? "✔️" : "❌";
     document.getElementById("shirt_status").innerText = user.did_get_shirt ? "Claimed" : `Unclaimed: Size ${user.shirt_size}`
 
