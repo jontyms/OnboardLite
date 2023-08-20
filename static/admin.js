@@ -216,6 +216,20 @@ function logoff() {
     window.location.href = "/";
 }
 
+function changeCamera() {
+    QrScanner.listCameras().then(evt => {
+        const cameras = evt;
+        let camArray = [];
+        let camString = "Please enter a camera number:";
+        for (let i = 0; i < cameras.length; i++) {
+            camString += `\n${i}: ${cameras[i].label}`;
+            camArray.push(cameras[i].id);
+        }
+        let camSelect = prompt(camString);
+        qrScanner.setCamera(camArray[camSelect]);
+    });
+}
+
 function scannedCode(result) {
     // Enter load mode...
     qrScanner.stop();
@@ -258,5 +272,9 @@ window.onload = evt => {
         document.getElementById("goBackBtn").onclick = (evt) => {
             showTable();
         }
+    }
+
+    document.getElementById("changeCamera").onclick = (evt) => {
+        changeCamera();
     }
 }

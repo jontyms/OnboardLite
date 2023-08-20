@@ -2,13 +2,13 @@ from pydantic import BaseModel
 from typing import Optional
 
 class DiscordModel(BaseModel):
-    email:              str
-    mfa:                bool
-    avatar:             str
+    email:              Optional[str] = None
+    mfa:                Optional[bool] = None
+    avatar:             Optional[str] = None
     banner:             Optional[str] = None
-    color:              int
-    nitro:              int
-    locale:             str
+    color:              Optional[int] = None
+    nitro:              Optional[int] = None
+    locale:             Optional[str] = None
     username:           str
 
 
