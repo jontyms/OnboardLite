@@ -3,12 +3,14 @@ import os
 import yaml
 import boto3
 import requests
+from python_terraform import *
 from boto3.dynamodb.conditions import Key, Attr
 
 from util.options import Options
 from util.horsepass import HorsePass
 
 options = Options.fetch()
+tf = Terraform(working_dir=options.get("infra", {}).get("tf_directory", "./"))
 
 """
 This function will ensure a member meets all requirements to be a member, and if so, creates an
@@ -65,19 +67,19 @@ class Approve:
             username = user_data.get("discord", {}).get("username") + "@infra.hackucf.org"
             password = HorsePass.gen()
 
-            # # Add username to Onboard database
-            # table.update_item(
-            #     Key={
-            #         'id': member_id
-            #     },
-            #     UpdateExpression='SET infra_email = :val',
-            #     ExpressionAttributeValues={
-            #         ':val': username
-            #     }
-            # )
+            # Add username to Onboard database
+            table.update_item(
+                Key={
+                    'id': member_id
+                },
+                UpdateExpression='SET infra_email = :val',
+                ExpressionAttributeValues={
+                    ':val': username
+                }
+            )
             
             # Push account to OpenStack via Terraform magics
-            # <TODO!!>
+            # tf.apply(var={'a':'b', 'c':'d'})
             
             # Minecraft server
             if user_data.get("minecraft", False):
@@ -93,37 +95,20 @@ class Approve:
 
 This message is to confirm that your membership has processed successfully. You can access and edit your membership ID at https://{options.get('http', {}).get('domain')}/profile.
 
-These credentials can be used to the Hack@UCF Private Cloud, one of our many benefits of paying dues. This can be accessed at {options.get('infra', {}).get('horizon')}.
+These temporary credentials can be used to the Hack@UCF Private Cloud, one of our many benefits of paying dues. This can be accessed at {options.get('infra', {}).get('horizon')}.
 
 ```yaml
 Username: {username}
 Password: {password}
 ```
 
+You will need to change your password after your first log-in.
+
 The password for the `Cyberlab` WiFi is currently `{options.get('infra', {}).get('wifi')}`, but this is subject to change (and we'll let you know when that happens).
 
 Happy Hacking,
   - Hack@UCF Bot
             """
-
-#             welcome_msg = f"""Hello {user_data.get('first_name')}, and welcome to Hack@UCF!
-
-# This message is to confirm that your membership has processed successfully, and to give you your temporary Hack@UCF credentials.
-
-# These credentials can be used to the Hack@UCF Private Cloud, one of our many benefits of paying dues.
-
-# ```yaml
-# Username: {username}
-# Password: {password}
-# ```
-
-# When connected to the `Cyberlab` WiFi, you can access the Hack@UCF Private Cloud at {config_option}.
-
-# The password for the `Cyberlab` WiFi is currently `cyberlab`, but this is subject to change (and we'll let you know when that happens).
-
-# Happy Hacking,
-#   - Hack@UCF Bot
-# """
 
             send_message_body = {
                 "content": welcome_msg
@@ -146,7 +131,7 @@ Happy Hacking,
             # Send a message on why this check failed.
             fail_msg = f"""Hello {user_data.get('first_name')},
 
-We wanted to let you know that you did not complete all of the steps for being able to become a full-fledged Hack@UCF member.
+We wanted to let you know that you **did not** complete all of the steps for being able to become an Hack@UCF member.
 
 - Provided a name: {'✅' if user_data.get('first_name') else '❌'}
 - Provided a UCF NID: {'✅' if user_data.get('nid') else '❌'}

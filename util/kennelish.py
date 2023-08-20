@@ -85,9 +85,9 @@ class Kennelish:
 
         regex_pattern = " "
         if inp_type == 'email' and entry.get('domain', False):
-            regex_pattern = ' pattern="([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@' + entry.get('domain') + '"'
+            regex_pattern = ' pattern="([A-Za-z0-9.-_+]+)@' + entry.get('domain') + '"'
         elif inp_type == 'email':
-            regex_pattern = ' pattern="([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\\.[A-Z|a-z]{2,})+"'
+            regex_pattern = ' pattern="([A-Za-z0-9.-_+]+)@[A-Za-z0-9-]+(.[A-Za-z-]{2,})"'
 
         output = f"<input class='kennelish_input'{' required' if entry.get('required') else ' '}{regex_pattern} name='{entry.get('key', '')}' type='{inp_type}' value='{prefill}' placeholder='{entry.get('label', '')}' />"
         return Kennelish.label(entry, output)
@@ -220,12 +220,12 @@ class Transformer:
             
             # For emails (specified domain)
             elif element_type == "email" and el.get("domain", False):
-                regex_constr = constr(regex="([A-Za-z0-9]+[.-_+])*[A-Za-z0-9]+@" + el.get("domain").lower())
+                regex_constr = constr(regex="([A-Za-z0-9.-_+]+)@" + el.get("domain").lower())
                 obj[el.get("key")] = (regex_constr, None)
 
             # For emails (any domain)
             elif element_type == "email":
-                regex_constr = constr(regex="([A-Za-z0-9]+[.-_+])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\\.[A-Z|a-z]{2,})+")
+                regex_constr = constr(regex="([A-Za-z0-9.-_+]+)@[A-Za-z0-9-]+(.[A-Za-z-]{2,})")
                 obj[el.get("key")] = (regex_constr, None)
 
             # For numbers
