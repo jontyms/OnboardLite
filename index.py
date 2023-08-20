@@ -262,6 +262,15 @@ async def forms(request: Request, token: Optional[str] = Cookie(None), payload: 
 async def final(request: Request):
     return templates.TemplateResponse("done.html", {"request": request})
 
+@app.get("/logout")
+async def logout(request: Request):
+    rr = RedirectResponse(
+        "/", 
+        status_code=status.HTTP_302_FOUND
+    )
+    rr.delete_cookie(key="token")
+    return rr
+
 
 if __name__ == "__main__":
     import uvicorn
