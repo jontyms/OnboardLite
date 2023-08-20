@@ -161,6 +161,13 @@ input[type=checkbox]:checked:after {
     margin: 5px;
 }
 
+div > label {
+    display: inline-block;
+    width: calc(100% - 50px);
+    transform: translateY(-6px);
+    margin: 5px 0;
+}
+
 input[type=radio] {
     appearance: none;
     width: 20px;
