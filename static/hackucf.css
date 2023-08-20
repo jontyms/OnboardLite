@@ -312,7 +312,8 @@ fieldset {
 
 .qr {
     height: 250px;
-    margin-left: 250px;
+    width: 250px;
+    margin: auto;
     margin-bottom: 20px;
 }
 
@@ -396,6 +397,10 @@ video, .scan-region-highlight {
 
 video {
     margin: 20px 0;
+}
+
+.qr > svg {
+    border-radius: 10px;
 }
 
 @media screen and (max-width: 619px) {

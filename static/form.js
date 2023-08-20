@@ -239,13 +239,12 @@ window.onload = (evt) => {
                 height: 260,
                 type: "svg",
                 data: document.getElementById("membership_id").innerText,
-                image: "/static/qr_hack_dark.svg",
+                image: "/static/qr_hack_light.svg",
                 dotsOptions: {
-                    color: "#fff",
-                    type: "rounded"
+                    color: "#000"
                 },
                 backgroundOptions: {
-                    color: "transparent"
+                    color: "#fff"
                 },
                 imageOptions: {
                     crossOrigin: "anonymous",
