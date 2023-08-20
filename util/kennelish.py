@@ -29,6 +29,8 @@ class Kennelish:
                     output += Kennelish.header(entry, user_data, "p")
                 elif entry['input'] == 'email':
                     output += Kennelish.text(entry, user_data, "email")
+                elif entry['input'] == 'nid':
+                    output += Kennelish.text(entry, user_data, "nid")
                 elif entry['input'] == 'text':
                     output += Kennelish.text(entry, user_data)
                 elif entry['input'] == 'radio':
@@ -88,8 +90,10 @@ class Kennelish:
             regex_pattern = ' pattern="([A-Za-z0-9.-_+]+)@' + entry.get('domain') + '"'
         elif inp_type == 'email':
             regex_pattern = ' pattern="([A-Za-z0-9.-_+]+)@[A-Za-z0-9-]+(.[A-Za-z-]{2,})"'
+        elif inp_type == 'nid':
+            regex_pattern = ' pattern="^([a-z]{2}[0-9]{6})$"'
 
-        output = f"<input class='kennelish_input'{' required' if entry.get('required') else ' '}{regex_pattern} name='{entry.get('key', '')}' type='{inp_type}' value='{prefill}' placeholder='{entry.get('label', '')}' />"
+        output = f"<input class='kennelish_input'{' required' if entry.get('required') else ' '}{regex_pattern} name='{entry.get('key', '')}' type='{'text' if inp_type == 'nid' else inp_type}' value='{prefill}' placeholder='{entry.get('label', '')}' />"
         return Kennelish.label(entry, output)
 
     def radio(entry, user_data=None):
@@ -226,6 +230,11 @@ class Transformer:
             # For emails (any domain)
             elif element_type == "email":
                 regex_constr = constr(regex="([A-Za-z0-9.-_+]+)@[A-Za-z0-9-]+(.[A-Za-z-]{2,})")
+                obj[el.get("key")] = (regex_constr, None)
+
+            # For NIDs
+            elif element_type == "nid":
+                regex_constr = constr(regex="(^([a-z]{2}[0-9]{6})$)")
                 obj[el.get("key")] = (regex_constr, None)
 
             # For numbers
