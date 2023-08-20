@@ -68,16 +68,16 @@ class Approve:
             username = user_data.get("discord", {}).get("username") + "@infra.hackucf.org"
             password = HorsePass.gen()
 
-            # Add username to Onboard database
-            table.update_item(
-                Key={
-                    'id': member_id
-                },
-                UpdateExpression='SET infra_email = :val',
-                ExpressionAttributeValues={
-                    ':val': username
-                }
-            )
+            # # Add username to Onboard database
+            # table.update_item(
+            #     Key={
+            #         'id': member_id
+            #     },
+            #     UpdateExpression='SET infra_email = :val',
+            #     ExpressionAttributeValues={
+            #         ':val': username
+            #     }
+            # )
             
             # Push account to OpenStack via Terraform magics
             # tf.apply(var={'a':'b', 'c':'d'})
@@ -95,15 +95,6 @@ class Approve:
             welcome_msg = f"""Hello {user_data.get('first_name')}, and welcome to Hack@UCF!
 
 This message is to confirm that your membership has processed successfully. You can access and edit your membership ID at https://{options.get('http', {}).get('domain')}/profile.
-
-These temporary credentials can be used to the Hack@UCF Private Cloud, one of our many benefits of paying dues. This can be accessed at {options.get('infra', {}).get('horizon')}.
-
-```yaml
-Username: {username}
-Password: {password}
-```
-
-You will need to change your password after your first log-in.
 
 The password for the `Cyberlab` WiFi is currently `{options.get('infra', {}).get('wifi')}`, but this is subject to change (and we'll let you know when that happens).
 
