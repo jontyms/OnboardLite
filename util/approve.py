@@ -1,13 +1,14 @@
 import json
 import os
-import yaml
+
 import boto3
 import requests
 from python_terraform import *
 from boto3.dynamodb.conditions import Key, Attr
+import yaml
 
-from util.options import Options
 from util.horsepass import HorsePass
+from util.options import Options
 
 options = Options.fetch()
 tf = Terraform(working_dir=options.get("infra", {}).get("tf_directory", "./"))
@@ -46,7 +47,7 @@ class Approve:
             "Content-Type": "application/json",
             "X-Audit-Log-Reason": "Hack@UCF OnboardLite Bot"
         }
-        requests.put(f"http://discordapp.com/api/guilds/{options.get('discord', {}).get('guild_id')}/members/{discord_id}", headers=headers)
+        requests.put(f"https://discordapp.com/api/guilds/{options.get('discord', {}).get('guild_id')}/members/{discord_id}", headers=headers)
 
         # Get DM channel ID to send later...
         get_channel_id_body = {
