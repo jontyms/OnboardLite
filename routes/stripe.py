@@ -72,7 +72,7 @@ async def create_checkout_session(request: Request, token: Optional[str] = Cooki
             line_items=[
                 {
                     # Provide the exact Price ID (for example, pr_1234) of the product you want to sell
-                    'price': stripe_email,
+                    'price': options.get('stripe').get('price_id'),
                     'quantity': 1,
                 },
             ],
