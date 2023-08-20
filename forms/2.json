@@ -16,7 +16,7 @@
             },
             {
                 "label": "Surname",
-                "caption": "The rest of your name, including middle name if you have one.",
+                "caption": "The rest of your name, including middle name if you have one, and your last name.",
                 "input": "text",
                 "key": "surname"
             },
