@@ -14,7 +14,7 @@
                 "input": "email",
                 "key": "ops_email",
                 "required": true
-            }
+            },
             
             {
                 "input": "navigation",
