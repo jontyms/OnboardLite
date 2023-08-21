@@ -40,15 +40,6 @@ class Approve:
             print("\tAlready full member.")
             return True
 
-        # Make user join the Hack@UCF Discord
-        discord_id = str(user_data.get("discord_id"))
-        headers = {
-            "Authorization": f"Bot {options.get('discord', {}).get('bot_token')}",
-            "Content-Type": "application/json",
-            "X-Audit-Log-Reason": "Hack@UCF OnboardLite Bot"
-        }
-        requests.put(f"https://discordapp.com/api/guilds/{options.get('discord', {}).get('guild_id')}/members/{discord_id}", headers=headers)
-
         # Get DM channel ID to send later...
         get_channel_id_body = {
             'recipient_id': discord_id
@@ -95,6 +86,15 @@ class Approve:
             welcome_msg = f"""Hello {user_data.get('first_name')}, and welcome to Hack@UCF!
 
 This message is to confirm that your membership has processed successfully. You can access and edit your membership ID at https://{options.get('http', {}).get('domain')}/profile.
+
+These temporary credentials can be used to the Hack@UCF Private Cloud, one of our many benefits of paying dues. This can be accessed at {options.get('infra', {}).get('horizon')}.
+
+```yaml
+Username: {username}
+Password: {password}
+```
+
+You will need to change your password after your first log-in.
 
 The password for the `Cyberlab` WiFi is currently `{options.get('infra', {}).get('wifi')}`, but this is subject to change (and we'll let you know when that happens).
 

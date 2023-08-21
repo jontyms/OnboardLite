@@ -1,5 +1,6 @@
 import json, re, uuid
 import os
+import requests
 
 from datetime import datetime, timedelta
 import time
@@ -73,7 +74,7 @@ async def oauth_transformer(redir: str = "/join/2"):
     # Open redirect check
     hostname = urlparse(redir).netloc
     print(hostname)
-    if hostname != "" and hostname != "my.hackucf.org" and hostname != "hackucf.org":
+    if hostname != "" and hostname != options.get("http", {}).get("domain", "my.hackucf.org"):
         redir = "/join/2"
 
     oauth = OAuth2Session(options.get("discord").get("client_id"), redirect_uri=options.get("discord").get("redirect_base") + redir, scope=options.get("discord").get("scope"))
@@ -97,7 +98,7 @@ async def oauth_transformer_new(request: Request, response: Response, code: str 
 
     # Open redirect check
     hostname = urlparse(redir).netloc
-    if hostname != "" and hostname != "my.hackucf.org" and hostname != "hackucf.org":
+    if hostname != "" and hostname != options.get("http", {}).get("domain", "my.hackucf.org"):
         redir = "/join/2"
 
     if code is None:
@@ -134,6 +135,18 @@ async def oauth_transformer_new(request: Request, response: Response, code: str 
         member_id = str(uuid.uuid4())
         do_sudo = False
         is_new = True
+
+        # Make user join the Hack@UCF Discord, if it's their first rodeo.
+        discord_id = str(discordData['id'])
+        headers = {
+            "Authorization": f"Bot {options.get('discord', {}).get('bot_token')}",
+            "Content-Type": "application/json",
+            "X-Audit-Log-Reason": "Hack@UCF OnboardLite Bot"
+        }
+        put_join_guild = {
+            'access_token': token['access_token']
+        }
+        req = requests.put(f"https://discordapp.com/api/guilds/{options.get('discord', {}).get('guild_id')}/members/{discord_id}", headers=headers, data=json.dumps(put_join_guild))
 
     data = {
         "id": member_id,
