@@ -47,7 +47,7 @@ class Approve:
             "X-Audit-Log-Reason": "Hack@UCF OnboardLite Bot"
         }
         get_channel_id_body = {
-            'recipient_id': user_data.get("discord_id")
+            'recipient_id': str(user_data.get("discord_id"))
         }
         req = requests.post(f"https://discord.com/api/users/@me/channels", headers=headers, data=json.dumps(get_channel_id_body))
         resp = req.json()
