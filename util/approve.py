@@ -42,7 +42,7 @@ class Approve:
 
         # Get DM channel ID to send later...
         get_channel_id_body = {
-            'recipient_id': discord_id
+            'recipient_id': user_data.get("discord_id")
         }
         req = requests.post(f"https://discord.com/api/users/@me/channels", headers=headers, data=json.dumps(get_channel_id_body))
         resp = req.json()
@@ -86,15 +86,6 @@ class Approve:
             welcome_msg = f"""Hello {user_data.get('first_name')}, and welcome to Hack@UCF!
 
 This message is to confirm that your membership has processed successfully. You can access and edit your membership ID at https://{options.get('http', {}).get('domain')}/profile.
-
-These temporary credentials can be used to the Hack@UCF Private Cloud, one of our many benefits of paying dues. This can be accessed at {options.get('infra', {}).get('horizon')}.
-
-```yaml
-Username: {username}
-Password: {password}
-```
-
-You will need to change your password after your first log-in.
 
 The password for the `Cyberlab` WiFi is currently `{options.get('infra', {}).get('wifi')}`, but this is subject to change (and we'll let you know when that happens).
 
