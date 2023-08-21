@@ -41,6 +41,11 @@ class Approve:
             return True
 
         # Get DM channel ID to send later...
+        headers = {
+            "Authorization": f"Bot {options.get('discord', {}).get('bot_token')}",
+            "Content-Type": "application/json",
+            "X-Audit-Log-Reason": "Hack@UCF OnboardLite Bot"
+        }
         get_channel_id_body = {
             'recipient_id': user_data.get("discord_id")
         }
