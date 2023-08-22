@@ -1,5 +1,6 @@
 import json
 import os
+import datetime
 
 import boto3
 import requests
@@ -22,6 +23,45 @@ If approval fails, dispatch a Discord message saying that something went wrong a
 class Approve:
     def __init__(self):
         super(Approve, self).__init__
+
+    def provision_infra(member_id, user_data=None):
+        try:
+            if not user_data:
+                dynamodb = boto3.resource('dynamodb')
+                table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
+
+                user_data = table.get_item(
+                    Key={
+                        'id': member_id
+                    }
+                ).get("Item", None)
+
+            username = user_data.get("discord", {}).get("username") + "@infra.hackucf.org"
+            password = HorsePass.gen()
+
+            # Add username to Onboard database
+            table.update_item(
+                Key={
+                    'id': member_id
+                },
+                UpdateExpression='SET infra_email = :val',
+                ExpressionAttributeValues={
+                    ':val': username
+                }
+            )
+            
+            # Push account to OpenStack via Terraform magics
+            tf_vars = {'os_password': options.get('infra', {}).get('ad', {}).get('password'), 'tenant_name': member_id + datetime.date.today().strftime("%Y"), 'handle': username, 'password': password}
+            tf.apply(var=tf_vars, skip_plan=True)
+
+            return {
+                "username": username,
+                "password": password
+            }
+        except Exception as e:
+            print(e)
+            return None
+
 
     # !TODO finish the post-sign-up stuff + testing
     def approve_member(member_id):
@@ -61,23 +101,9 @@ class Approve:
         # - They signed their ethics form
         if user_data.get("first_name") and user_data.get("nid") and user_data.get("discord_id") and user_data.get("did_pay_dues") and user_data.get("ethics_form", {}).get("signtime", 0) != 0:
             print("\tNewly-promoted full member!")
-            # Create an Infra account.
-            username = user_data.get("discord", {}).get("username") + "@infra.hackucf.org"
-            password = HorsePass.gen()
 
-            # # Add username to Onboard database
-            # table.update_item(
-            #     Key={
-            #         'id': member_id
-            #     },
-            #     UpdateExpression='SET infra_email = :val',
-            #     ExpressionAttributeValues={
-            #         ':val': username
-            #     }
-            # )
-            
-            # Push account to OpenStack via Terraform magics
-            # tf.apply(var={'a':'b', 'c':'d'})
+            # Create an Infra account.
+            creds = provision_infra(member_id, user_data=user_data)
             
             # Minecraft server
             if user_data.get("minecraft", False):
@@ -92,6 +118,15 @@ class Approve:
             welcome_msg = f"""Hello {user_data.get('first_name')}, and welcome to Hack@UCF!
 
 This message is to confirm that your membership has processed successfully. You can access and edit your membership ID at https://{options.get('http', {}).get('domain')}/profile.
+
+These temporary credentials can be used to the Hack@UCF Private Cloud, one of our many benefits of paying dues. This can be accessed at {options.get('infra', {}).get('horizon')} while on the CyberLab WiFi.
+
+```yaml
+Username: {creds.get('username', 'Not Set')}
+Temporary Password: {creds.get('password', 'Please email ops@hackucf.org for assistance.')}
+```
+
+You will need to change your password after your first log-in.
 
 The password for the `Cyberlab` WiFi is currently `{options.get('infra', {}).get('wifi')}`, but this is subject to change (and we'll let you know when that happens).
 

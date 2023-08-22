@@ -186,6 +186,11 @@ function showUser(userId) {
     };
     document.getElementById("adminLabel").innerText = user.sudo ? "Revoke Admin" : "Promote to Admin";
 
+    document.getElementById("joinInfra").onclick = (evt) => {
+        inviteToInfra(user.id);
+    };
+    document.getElementById("joinInfra").style.display = user.infra_email ? "inline-block" : "none";
+
     // Set page visibilities
     document.getElementById("users").style.display = "none";
     document.getElementById("scanner").style.display = "none";
@@ -230,6 +235,23 @@ function verifyUser(user_id) {
         member.status = userStatusString(member);
 
         userDict[user_id] = member;
+        showUser(user_id);
+    })
+}
+
+function inviteToInfra(user_id) {
+    fetch("/admin/infra?member_id=" + user_id).then(data => {
+        return data.json();
+    }).then(data2 => {
+        // Update user data.
+        let resp = data2.data;
+
+        alert(`The user has been provisioned and an email to them sent!
+
+Username: ${resp.username}
+Password: ${resp.password}`);
+
+        userDict[user_id].infra_email = resp.username;
         showUser(user_id);
     })
 }

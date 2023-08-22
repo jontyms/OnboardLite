@@ -1,4 +1,4 @@
-import boto3, json
+import boto3, json, requests
 from boto3.dynamodb.conditions import Key, Attr
 
 from jose import JWTError, jwt
@@ -39,6 +39,78 @@ Renders the Admin home page.
 async def admin(request: Request, token: Optional[str] = Cookie(None)):
     payload = jwt.decode(token, options.get("jwt").get("secret"), algorithms=options.get("jwt").get("algorithm"))
     return templates.TemplateResponse("admin_searcher.html", {"request": request, "icon": payload['pfp'], "name": payload['name'], "id": payload['id']})
+
+
+"""
+API endpoint to FORCE-provision Infra credentials (even without membership!!!)
+"""
+@router.get("/infra/")
+@Authentication.admin
+async def get_refresh(request: Request, token: Optional[str] = Cookie(None), member_id: Optional[str] = "FAIL"):
+    if member_id == "FAIL":
+        return {
+            "username": "",
+            "password": "",
+            "error": "Missing ?member_id"
+        }
+
+    creds = Approve.provision_infra(member_id)
+
+    if not creds:
+        return Errors.generate(request, 404, "User Not Found")
+
+    # Get user data
+    dynamodb = boto3.resource('dynamodb')
+    table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
+
+    user_data = table.get_item(
+        Key={
+            'id': member_id
+        }
+    ).get("Item", None)
+
+    # Send DM...
+    new_creds_msg = f"""Hello {user_data.get('first_name')},
+
+We are happy to grant you Hack@UCF Private Cloud access!
+
+These temporary credentials can be used to the Hack@UCF Private Cloud. This can be accessed at {options.get('infra', {}).get('horizon')} while on the CyberLab WiFi.
+
+```yaml
+Username: {creds.get('username', 'Not Set')}
+Temporary Password: {creds.get('password', 'Please email ops@hackucf.org for assistance.')}
+```
+
+You will need to change your password after your first log-in.
+
+The password for the `Cyberlab` WiFi is currently `{options.get('infra', {}).get('wifi')}`, but this is subject to change (and we'll let you know when that happens).
+
+Happy Hacking,
+  - Hack@UCF Bot
+            """
+    
+    # Get DM channel ID to send later...
+    discord_id = str(user_data.get("discord_id"))
+    headers = {
+        "Authorization": f"Bot {options.get('discord', {}).get('bot_token')}",
+        "Content-Type": "application/json",
+        "X-Audit-Log-Reason": "Hack@UCF OnboardLite Bot"
+    }
+    get_channel_id_body = {
+        'recipient_id': discord_id
+    }
+    req = requests.post(f"https://discord.com/api/users/@me/channels", headers=headers, data=json.dumps(get_channel_id_body))
+    resp = req.json()
+
+    send_message_body = {
+        "content": new_creds_msg
+    }
+    requests.post(f"https://discord.com/api/channels/{resp.get('id')}/messages", headers=headers, data=json.dumps(send_message_body))
+
+    return {
+        "username": creds.get('username'),
+        "password": creds.get('password')
+    }
 
 
 """
