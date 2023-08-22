@@ -34,8 +34,8 @@
     <div class="admin">
         <div id="users">
             <input type="text" class="search" placeholder="Search" />
-            <button class="btn searchbtn sort" data-sort="name">Sort Name</button>
-            <button class="btn searchbtn sort" data-sort="status">Sort Status</button>
+            <button id="activeFilter" class="btn searchbtn">Active</button>
+            <button id="notActiveFilter" class="btn searchbtn">Inactive</button>
             <button id="scannerOn" class="btn searchbtn">Scanner</button>
             <table>
                 <thead></thead>
@@ -147,6 +147,7 @@
             <details>
                 <summary><h2>Actions</h2></summary>
                 <button class="hide_default btn" id="payDues"><i class="fa-solid fa-dollar"></i> Pay Dues</button>
+                <button class="hide_default btn" id="reverify"><i class="fa-solid fa-refresh"></i> Refresh Status</button>
                 <button class="hide_default btn" id="claimShirt"><i class="fa-solid fa-shirt"></i> Claim T-Shirt</button>
                 <button class="btn" id="setAdmin"><i class="fa-solid fa-lock"></i> <span id="adminLabel">Toggle Admin</span></button>
             </details>

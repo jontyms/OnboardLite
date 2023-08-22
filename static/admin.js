@@ -8,7 +8,7 @@ function load() {
     let valueHeader = "<tr>";
     for (let i = 0; i < valueNames.length; i++) {
         valueItems += `<td class="${valueNames[i].toLowerCase()}"></td>`;
-        valueHeader += `<td>${valueNames[i]}</td>`
+        valueHeader += `<td><button class="sort totally_text" data-sort="${valueNames[i].toLowerCase()}">${valueNames[i]}</button></td>`
         valueNames[i] = valueNames[i].toLowerCase();
     }
     valueItems += "</tr>";
@@ -19,7 +19,7 @@ function load() {
     const options = {
         valueNames: valueNames,
         item: valueItems,
-        searchColumns: ["name", "nid", "discord", "email", "major"]
+        searchColumns: ["name", "nid", "discord", "email", "major", "status"]
     };
 
     let members = [];
@@ -33,7 +33,7 @@ function load() {
 
             let userStatus = userStatusString(member);
             let userEntry = {
-                "id": sanitizeHTML(member.id),
+                "id": sanitizeHTML(member.id).replaceAll("&#45;", "-"),
                 "name": sanitizeHTML(member.first_name + " " + member.surname),
                 "status": userStatus,
                 "discord": "@" + sanitizeHTML(member.discord.username),
@@ -41,7 +41,8 @@ function load() {
                 "nid": sanitizeHTML(member.nid),
                 "experience": sanitizeHTML(member.experience),
                 "major": sanitizeHTML(member.major),
-                "details": `<button class="searchbtn btn" onclick="showUser('${sickoModeSanitize(member.id)}')">Details</a>`
+                "details": `<button class="searchbtn btn" onclick="showUser('${sickoModeSanitize(member.id)}')">Details</a>`,
+                "is_full_member": Boolean(member.is_full_member)
             }
 
             members.push(userEntry);
@@ -164,6 +165,11 @@ function showUser(userId) {
     };
     document.getElementById("payDues").style.display = user.did_pay_dues ? "none" : "inline-block";
 
+    document.getElementById("reverify").onclick = (evt) => {
+        verifyUser(user.id)
+    };
+    document.getElementById("reverify").style.display = user.is_full_member ? "none" : "inline-block";
+
     document.getElementById("claimShirt").onclick = (evt) => {
         editUser({
             "id": user.id,
@@ -211,6 +217,23 @@ function editUser(payload) {
     })
 }
 
+function verifyUser(user_id) {
+    fetch("/admin/refresh?member_id=" + user_id).then(data => {
+        return data.json();
+    }).then(data2 => {
+        // Update user data.
+        let member = data2.data;
+
+        member.name = member.first_name + " " + member.surname;
+        member.username = "@" + member.discord.username;
+        member.pfp = member.discord.avatar;
+        member.status = userStatusString(member);
+
+        userDict[user_id] = member;
+        showUser(user_id);
+    })
+}
+
 function logoff() {
     document.cookie = 'token=; Max-Age=0; path=/; domain=' + location.hostname;
     window.location.href = "/logout";
@@ -235,6 +258,18 @@ function scannedCode(result) {
     qrScanner.stop();
 
     showUser(result.data);
+}
+
+function filter(showOnlyActiveUsers) {
+    // showActiveUsers == true -> only active shown
+    // showActiveUsers == false -> only inactive shown
+    userList.filter((item) => {
+        let activeOrInactive = item.values().is_full_member;
+        if (!showOnlyActiveUsers) {
+            activeOrInactive = !activeOrInactive
+        }
+        return activeOrInactive;
+    });
 }
 
 window.onload = evt => {
@@ -276,5 +311,14 @@ window.onload = evt => {
 
     document.getElementById("changeCamera").onclick = (evt) => {
         changeCamera();
+    }
+
+    // Filter buttons    
+    document.getElementById("notActiveFilter").onclick = (evt) => {
+        filter(false);
+    }
+
+    document.getElementById("activeFilter").onclick = (evt) => {
+        filter(true);
     }
 }

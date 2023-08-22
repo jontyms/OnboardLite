@@ -410,6 +410,14 @@ video {
     border-radius: 10px;
 }
 
+.totally_text {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+}
+
 @media screen and (max-width: 619px) {
     .entry {
         grid-template-columns: auto;
