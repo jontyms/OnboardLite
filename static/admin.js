@@ -189,7 +189,7 @@ function showUser(userId) {
     document.getElementById("joinInfra").onclick = (evt) => {
         inviteToInfra(user.id);
     };
-    document.getElementById("joinInfra").style.display = user.infra_email ? "inline-block" : "none";
+    document.getElementById("joinInfra").style.display = user.infra_email ? "none" : "inline-block";
 
     // Set page visibilities
     document.getElementById("users").style.display = "none";
