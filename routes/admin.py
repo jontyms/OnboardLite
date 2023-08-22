@@ -17,6 +17,7 @@ from models.info import InfoModel
 from util.authentication import Authentication
 from util.errors import Errors
 from util.options import Options
+from util.approve import Approve
 from util.kennelish import Kennelish, Transformer
 
 options = Options.fetch()
@@ -38,6 +39,36 @@ Renders the Admin home page.
 async def admin(request: Request, token: Optional[str] = Cookie(None)):
     payload = jwt.decode(token, options.get("jwt").get("secret"), algorithms=options.get("jwt").get("algorithm"))
     return templates.TemplateResponse("admin_searcher.html", {"request": request, "icon": payload['pfp'], "name": payload['name'], "id": payload['id']})
+
+
+"""
+API endpoint that re-runs the member verification workflow
+"""
+@router.get("/refresh/")
+@Authentication.admin
+async def get_refresh(request: Request, token: Optional[str] = Cookie(None), member_id: Optional[str] = "FAIL"):
+    if member_id == "FAIL":
+        return {
+            "data": {},
+            "error": "Missing ?member_id"
+        }
+
+    Approve.approve_member(member_id)
+
+    dynamodb = boto3.resource('dynamodb')
+    table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
+    data = table.get_item(
+        Key={
+            'id': member_id
+        }
+    ).get("Item", None)
+
+    if not data:
+        return Errors.generate(request, 404, "User Not Found")
+
+    return {
+        "data": data
+    }
 
 
 """
