@@ -418,6 +418,15 @@ video {
     font-weight: bold;
 }
 
+td.nid, td.email {
+    filter: blur(5px); 
+    transition: filter 0.15s ease-in-out;
+}
+
+td.nid:hover, td.email:hover {
+    filter: blur(0px);    
+}
+
 @media screen and (max-width: 619px) {
     .entry {
         grid-template-columns: auto;
