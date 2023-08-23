@@ -46,7 +46,7 @@ API endpoint to FORCE-provision Infra credentials (even without membership!!!)
 """
 @router.get("/infra/")
 @Authentication.admin
-async def get_refresh(request: Request, token: Optional[str] = Cookie(None), member_id: Optional[str] = "FAIL"):
+async def get_infra(request: Request, token: Optional[str] = Cookie(None), member_id: Optional[str] = "FAIL"):
     if member_id == "FAIL":
         return {
             "username": "",
@@ -78,7 +78,7 @@ These temporary credentials can be used to the Hack@UCF Private Cloud. This can 
 
 ```yaml
 Username: {creds.get('username', 'Not Set')}
-Temporary Password: {creds.get('password', 'Please email ops@hackucf.org for assistance.')}
+Temporary Password: {creds.get('password', 'Please email ops@hackucf.org for credentials.')}
 ```
 
 You will need to change your password after your first log-in.

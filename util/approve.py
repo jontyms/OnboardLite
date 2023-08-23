@@ -103,7 +103,7 @@ class Approve:
             print("\tNewly-promoted full member!")
 
             # Create an Infra account.
-            creds = provision_infra(member_id, user_data=user_data)
+            creds = Approve.provision_infra(member_id, user_data=user_data)
             
             # Minecraft server
             if user_data.get("minecraft", False):
@@ -123,7 +123,7 @@ These temporary credentials can be used to the Hack@UCF Private Cloud, one of ou
 
 ```yaml
 Username: {creds.get('username', 'Not Set')}
-Temporary Password: {creds.get('password', 'Please email ops@hackucf.org for assistance.')}
+Temporary Password: {creds.get('password', 'Please email ops@hackucf.org for credentials.')}
 ```
 
 You will need to change your password after your first log-in.
