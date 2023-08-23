@@ -27,9 +27,9 @@ class Approve:
     def provision_infra(member_id, user_data=None):
         print("!!! PROVISIONING !!!")
         try:
+            dynamodb = boto3.resource('dynamodb')
+            table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
             if not user_data:
-                dynamodb = boto3.resource('dynamodb')
-                table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
 
                 user_data = table.get_item(
                     Key={
