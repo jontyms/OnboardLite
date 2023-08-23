@@ -24,6 +24,7 @@ class Approve:
     def __init__(self):
         super(Approve, self).__init__
 
+    @staticmethod
     def provision_infra(member_id, user_data=None):
         try:
             if not user_data:
@@ -103,9 +104,8 @@ class Approve:
             print("\tNewly-promoted full member!")
 
             # Create an Infra account.
-            creds = Approve.provision_infra(member_id, user_data=user_data)
-
-            print(creds)
+            approve = Approve()
+            creds = approve.provision_infra(member_id, user_data=user_data)
             
             # Minecraft server
             if user_data.get("minecraft", False):
