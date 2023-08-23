@@ -25,6 +25,7 @@ class Approve:
         super(Approve, self).__init__
 
     def provision_infra(member_id, user_data=None):
+        print("!!! PROVISIONING !!!")
         try:
             if not user_data:
                 dynamodb = boto3.resource('dynamodb')
@@ -103,7 +104,7 @@ class Approve:
             print("\tNewly-promoted full member!")
 
             # Create an Infra account.
-            creds = _provision_infra(member_id, user_data=user_data)
+            creds = provision_infra(member_id, user_data=user_data)
             
             # Minecraft server
             if user_data.get("minecraft", False):
@@ -179,7 +180,3 @@ We hope to see you soon,
         # is_dues_paying
 
         return False
-
-# I am super sorry about this.
-def _provision_infra(member_id, user_data=None):
-    Approve.provision_infra(member_id, user_data)
