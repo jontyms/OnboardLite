@@ -74,14 +74,12 @@ async def get_infra(request: Request, token: Optional[str] = Cookie(None), membe
 
 We are happy to grant you Hack@UCF Private Cloud access!
 
-These temporary credentials can be used to the Hack@UCF Private Cloud. This can be accessed at {options.get('infra', {}).get('horizon')} while on the CyberLab WiFi.
+These credentials can be used to the Hack@UCF Private Cloud. This can be accessed at {options.get('infra', {}).get('horizon')} while on the CyberLab WiFi.
 
 ```yaml
 Username: {creds.get('username', 'Not Set')}
-Temporary Password: {creds.get('password', 'Please email ops@hackucf.org for credentials.')}
+Password: {creds.get('password', 'Please email ops@hackucf.org for credentials.')}
 ```
-
-You will need to change your password after your first log-in.
 
 The password for the `Cyberlab` WiFi is currently `{options.get('infra', {}).get('wifi')}`, but this is subject to change (and we'll let you know when that happens).
 

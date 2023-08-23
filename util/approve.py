@@ -52,7 +52,7 @@ class Approve:
             )
             
             # Push account to OpenStack via Terraform magics
-            tf_vars = {'os_password': options.get('infra', {}).get('ad', {}).get('password'), 'tenant_name': member_id + datetime.date.today().strftime("%Y"), 'handle': username, 'password': password}
+            tf_vars = {'os_password': options.get('infra', {}).get('ad', {}).get('password'), 'tenant_name': member_id + "-" + datetime.date.today().strftime("%Y"), 'handle': username, 'password': password}
             tf.apply(var=tf_vars, skip_plan=True)
 
             return {
@@ -120,14 +120,12 @@ class Approve:
 
 This message is to confirm that your membership has processed successfully. You can access and edit your membership ID at https://{options.get('http', {}).get('domain')}/profile.
 
-These temporary credentials can be used to the Hack@UCF Private Cloud, one of our many benefits of paying dues. This can be accessed at {options.get('infra', {}).get('horizon')} while on the CyberLab WiFi.
+These credentials can be used to the Hack@UCF Private Cloud, one of our many benefits of paying dues. This can be accessed at {options.get('infra', {}).get('horizon')} while on the CyberLab WiFi.
 
 ```yaml
 Username: {creds.get('username', 'Not Set')}
-Temporary Password: {creds.get('password', 'Please email ops@hackucf.org for credentials.')}
+Password: {creds.get('password', 'Please email ops@hackucf.org for credentials.')}
 ```
-
-You will need to change your password after your first log-in.
 
 The password for the `Cyberlab` WiFi is currently `{options.get('infra', {}).get('wifi')}`, but this is subject to change (and we'll let you know when that happens).
 
