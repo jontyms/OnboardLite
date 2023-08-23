@@ -182,5 +182,4 @@ We hope to see you soon,
 
 # I am super sorry about this.
 def _provision_infra(member_id, user_data=None):
-    approve = Approve()
-    approve.provision_infra(member_id, user_data)
+    Approve.provision_infra(member_id, user_data)
