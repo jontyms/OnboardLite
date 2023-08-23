@@ -25,7 +25,16 @@ class Approve:
         super(Approve, self).__init__
 
     def provision_infra(member_id, user_data=None):
-        print("!!! PROVISIONING !!!")
+        try:
+            os.remove("terraform.tfstate")
+        except Exception as e:
+            pass
+
+        try:
+            os.remove("terraform.tfstate.backup")
+        except Exception as e:
+            pass
+
         try:
             dynamodb = boto3.resource('dynamodb')
             table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
