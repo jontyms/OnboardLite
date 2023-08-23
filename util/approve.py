@@ -104,6 +104,8 @@ class Approve:
 
             # Create an Infra account.
             creds = Approve.provision_infra(member_id, user_data=user_data)
+
+            print(creds)
             
             # Minecraft server
             if user_data.get("minecraft", False):
