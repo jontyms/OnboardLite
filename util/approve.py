@@ -104,7 +104,7 @@ class Approve:
             print("\tNewly-promoted full member!")
 
             # Create an Infra account.
-            creds = provision_infra(member_id, user_data=user_data)
+            creds = Approve.provision_infra(member_id, user_data=user_data)
             
             # Minecraft server
             if user_data.get("minecraft", False):
