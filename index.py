@@ -151,6 +151,7 @@ async def oauth_transformer_new(request: Request, response: Response, code: str 
         do_sudo = query_for_id.get('sudo')
         is_full_member = query_for_id.get('is_full_member')
     else:
+        is_full_member = False
         member_id = str(uuid.uuid4())
         do_sudo = False
         is_new = True
