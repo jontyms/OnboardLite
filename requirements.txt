@@ -11,3 +11,4 @@ uvicorn[standard]
 passwordgenerator
 python-terraform
 airpress
+cffi
