@@ -254,4 +254,19 @@ window.onload = (evt) => {
             });
         qrCode.append(document.getElementById("qr"));
     }
+
+    // This variable is licensed CC BY-SA. Just this variable.
+    // https://stackoverflow.com/a/9039885
+    const is_iOS = ([
+        'iPad Simulator',
+        'iPhone Simulator',
+        'iPod Simulator',
+        'iPad',
+        'iPhone',
+        'iPod'
+      ].includes(navigator.platform) || (navigator.userAgent.includes("Mac") && "ontouchend" in document));
+
+    if (is_iOS) {
+        document.getElementById("apple_wallet").style.display = "block";
+    }
 }

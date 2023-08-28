@@ -10,3 +10,4 @@ stripe
 uvicorn[standard]
 passwordgenerator
 python-terraform
+airpress

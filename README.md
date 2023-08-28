@@ -64,8 +64,9 @@ server {
 }
 ```
 9. Start and enable the service using `systemctl`. Do the same for `nginx` if installed.
-10. Put the service behind Cloudflare.
-11. Profit!
+10. Put the service behind Cloudflare (optional).
+11. Generate the Apple Wallet secrets and place them in `config/pki`. See [this tutorial](https://github.com/alexandercerutti/passkit-generator/wiki/Generating-Certificates) for details.
+12. Profit!
 
 ## Editing Form Data
 

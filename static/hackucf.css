@@ -427,6 +427,19 @@ td.nid:hover, td.email:hover {
     filter: blur(0px);    
 }
 
+
+#apple_wallet {
+    margin: auto;
+    width: 220px;
+    padding: 10px;
+    display: none;
+}
+
+#apple_wallet > img {
+    width: 200px;
+    height: auto
+}
+
 @media screen and (max-width: 619px) {
     .entry {
         grid-template-columns: auto;

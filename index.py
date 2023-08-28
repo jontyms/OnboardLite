@@ -39,7 +39,7 @@ options = Options.fetch()
 from models.user import UserModel
 
 # Import routes
-from routes import api, stripe, admin
+from routes import api, stripe, admin, wallet
 
 ### TODO: TEMP
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '0'
@@ -55,6 +55,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(api.router)
 app.include_router(stripe.router)
 app.include_router(admin.router)
+app.include_router(wallet.router)
 
 
 """
