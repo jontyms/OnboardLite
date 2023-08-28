@@ -108,7 +108,7 @@
             },
             {
                 "input": "navigation",
-                "next": "/profile/user",
+                "next": "/profile/",
                 "next_label": "Save"
             }
         ]

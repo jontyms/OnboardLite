@@ -136,6 +136,12 @@ function showUser(userId) {
     document.getElementById("is_full_member").innerText = user.is_full_member ? "✔️" : "❌";
     document.getElementById("shirt_status").innerText = user.did_get_shirt ? "Claimed" : `Unclaimed: Size ${user.shirt_size}`
 
+    let mentee_status = (user.mentee && user.mentee.time_in_cyber) ? "➖ Requested" : "❌";
+    if (user.mentor_name) {
+        mentee_status = "✔️ Assigned to " + user.mentor_name;
+    }
+    document.getElementById("mentee_status").innerHTML =  mentee_status;
+
     // Identifiers
     document.getElementById("id").innerText = user.id;
     document.getElementById("nid").innerText = user.nid;
@@ -143,6 +149,7 @@ function showUser(userId) {
     document.getElementById("email").innerText = user.email;
     document.getElementById("infra_email").innerText = user.infra_email ? user.infra_email : "Account Not Provisioned";
     document.getElementById("minecraft").innerText = user.minecraft ? user.minecraft : "Not Provided";
+    document.getElementById("github").innerText = user.github ? user.github : "Not Provided";
     document.getElementById("phone_number").innerText = user.phone_number ? user.phone_number : "Not Provided";
 
     // Demography
@@ -156,17 +163,22 @@ function showUser(userId) {
     document.getElementById("is_returning").innerText = user.is_returning ? "✔️" : "❌";
     document.getElementById("comments").innerText = user.comments ? user.comments : "(none)";
 
+    document.getElementById("user_json").innerText = JSON.stringify(user, "\t", "\t")
+
     // Set buttons up
     document.getElementById("payDues").onclick = (evt) => {
         editUser({
             "id": user.id,
             "did_pay_dues": true
-        })
+        });
+        setTimeout(evt => {
+            verifyUser(user.id);
+        }, 2000);
     };
     document.getElementById("payDues").style.display = user.did_pay_dues ? "none" : "inline-block";
 
     document.getElementById("reverify").onclick = (evt) => {
-        verifyUser(user.id)
+        verifyUser(user.id);
     };
     document.getElementById("reverify").style.display = user.is_full_member ? "none" : "inline-block";
 
@@ -190,6 +202,15 @@ function showUser(userId) {
         inviteToInfra(user.id);
     };
     document.getElementById("joinInfra").style.display = user.infra_email ? "none" : "inline-block";
+
+    document.getElementById("assignMentor").onclick = (evt) => {
+        let mentor_name = prompt("Please enter the mentor's name below:");
+        editUser({
+            "id": user.id,
+            "mentor_name": mentor_name
+        });
+    };
+    document.getElementById("assignMentor").style.display = (user.mentee && user.mentee.time_in_cyber) ? "inline-block" : "none";
 
     // Set page visibilities
     document.getElementById("users").style.display = "none";

@@ -1,7 +1,33 @@
 [
     {
+        "label": "Your Information",
+        "input": "h1",
+        "elements": [ 
+            {
+                "label": "First Name",
+                "caption": "Your (preferred) first name.",
+                "input": "text",
+                "key": "first_name",
+                "required": true
+            },
+            {
+                "label": "Surname",
+                "caption": "The rest of your name, including middle name if you have one, and your last name.",
+                "input": "text",
+                "key": "surname"
+            },
+            {
+                "label": "NID",
+                "caption": "This is the UCF identifier with two letters and six numbers. It's in your school email!",
+                "input": "nid",
+                "key": "nid",
+                "required": true
+            }
+        ]
+    },
+    {
         "label": "Ethics Form",
-        "input": "h2",
+        "input": "h1",
         "elements": [
             {
                 "label": "All participants of Hack@UCF (both members and non-members attending meetings) must agree to the tenats of the Ethics Form",

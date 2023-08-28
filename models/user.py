@@ -34,6 +34,15 @@ class CyberLabModel(BaseModel):
     signtime:           Optional[int] = 0
 
 
+class MenteeModel(BaseModel):
+    schedule:           Optional[str] = None
+    time_in_cyber:      Optional[str] = None
+    personal_proj:      Optional[str] = None
+    hope_to_gain:       Optional[str] = None
+    domain_interest:    Optional[str] = None
+
+
+
 class UserModel(BaseModel):
     # Identifiers
     id:                 str
@@ -44,6 +53,7 @@ class UserModel(BaseModel):
     infra_email:        Optional[str] = None
 
     minecraft:          Optional[str] = ""
+    github:             Optional[str] = ""
 
     # PII
     first_name:         Optional[str] = ""
@@ -66,6 +76,10 @@ class UserModel(BaseModel):
     # Paperwork Signed
     ethics_form:        Optional[EthicsFormModel] = EthicsFormModel()
     cyberlab_monitor:   Optional[CyberLabModel] = CyberLabModel()
+
+    # Mentorship Program
+    mentee:             Optional[MenteeModel] = MenteeModel()
+    mentor_name:        Optional[str] = None
     
     is_full_member:     Optional[bool] = False
 
@@ -80,6 +94,7 @@ class UserModel(BaseModel):
     comments:           Optional[str] = ""
 
 
+# What admins can edit.
 class UserModelMutable(BaseModel):
     # Identifiers
     id:                 str
@@ -90,6 +105,7 @@ class UserModelMutable(BaseModel):
     infra_email:        Optional[str]
 
     minecraft:          Optional[str]
+    github:             Optional[str]
 
     # PII
     first_name:         Optional[str]
@@ -106,6 +122,9 @@ class UserModelMutable(BaseModel):
     # Permissions and Member Status
     sudo:               Optional[bool]
     did_pay_dues:       Optional[bool]
+
+    # Mentorship Program
+    mentor_name:        Optional[str] = None
     
     is_full_member:     Optional[bool]
 

@@ -23,8 +23,10 @@
         <p><strong>Want to see your Hack@UCF profile?</strong> Check your membership account.</p>
         <a class="btn" href="/profile/"><i class="fa-solid fa-user"></i> My Membership</a>
 
+        {% if not is_full_member %}
         <p><strong>Want to become a dues-paying member?</strong> Join today!</p>
         <a class="btn" href="/join/"><i class="fa-solid fa-user-plus"></i> Join Hack@UCF</a>
+        {% endif %}
 
         <p><strong>Just want to join our Discord?</strong> Join our Discord server!</p>
         <a class="btn" href="https://discord.com/invite/dqFtKgMqkJ"><i class="fa-brands fa-discord"></i> Join Discord</a>

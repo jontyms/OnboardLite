@@ -1,4 +1,5 @@
 import boto3
+from botocore.exceptions import ClientError
 
 from fastapi import APIRouter, Cookie, Request
 from fastapi.responses import HTMLResponse
@@ -114,8 +115,6 @@ async def post_form(request: Request, token: Optional[str] = Cookie(None), paylo
 
     # Here, the variable 'items_to_keep' is validated input. We can update the user's profile from here.
     
-    print(items_to_keep)
-    
     # Prepare to update to DynamoDB
     for item in items_to_keep:
         update_expression += f"{item[0]} = :{item[0].replace('.', '_')}, "
@@ -129,12 +128,50 @@ async def post_form(request: Request, token: Optional[str] = Cookie(None), paylo
     table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
 
     # Push data back to DynamoDB
-    table.update_item(
-        Key={
-            'id': payload.get('id')
-        },
-        UpdateExpression=update_expression,
-        ExpressionAttributeValues=expression_attribute_values
-    )
+    try:
+        table.update_item(
+            Key={
+                'id': payload.get('id')
+            },
+            UpdateExpression=update_expression,
+            ExpressionAttributeValues=expression_attribute_values
+        )
+    except ClientError as e:
+        # We need to do a migration on *something*. We know it's a subtype.
+        # So we will find it and migrate it.
+        print("MIGRATION TIEM")
+        print(e)
+
+        for item in items_to_keep:
+            if "." in item[0]:
+                dot_loc = item[0].find(".")
+                key_to_make = item[0][:dot_loc]
+
+                print(update_expression)
+                print(":3")
+                print(expression_attribute_values)
+
+                # Create dictionary
+                table.update_item(
+                    Key={
+                        'id': payload.get('id')
+                    },
+                    # key_to_make is not user-supplied, rather, it's from the form JSON.
+                    # if this noSQLi's, then it's because of an insider threat.
+                    UpdateExpression=f"SET {key_to_make} = :dicty",
+                    ExpressionAttributeValues={
+                        ":dicty": {}
+                    }
+                )
+
+        # After all dicts are a thing, re-run query.
+        table.update_item(
+            Key={
+                'id': payload.get('id')
+            },
+            UpdateExpression=update_expression,
+            ExpressionAttributeValues=expression_attribute_values
+        )
+
 
     return validated

@@ -4,7 +4,8 @@ from functools import wraps
 from jose import JWTError, jwt
 from typing import Optional
 
-from fastapi import Request
+from fastapi import Request, status
+from fastapi.responses import RedirectResponse
 
 # Import options and errors
 from util.errors import Errors
@@ -51,7 +52,10 @@ class Authentication:
 
             # Validate auth.
             if not token:
-                return Errors.generate(request, 401, "You are not logged in.")
+                return RedirectResponse(
+                    "/discord/new?redir=" + request.url.path, 
+                    status_code=status.HTTP_302_FOUND
+                )
 
             try:
                 payload = jwt.decode(token, options.get("jwt").get("secret"), algorithms=options.get("jwt").get("algorithm"))

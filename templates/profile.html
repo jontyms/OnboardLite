@@ -76,7 +76,12 @@
             </div>
             <div class="entry">
                 <h3>Minecraft Username</h3>
-                <div>{{ user_data.get('minecraft', 'Unknown') }}</div>
+                <div>{{ user_data.get('minecraft', 'Not Collected') }}</div>
+            </div>
+
+            <div class="entry">
+                <h3>GitHub Username</h3>
+                <div>{{ user_data.get('github', 'Not Collected') }}</div>
             </div>
 
             <h1>Membership Status</h1>
@@ -126,6 +131,24 @@
                         <div>You have access to sensitive Hack@UCF membership data. With great power comes great responsibility!</div>
                     </div>
                     <div>Yes</div>
+                </div>
+            {% endif %}
+
+            {% if user_data.get('mentee', {}).get('time_in_cyber', None) %}
+                <div class="entry">
+                    <div>
+                        <h3>Your Mentor</h3>
+                        <div>You have applied to our mentorship program. If you have a mentor assigned, they will be listed below.</div>
+                    </div>
+                    <div>{{ user_data.get('mentor_name', "Not Assigned") }}</div>
+                </div>
+            {% elif user_data.get('is_full_member', False) %}
+            <div class="entry">
+                    <div>
+                        <h3>Mentorship Program</h3>
+                        <div>You did not apply to our mentorship program. If you wish to, click the link to join.</div>
+                    </div>
+                    <div><a target="_blank" href="/join/mentee/">Join Mentorship Program</a></div>
                 </div>
             {% endif %}
 

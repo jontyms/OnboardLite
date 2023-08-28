@@ -61,8 +61,17 @@ app.include_router(admin.router)
 Render the Onboard home page.
 """
 @app.get("/")
-async def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+async def index(request: Request, token: Optional[str] = Cookie(None)):
+    is_full_member = False
+
+    try:
+        payload = jwt.decode(token, options.get("jwt").get("secret"), algorithms=options.get("jwt").get("algorithm"))
+        is_full_member: bool = payload.get("is_full_member", False)
+    except Exception as e:
+        print(e)
+        pass
+
+    return templates.TemplateResponse("index.html", {"request": request, "is_full_member": is_full_member})
 
 
 """
@@ -77,13 +86,17 @@ async def oauth_transformer(redir: str = "/join/2"):
     if hostname != "" and hostname != options.get("http", {}).get("domain", "my.hackucf.org"):
         redir = "/join/2"
 
-    oauth = OAuth2Session(options.get("discord").get("client_id"), redirect_uri=options.get("discord").get("redirect_base") + redir, scope=options.get("discord").get("scope"))
+    oauth = OAuth2Session(options.get("discord").get("client_id"), redirect_uri=options.get("discord").get("redirect_base") + "_redir", scope=options.get("discord").get("scope"))
     authorization_url, state = oauth.authorization_url('https://discord.com/api/oauth2/authorize')
 
-    return RedirectResponse(
+    rr = RedirectResponse(
         authorization_url, 
         status_code=302
     )
+
+    rr.set_cookie(key="redir_endpoint", value=redir)
+
+    return rr
 
 
 """
@@ -91,13 +104,17 @@ Logs the user into Onboard via Discord OAuth and updates their Discord metadata.
 This is what Discord will redirect to.
 """
 @app.get("/api/oauth/")
-async def oauth_transformer_new(request: Request, response: Response, code: str = None, redir: str = "/join/2"):
+async def oauth_transformer_new(request: Request, response: Response, code: str = None, redir: str = "/join/2",  redir_endpoint: Optional[str] = Cookie(None)):
     # AWS dependencies
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
 
     # Open redirect check
+    if redir == "_redir":
+        redir = redir_endpoint
+
     hostname = urlparse(redir).netloc
+    
     if hostname != "" and hostname != options.get("http", {}).get("domain", "my.hackucf.org"):
         redir = "/join/2"
 
@@ -105,7 +122,7 @@ async def oauth_transformer_new(request: Request, response: Response, code: str 
         return Errors.generate(request, 401, "You declined Discord log-in", essay="We need your Discord account to log into myHack@UCF.")
 
     # Get data from Discord
-    oauth = OAuth2Session(options.get("discord").get("client_id"), redirect_uri=options.get("discord").get("redirect_base") + redir, scope=options.get("discord")['scope'])
+    oauth = OAuth2Session(options.get("discord").get("client_id"), redirect_uri=options.get("discord").get("redirect_base") + "_redir", scope=options.get("discord")['scope'])
 
     token = oauth.fetch_token(
         'https://discord.com/api/oauth2/token',
@@ -131,6 +148,7 @@ async def oauth_transformer_new(request: Request, response: Response, code: str 
         query_for_id = query_for_id[0]
         member_id = query_for_id.get('id')
         do_sudo = query_for_id.get('sudo')
+        is_full_member = query_for_id.get('is_full_member')
     else:
         member_id = str(uuid.uuid4())
         do_sudo = False
@@ -190,6 +208,7 @@ async def oauth_transformer_new(request: Request, response: Response, code: str 
         "pfp": full_data['discord']['avatar'],
         "id": member_id,
         "sudo": do_sudo,
+        "is_full_member": is_full_member,
         "issued": time.time()
     }
     bearer = jwt.encode(jwtData, options.get("jwt").get("secret"), algorithm=options.get("jwt").get("algorithm"))
@@ -198,6 +217,10 @@ async def oauth_transformer_new(request: Request, response: Response, code: str 
         status_code=status.HTTP_302_FOUND
     )
     rr.set_cookie(key="token", value=bearer)
+
+    # Clear redirect cookie.
+    rr.delete_cookie("redir_endpoint")
+
     return rr
     
 
@@ -216,13 +239,6 @@ async def join(request: Request, token: Optional[str] = Cookie(None)):
 Renders a basic "my membership" page
 """
 @app.get("/profile/")
-async def profile(request: Request, token: Optional[str] = Cookie(None)):
-    if token == None:
-        return RedirectResponse("/discord/new/?redir=/profile", status_code=status.HTTP_302_FOUND)
-    else:
-        return RedirectResponse("/profile/user", status_code=status.HTTP_302_FOUND)
-
-@app.get("/profile/user")
 @Authentication.member
 async def profile(request: Request, token: Optional[str] = Cookie(None), payload: Optional[object] = {}):
     # Get data from DynamoDB
