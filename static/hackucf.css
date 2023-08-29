@@ -427,6 +427,16 @@ td.nid:hover, td.email:hover {
     filter: blur(0px);    
 }
 
+.center {
+    display: block;
+    margin: auto;
+    width: 100%;
+    text-align: center;
+}
+
+.alt {
+    opacity: 0.5;
+}
 
 #apple_wallet {
     margin: auto;

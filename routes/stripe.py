@@ -50,7 +50,9 @@ async def get_root(request: Request, token: Optional[str] = Cookie(None), payloa
 
     did_pay_dues = user_data.get('did_pay_dues', False)
 
-    return templates.TemplateResponse("pay.html", {"request": request, "icon": payload['pfp'], "name": payload['name'], "id": payload['id'], "did_pay_dues": did_pay_dues})
+    is_nid = True if user_data.get('nid', False) else False
+
+    return templates.TemplateResponse("pay.html", {"request": request, "icon": payload['pfp'], "name": payload['name'], "id": payload['id'], "did_pay_dues": did_pay_dues, "is_nid": is_nid})
 
 @router.post('/checkout')
 @Authentication.member

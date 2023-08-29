@@ -64,15 +64,19 @@ Render the Onboard home page.
 @app.get("/")
 async def index(request: Request, token: Optional[str] = Cookie(None)):
     is_full_member = False
+    is_admin = False
+    user_id = None
 
     try:
         payload = jwt.decode(token, options.get("jwt").get("secret"), algorithms=options.get("jwt").get("algorithm"))
         is_full_member: bool = payload.get("is_full_member", False)
+        is_admin: bool = payload.get("sudo", False)
+        user_id: bool = payload.get("id", None)
     except Exception as e:
         print(e)
         pass
 
-    return templates.TemplateResponse("index.html", {"request": request, "is_full_member": is_full_member})
+    return templates.TemplateResponse("index.html", {"request": request, "is_full_member": is_full_member, "is_admin": is_admin, "user_id": user_id})
 
 
 """

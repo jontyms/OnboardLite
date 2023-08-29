@@ -13,6 +13,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@900&family=Roboto:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap" rel="stylesheet">
 
+    {% if is_full_member %}
+    <!-- QR Code library -->
+    <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+    {% endif %}
+
     <!-- Font Awesome -->
     <link href="https://use.fontawesome.com/releases/v6.1.1/css/all.css" rel="stylesheet">
 </head>
@@ -23,9 +28,17 @@
         <p><strong>Want to see your Hack@UCF profile?</strong> Check your membership account.</p>
         <a class="btn" href="/profile/"><i class="fa-solid fa-user"></i> My Membership</a>
 
-        {% if not is_full_member %}
+        {% if is_full_member %}
+        <div id="qr" class="qr"></div>
+        <div id="membership_id" class="center alt">{{ user_id }}</div>
+        {% else %}
         <p><strong>Want to become a dues-paying member?</strong> Join today!</p>
         <a class="btn" href="/join/"><i class="fa-solid fa-user-plus"></i> Join Hack@UCF</a>
+        {% endif %}
+
+        {% if is_admin %}
+        <p><strong>Need to search the member roster?</strong> Use the admin panel!</p>
+        <a class="btn" href="/admin/"><i class="fa-solid fa-lock"></i> Admin</a>
         {% endif %}
 
         <p><strong>Just want to join our Discord?</strong> Join our Discord server!</p>

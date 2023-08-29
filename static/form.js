@@ -266,7 +266,7 @@ window.onload = (evt) => {
         'iPod'
       ].includes(navigator.platform) || (navigator.userAgent.includes("Mac") && "ontouchend" in document));
 
-    if (is_iOS) {
+    if (is_iOS && document.getElementById("apple_wallet")) {
         document.getElementById("apple_wallet").style.display = "block";
     }
 }
