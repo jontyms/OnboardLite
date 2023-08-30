@@ -50,14 +50,12 @@
                     <button type="button" class="btn wide grey" onclick="submit_and_nav('/final')">Skip</button>
                 </div>
                 <div>
-                    {% if not did_pay_dues and is_nid %}
+                    {% if not did_pay_dues %}
                     <form action="/pay/checkout/" method="POST">
                         <button type="submit" id="checkout-button" class="btn wide">Pay Dues</button>
                     </form>
                     {% elif did_pay_dues %}
                         <h1>Dues Already Paid</h1>
-                    {% elif not is_nid %}
-                        <h1>No NID: Please Pay in Person</h1>
                     {% else %}
                         <h1>Please Pay in Person</h1>
                     {% endif %}

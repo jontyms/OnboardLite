@@ -1,0 +1,91 @@
+[
+    {
+        "label": "Non-UCF Student Membership",
+        "input": "h1",
+        "elements": [
+            {
+                "label": "Hack@UCF does allow limited membership to non-UCF students and alumni in order to fulfill our mission. However, some benefits may be limited, including the right to vote and hold an executive office position.",
+                "input": "p"
+            }
+        ]
+    },
+    {
+        "label": "About You",
+        "input": "h1",
+        "elements": [
+            {
+                "label": "We need to know who you are.",
+                "input": "p"
+            },
+            {
+                "label": "First Name",
+                "caption": "Your (preferred) first name.",
+                "input": "text",
+                "key": "first_name",
+                "required": true
+            },
+            {
+                "label": "Surname",
+                "caption": "The rest of your name, including middle name if you have one, and your last name.",
+                "input": "text",
+                "key": "surname"
+            },
+            {
+                "label": "Preferred Email",
+                "caption": "We’ll use this to reach out to you if we need to.",
+                "input": "email",
+                "key": "email",
+                "required": true
+            },
+            {
+                "label": "Home School",
+                "caption": "What school are you from? If you are not in school right now, put down your alma mater.",
+                "input": "text",
+                "key": "class_standing",
+                "required": true
+            },
+            {
+                "label": "Are You Returning?",
+                "caption": "If so, welcome back! If not, welcome to Hack@UCF!",
+                "input": "radio",
+                "options": ["Yes", "No"],
+                "key": "is_returning",
+                "required": true
+            },
+            {
+                "label": "Minecraft username",
+                "caption": "If you have a Minecraft account, put your username here to join our members-only Minecraft server.",
+                "input": "text",
+                "key": "minecraft",
+                "required": false
+            }
+        ]
+    },
+    {
+        "label": "The following are used to get an idea of our demographics:",
+        "input": "h2",
+        "elements": [
+            {
+                "label": "Gender",
+                "input": "radio",
+                "options": ["Male", "Female", "Other / Prefer Not To Answer"],
+                "key": "gender",
+                "required": true
+            },
+            {
+                "label": "Shirt Size",
+                "caption": "Members get a free Hack@UCF t-shirt thanks to our sponsors!",
+                "input": "radio",
+                "options": ["S", "M", "L", "XL", "2XL", "3XL"],
+                "key": "shirt_size",
+                "required": true
+            },
+            {
+                "input": "navigation",
+                "next": "/join/3",
+                "prev": "/",
+                "prev_label": "Cancel"
+            }
+        ]
+    }
+]

@@ -69,7 +69,7 @@ async def create_checkout_session(request: Request, token: Optional[str] = Cooki
     ).get("Item", None)
 
     try:
-        stripe_email = user_data.get('nid') + "@ucf.edu" if user_data.get('nid', False) else user_data.get('email')
+        stripe_email = user_data.get('email')
         checkout_session = stripe.checkout.Session.create(
             line_items=[
                 {
@@ -134,7 +134,6 @@ async def webhook(request: Request):
 
 def pay_dues(session):
     customer_email = session.get('customer_email')
-    nid = customer_email.replace("@ucf.edu", "")
 
     print(customer_email)
 
@@ -144,7 +143,7 @@ def pay_dues(session):
 
     # Get data from DynamoDB
     response = table.scan(
-        FilterExpression=Attr('nid').eq(nid)
+        FilterExpression=Attr('email').eq(customer_email)
     ).get("Items", None)[0]
 
     member_id = response.get('id')

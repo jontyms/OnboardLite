@@ -106,10 +106,9 @@ class Approve:
         # Sorry for the long if statement. But we consider someone a "member" iff:
         # - They have a name
         # - We have their Discord snowflake
-        # - We have their NID
         # - They paid dues
         # - They signed their ethics form
-        if user_data.get("first_name") and user_data.get("nid") and user_data.get("discord_id") and user_data.get("did_pay_dues") and user_data.get("ethics_form", {}).get("signtime", 0) != 0:
+        if user_data.get("first_name") and user_data.get("discord_id") and user_data.get("did_pay_dues") and user_data.get("ethics_form", {}).get("signtime", 0) != 0:
             print("\tNewly-promoted full member!")
 
             # Create an Infra account.
@@ -166,7 +165,6 @@ Happy Hacking,
 We wanted to let you know that you **did not** complete all of the steps for being able to become an Hack@UCF member.
 
 - Provided a name: {'✅' if user_data.get('first_name') else '❌'}
-- Provided a UCF NID: {'✅' if user_data.get('nid') else '❌'}
 - Signed Ethics Form: {'✅' if user_data.get('ethics_form', {}).get('signtime', 0) != 0 else '❌'}
 - Paid $10 dues: ✅
 

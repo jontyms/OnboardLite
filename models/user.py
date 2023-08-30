@@ -82,6 +82,7 @@ class UserModel(BaseModel):
     mentor_name:        Optional[str] = None
     
     is_full_member:     Optional[bool] = False
+    can_vote:           Optional[bool] = False
 
     # Other models
     discord:            DiscordModel
@@ -127,6 +128,7 @@ class UserModelMutable(BaseModel):
     mentor_name:        Optional[str] = None
     
     is_full_member:     Optional[bool]
+    can_vote:           Optional[bool] = False
 
     # Other models
     experience:         Optional[int]
