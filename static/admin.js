@@ -3,7 +3,7 @@ let userList;
 let qrScanner;
 
 function load() {
-    let valueNames = ["Name", "Status", "NID", "Discord", "Email", "Experience", "Major", "Details"];
+    let valueNames = ["Name", "Status", "NID", "Discord", "Email", "Experience", "Major", "Mentee", "Details"];
     let valueItems = "<tr>";
     let valueHeader = "<tr>";
     for (let i = 0; i < valueNames.length; i++) {
@@ -42,7 +42,8 @@ function load() {
                 "experience": sanitizeHTML(member.experience),
                 "major": sanitizeHTML(member.major),
                 "details": `<button class="searchbtn btn" onclick="showUser('${sickoModeSanitize(member.id)}')">Details</a>`,
-                "is_full_member": Boolean(member.is_full_member)
+                "is_full_member": Boolean(member.is_full_member),
+                "mentee": member.mentee ? member.mentee.domain_interest : "Not Mentee"
             }
 
             members.push(userEntry);
@@ -313,6 +314,28 @@ function filter(showOnlyActiveUsers) {
         }
         return activeOrInactive;
     });
+
+    document.getElementById("activeFilter").innerText = showOnlyActiveUsers ? "Active" : "Inactive"
+    document.getElementById("activeFilter").onclick = (evt) => {
+        filter(!showOnlyActiveUsers);
+    }
+}
+
+function mentorFilter(isMentorMode) {
+    // isMentorMode == true -> show those in mentor program
+    // isMentorMode == false -> show all
+    userList.filter((item) => {
+        let activeOrInactive = (item.values().mentee !== "Not Mentee");
+        if (!isMentorMode) {
+            activeOrInactive = true;
+        }
+        return activeOrInactive;
+    });
+
+    document.getElementById("menteeFilter").innerText = isMentorMode ? "Mentees" : "All Mentee"
+    document.getElementById("menteeFilter").onclick = (evt) => {
+        mentorFilter(!isMentorMode);
+    }
 }
 
 window.onload = evt => {
@@ -356,12 +379,12 @@ window.onload = evt => {
         changeCamera();
     }
 
-    // Filter buttons    
-    document.getElementById("notActiveFilter").onclick = (evt) => {
-        filter(false);
-    }
-
+    // Filter buttons
     document.getElementById("activeFilter").onclick = (evt) => {
         filter(true);
+    }
+
+    document.getElementById("menteeFilter").onclick = (evt) => {
+        mentorFilter(true);
     }
 }
