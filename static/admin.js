@@ -325,7 +325,7 @@ function mentorFilter(isMentorMode) {
     // isMentorMode == true -> show those in mentor program
     // isMentorMode == false -> show all
     userList.filter((item) => {
-        let activeOrInactive = (item.values().mentee !== "Not Mentee");
+        let activeOrInactive = ((typeof item.values().mentee !== "undefined") && (item.values().mentee !== "Not Mentee") && (item.values().mentee !== ""));
         if (!isMentorMode) {
             activeOrInactive = true;
         }
