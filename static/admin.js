@@ -23,6 +23,8 @@ function load() {
     };
 
     let members = [];
+    let count_full_member = 0;
+    let count_all = 0;
 
     fetch("/admin/list").then(data => {
         return data.json();
@@ -46,6 +48,10 @@ function load() {
                 "mentee": (member.mentee && member.mentee.domain_interest) ? member.mentee.domain_interest : "Not Mentee"
             }
 
+            count_all++;
+            if (member.is_full_member)
+                count_full_member++;
+
             members.push(userEntry);
 
             member.name = member.first_name + " " + member.surname;
@@ -56,6 +62,8 @@ function load() {
         }
 
         userList = new List('users', options, members);
+
+        document.querySelector(".right").innerHTML += `<br>${count_full_member} dues-paying, ${count_all} total`;        
     })
 }
 
