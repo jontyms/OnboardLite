@@ -43,7 +43,7 @@ function load() {
                 "major": sanitizeHTML(member.major),
                 "details": `<button class="searchbtn btn" onclick="showUser('${sickoModeSanitize(member.id)}')">Details</a>`,
                 "is_full_member": Boolean(member.is_full_member),
-                "mentee": member.mentee ? member.mentee.domain_interest : "Not Mentee"
+                "mentee": (member.mentee && member.mentee.domain_interest) ? member.mentee.domain_interest : "Not Mentee"
             }
 
             members.push(userEntry);
@@ -325,7 +325,7 @@ function mentorFilter(isMentorMode) {
     // isMentorMode == true -> show those in mentor program
     // isMentorMode == false -> show all
     userList.filter((item) => {
-        let activeOrInactive = ((typeof item.values().mentee !== "undefined") && (item.values().mentee !== "Not Mentee") && (item.values().mentee !== ""));
+        let activeOrInactive = (item.values().mentee && item.values().mentee !== "Not Mentee");
         if (!isMentorMode) {
             activeOrInactive = true;
         }
