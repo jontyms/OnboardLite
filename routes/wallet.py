@@ -35,7 +35,11 @@ Used to get Discord image.
 """
 def get_img(url):
     resp = requests.get(url, stream=True)
-    return resp.raw.read()
+    status = resp.status_code
+    if status < 400:
+        return resp.raw.read()
+    else:
+        return get_img("https://cdn.hackucf.org/PFP.png")
 
 
 """
@@ -77,7 +81,7 @@ def apple_wallet(user_data):
         "barcodes" : [
             {
                 "format" : "PKBarcodeFormatQR",
-                "message" : user_data.get("id"),
+                "message" : user_data.get("id", "Unknown_ID"),
                 "messageEncoding" : "iso-8859-1",
                 "altText" : user_data.get("discord", {}).get("username", None)
             }
@@ -110,8 +114,7 @@ def apple_wallet(user_data):
                     "value": "At a meeting? Visit https://hackucf.org/signin to sign in",
                     "attributedValue": "At a meeting? Visit <a href='https://hackucf.org/signin'>hackucf.org/signin</a> to sign in." 
                 }
-            ]
-        }
+            ]        }
     }
 
     # I am duplicating the file reads because it's easier than re-setting file pointers to the start of each file.
