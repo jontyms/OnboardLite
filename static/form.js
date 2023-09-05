@@ -269,4 +269,12 @@ window.onload = (evt) => {
     if (is_iOS && document.getElementById("apple_wallet")) {
         document.getElementById("apple_wallet").style.display = "block";
     }
+
+    // Infra checker
+    fetch("https://horizon.hackucf.org", {mode: "no-cors"}).then(evt => {
+        // Do stuff if on Infra
+        document.querySelector(".infra_modal").style.display = "block"
+    }).catch(evt => {
+        // Do stuff if not on Infra
+    })
 }

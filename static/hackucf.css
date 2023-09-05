@@ -20,7 +20,7 @@ html {
     padding: 25px;
 }
 
-a {
+a, .hl  {
     color: var(--hackucf-gold);
 }
 
@@ -448,6 +448,12 @@ td.nid:hover, td.email:hover {
 #apple_wallet > img {
     width: 200px;
     height: auto
+}
+
+.infra_modal {
+    border-left: 7px var(--hackucf-gold) solid;
+    padding-left: 20px;
+    display: none;
 }
 
 @media screen and (max-width: 619px) {

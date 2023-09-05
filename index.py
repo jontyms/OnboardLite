@@ -66,17 +66,19 @@ async def index(request: Request, token: Optional[str] = Cookie(None)):
     is_full_member = False
     is_admin = False
     user_id = None
+    infra_email = None
 
     try:
         payload = jwt.decode(token, options.get("jwt").get("secret"), algorithms=options.get("jwt").get("algorithm"))
         is_full_member: bool = payload.get("is_full_member", False)
         is_admin: bool = payload.get("sudo", False)
         user_id: bool = payload.get("id", None)
+        infra_email: bool = payload.get("infra_email", None)
     except Exception as e:
         print(e)
         pass
 
-    return templates.TemplateResponse("index.html", {"request": request, "is_full_member": is_full_member, "is_admin": is_admin, "user_id": user_id})
+    return templates.TemplateResponse("index.html", {"request": request, "is_full_member": is_full_member, "is_admin": is_admin, "user_id": user_id, "infra_email": infra_email})
 
 
 """
@@ -148,17 +150,20 @@ async def oauth_transformer_new(request: Request, response: Response, code: str 
     query_for_id = query_for_id.get("Items")
 
     is_new = False
+    print(query_for_id)
 
     if query_for_id:
         query_for_id = query_for_id[0]
         member_id = query_for_id.get('id')
         do_sudo = query_for_id.get('sudo')
         is_full_member = query_for_id.get('is_full_member')
+        infra_email = query_for_id.get('infra_email', '')
     else:
         is_full_member = False
         member_id = str(uuid.uuid4())
         do_sudo = False
         is_new = True
+        infra_email = ""
 
         # Make user join the Hack@UCF Discord, if it's their first rodeo.
         discord_id = str(discordData['id'])
@@ -215,7 +220,8 @@ async def oauth_transformer_new(request: Request, response: Response, code: str 
         "id": member_id,
         "sudo": do_sudo,
         "is_full_member": is_full_member,
-        "issued": time.time()
+        "issued": time.time(),
+        "infra_email": infra_email
     }
     bearer = jwt.encode(jwtData, options.get("jwt").get("secret"), algorithm=options.get("jwt").get("algorithm"))
     rr = RedirectResponse(

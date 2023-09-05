@@ -25,6 +25,14 @@
     <div class="app" id="1">
         <h1>Welcome to myHack@UCF!</h1>
 
+        <div class="infra_modal">
+            <p><strong>You are connected to the Hack@UCF Private Cloud!</strong> You can access Horizon and other Infra servers from this network.</p>
+            {% if infra_email %}
+                <p>Your username is <code class="hl">{{ infra_email }}</code></p>
+            {% endif %}
+            <a class="btn" href="https://horizon.hackucf.org"><i class="fa-solid fa-cloud"></i> Horizon</a>
+        </div>
+
         <p><strong>Want to see your Hack@UCF profile?</strong> Check your membership account.</p>
         <a class="btn" href="/profile/"><i class="fa-solid fa-user"></i> My Membership</a>
 
@@ -37,8 +45,9 @@
         {% endif %}
 
         {% if is_admin %}
-        <p><strong>Need to search the member roster?</strong> Use the admin panel!</p>
+        <p><strong>Need to search the member roster?</strong> Use the admin panel (or log out to renew your session)</p>
         <a class="btn" href="/admin/"><i class="fa-solid fa-lock"></i> Admin</a>
+        <a class="btn" href="/logout/"><i class="fa-solid fa-key"></i> Log Out</a>
         {% endif %}
 
         <p><strong>Just want to join our Discord?</strong> Join our Discord server!</p>
