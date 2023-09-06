@@ -210,7 +210,7 @@ function showUser(userId) {
     document.getElementById("joinInfra").onclick = (evt) => {
         inviteToInfra(user.id);
     };
-    document.getElementById("joinInfra").style.display = user.infra_email ? "none" : "inline-block";
+    document.getElementById("joinInfra").style.innerText = user.infra_email ? "Reset Infra Account" : "Invite to Infra";
 
     document.getElementById("assignMentor").onclick = (evt) => {
         let mentor_name = prompt("Please enter the mentor's name below:");
