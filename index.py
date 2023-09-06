@@ -57,6 +57,22 @@ app.include_router(stripe.router)
 app.include_router(admin.router)
 app.include_router(wallet.router)
 
+# Create the OpenStack SDK config.
+with open("clouds.yaml", "w", encoding="utf-8") as f:
+    f.write(f"""clouds:
+  hackucf_infra:
+    auth:
+      auth_url: {options.get('infra', {}).get('horizon', '')}:5000
+      username: {options.get('infra', {}).get('ad', {}).get('username', '')}
+      password: {options.get('infra', {}).get('ad', {}).get('password', '')}
+      project_id: 464dc8d09d9a457cba2cd1efd737d538
+      project_name: "admin"
+      user_domain_name: "Default"
+    region_name: "hack-ucf-0"
+    interface: "public"
+    identity_api_version: 3
+""")
+
 
 """
 Render the Onboard home page.

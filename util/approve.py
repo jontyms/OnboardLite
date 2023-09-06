@@ -7,6 +7,7 @@ import requests
 from python_terraform import *
 from boto3.dynamodb.conditions import Key, Attr
 import yaml
+import openstack
 
 from util.horsepass import HorsePass
 from util.options import Options
@@ -25,6 +26,9 @@ class Approve:
         super(Approve, self).__init__
 
     def provision_infra(member_id, user_data=None):
+        # Log into OpenStack
+        conn = openstack.connect(cloud='hackucf_infra')
+
         try:
             os.remove("terraform.tfstate")
         except Exception as e:
@@ -46,22 +50,38 @@ class Approve:
                     }
                 ).get("Item", None)
 
-            username = user_data.get("discord", {}).get("username") + "@infra.hackucf.org"
-            password = HorsePass.gen()
+            # See if existing email.
+            username = user_data.get("infra_email", False)
+            if username:
+                user = conn.identity.find_user(username)
+                if user:
+                    # Delete user's default project
+                    proj = conn.identity.get_project(user.default_project_id)
+                    conn.identity.delete_project(proj)
 
-            # Add username to Onboard database
-            table.update_item(
-                Key={
-                    'id': member_id
-                },
-                UpdateExpression='SET infra_email = :val',
-                ExpressionAttributeValues={
-                    ':val': username
-                }
-            )
+                    # Delete user
+                    conn.identity.delete_user(user)
+                    print(f"{username}: User deleted.")
+                else:
+                    print(f"{username}: No user.")
+
+            else:
+                username = user_data.get("discord", {}).get("username").replace(" ", "_") + "@infra.hackucf.org"
+                # Add username to Onboard database
+                table.update_item(
+                    Key={
+                        'id': member_id
+                    },
+                    UpdateExpression='SET infra_email = :val',
+                    ExpressionAttributeValues={
+                        ':val': username
+                    }
+                )
+            
+            password = HorsePass.gen()
             
             # Push account to OpenStack via Terraform magics
-            tf_vars = {'os_password': options.get('infra', {}).get('ad', {}).get('password'), 'tenant_name': member_id + "-" + datetime.date.today().strftime("%Y"), 'handle': username, 'password': password}
+            tf_vars = {'os_password': options.get('infra', {}).get('ad', {}).get('password'), 'tenant_name': member_id, 'handle': username, 'password': password}
             tf.apply(var=tf_vars, skip_plan=True)
 
             return {

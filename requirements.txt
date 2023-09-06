@@ -12,3 +12,4 @@ passwordgenerator
 python-terraform
 airpress
 cffi
+openstacksdk

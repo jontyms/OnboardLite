@@ -3,3 +3,4 @@ __pycache__
 config/
 .terraform*
 terraform.*
+clouds.yaml
