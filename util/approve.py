@@ -106,6 +106,14 @@ class Approve:
                 user=new_user,
                 role=member_role
             )
+
+            # Find admin role + assign it to Onboard user + user project
+            admin_role = conn.identity.find_role("admin")
+            conn.identity.assign_project_role_to_user(
+                project=new_proj,
+                user=conn.identity.find_user("onboard-service"),
+                role=admin_role
+            )
             
             ## Push account to OpenStack via Terraform magics (not used rn)
             # tf_vars = {'os_password': options.get('infra', {}).get('ad', {}).get('password'), 'tenant_name': member_id, 'handle': username, 'password': password}
