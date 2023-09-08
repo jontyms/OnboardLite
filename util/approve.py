@@ -167,7 +167,9 @@ class Approve:
             print("\tNewly-promoted full member!")
 
             # Create an Infra account.
-            creds = Approve.provision_infra(member_id, user_data=user_data)
+            creds = Approve.provision_infra(member_id, user_data=user_data)  # TODO(err): sometimes this is None
+            if creds == None:
+                creds = {}
             
             # Minecraft server
             if user_data.get("minecraft", False):
@@ -187,7 +189,7 @@ These credentials can be used to the Hack@UCF Private Cloud, one of our many ben
 
 ```yaml
 Username: {creds.get('username', 'Not Set')}
-Password: {creds.get('password', 'Please email ops@hackucf.org for credentials.')}
+Password: {creds.get('password', 'Please visit https://join.hackucf.org/profile and under Danger Zone, reset your Infra creds.')}
 ```
 
 The password for the `Cyberlab` WiFi is currently `{options.get('infra', {}).get('wifi')}`, but this is subject to change (and we'll let you know when that happens).
