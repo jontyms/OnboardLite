@@ -22,14 +22,19 @@ class Authentication:
 
             # Validate auth.
             if not token:
-                return Errors.generate(request, 401, "You are not logged in.")
+                return RedirectResponse(
+                    "/discord/new?redir=" + request.url.path, 
+                    status_code=status.HTTP_302_FOUND
+                )
 
             try:
                 payload = jwt.decode(token, options.get("jwt").get("secret"), algorithms=options.get("jwt").get("algorithm"))
                 is_admin: bool = payload.get("sudo", False)
                 creation_date: float = payload.get("issued", -1)
             except Exception:
-                return Errors.generate(request, 403, "Invalid token provided. Please log in again and try again.")
+                tr = Errors.generate(request, 403, "Invalid token provided. Please log in again (refresh the page) and try again.")
+                tr.delete_cookie(key="token")
+                return tr
 
             if not is_admin:
                 return Errors.generate(request, 403, "You are not a sudoer.", essay="If you think this is an error, please try logging in again.")
@@ -61,7 +66,9 @@ class Authentication:
                 payload = jwt.decode(token, options.get("jwt").get("secret"), algorithms=options.get("jwt").get("algorithm"))
                 creation_date: float = payload.get("issued", -1)
             except Exception:
-                return Errors.generate(request, 403, "Invalid token provided. Please log in again and try again.")
+                tr = Errors.generate(request, 403, "Invalid token provided. Please log in again (refresh the page) and try again.")
+                tr.delete_cookie(key="token")
+                return tr
 
             if time.time() > creation_date + options.get("jwt").get("lifetime").get("user"):
                 return Errors.generate(

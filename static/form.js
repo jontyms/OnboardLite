@@ -226,6 +226,21 @@ function submit_and_nav(target_url) {
     })
 }
 
+function resetInfra() {
+    fetch("/infra/reset").then(data => {
+        return data.json();
+    }).then(resp => {
+        // Update user data.
+        alert(`Your account has been RESET. Your new credentials are below (and sent to your Discord):
+
+Username: ${resp.username}
+Password: ${resp.password}`);
+
+        userDict[user_id].infra_email = resp.username;
+        showUser(user_id);
+    })
+}
+
 function logoff() {
     document.cookie = 'token=; Max-Age=0; path=/; domain=' + location.hostname;
     window.location.href = "/logout";
@@ -233,6 +248,12 @@ function logoff() {
 
 
 window.onload = (evt) => {
+    if (document.getElementById("resetInfra")) {
+        document.getElementById("resetInfra").onclick = evt => {
+            resetInfra();
+        }
+    }
+
     if (typeof QRCodeStyling !== "undefined" && document.getElementById("membership_id")) {
         const qrCode = new QRCodeStyling({
                 width: 260,

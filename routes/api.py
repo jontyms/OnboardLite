@@ -30,7 +30,7 @@ Get API information.
 @router.get("/")
 async def get_root():
     return InfoModel(
-        name="Onboard (beta)",
+        name="OnboardLite",
         description = "Hack@UCF's in-house membership management suite.",
         credits=[
             PublicContact(

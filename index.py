@@ -39,7 +39,7 @@ options = Options.fetch()
 from models.user import UserModel
 
 # Import routes
-from routes import api, stripe, admin, wallet
+from routes import api, stripe, admin, wallet, infra
 
 ### TODO: TEMP
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '0'
@@ -56,6 +56,7 @@ app.include_router(api.router)
 app.include_router(stripe.router)
 app.include_router(admin.router)
 app.include_router(wallet.router)
+app.include_router(infra.router)
 
 # Create the OpenStack SDK config.
 with open("clouds.yaml", "w", encoding="utf-8") as f:

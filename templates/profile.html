@@ -54,6 +54,14 @@
             {% endif %}
             <a class="btn" href="#logoff" onclick="logoff()"><i class="fa-solid fa-key"></i> Log Out</a>
 
+            {% if user_data.get('sudo', False) %}
+                <details>
+                    <summary><h2>Danger Zone</h2></summary>
+                    <span>Need to reset your Hack@UCF Private Cloud account? Do so here. This <i>WILL</i> cause data loss!</span>
+                    <button id="resetInfra" class="btn"><i class="fa-solid fa-trash"></i> Reset Infra Account</button>
+                </details>
+            {% endif %}
+
             <h1>Your Personal Information</h1>
             <div class="entry">
                 <h3>First Name</h3>

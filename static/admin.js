@@ -272,11 +272,9 @@ function verifyUser(user_id) {
 function inviteToInfra(user_id) {
     fetch("/admin/infra?member_id=" + user_id).then(data => {
         return data.json();
-    }).then(data2 => {
+    }).then(resp => {
         // Update user data.
-        let resp = data2.data;
-
-        alert(`The user has been provisioned and an email to them sent!
+        alert(`The user has been provisioned and a Discord message with credentials sent!
 
 Username: ${resp.username}
 Password: ${resp.password}`);

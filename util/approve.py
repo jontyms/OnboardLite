@@ -56,8 +56,9 @@ class Approve:
                 user = conn.identity.find_user(username)
                 if user:
                     # Delete user's default project
+                    print(f"user // {user.default_project_id}")
                     proj = conn.identity.get_project(user.default_project_id)
-                    conn.identity.delete_project(proj)
+                    proj = conn.identity.delete_project(proj)
 
                     # Delete user
                     conn.identity.delete_user(user)
@@ -79,10 +80,36 @@ class Approve:
                 )
             
             password = HorsePass.gen()
+
+            ###
+            # Let's create a new OpenStack user with the SDK!
+            ###
+
+            # Create a project for the new users
+            new_proj = conn.identity.create_project(
+                name=member_id,
+                description="Automatically provisioning with Hack@UCF Onboard"
+            )
+
+            # Create account and important resources via Terraform magics.
+            new_user = conn.identity.create_user(
+                default_project_id=new_proj.id,
+                name=username,
+                description="Hack@UCF Dues Paying Member",
+                password=password
+            )
+
+            # Find member role + assign it to user and project
+            member_role = conn.identity.find_role("member")
+            conn.identity.assign_project_role_to_user(
+                project=new_proj,
+                user=new_user,
+                role=member_role
+            )
             
-            # Push account to OpenStack via Terraform magics
-            tf_vars = {'os_password': options.get('infra', {}).get('ad', {}).get('password'), 'tenant_name': member_id, 'handle': username, 'password': password}
-            tf.apply(var=tf_vars, skip_plan=True)
+            ## Push account to OpenStack via Terraform magics (not used rn)
+            # tf_vars = {'os_password': options.get('infra', {}).get('ad', {}).get('password'), 'tenant_name': member_id, 'handle': username, 'password': password}
+            # tf.apply(var=tf_vars, skip_plan=True)
 
             return {
                 "username": username,
