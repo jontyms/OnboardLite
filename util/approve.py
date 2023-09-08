@@ -86,10 +86,14 @@ class Approve:
             ###
 
             # Create a project for the new users
-            new_proj = conn.identity.create_project(
-                name=member_id,
-                description="Automatically provisioning with Hack@UCF Onboard"
-            )
+            try:
+                new_proj = conn.identity.create_project(
+                    name=member_id,
+                    description="Automatically provisioning with Hack@UCF Onboard"
+                )
+            except openstack.exceptions.ConflictException as e:
+                # This happens sometimes.
+                new_proj = conn.identity.find_project("member_id")
 
             # Create account and important resources via Terraform magics.
             new_user = conn.identity.create_user(
@@ -189,7 +193,7 @@ These credentials can be used to the Hack@UCF Private Cloud, one of our many ben
 
 ```yaml
 Username: {creds.get('username', 'Not Set')}
-Password: {creds.get('password', 'Please visit https://join.hackucf.org/profile and under Danger Zone, reset your Infra creds.')}
+Password: {creds.get('password', f"Please visit https://{options.get('http', {}).get('domain')}/profile and under Danger Zone, reset your Infra creds.")}
 ```
 
 The password for the `Cyberlab` WiFi is currently `{options.get('infra', {}).get('wifi')}`, but this is subject to change (and we'll let you know when that happens).

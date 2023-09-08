@@ -69,7 +69,7 @@ async def get_infra(request: Request, token: Optional[str] = Cookie(None), paylo
     creds = Approve.provision_infra(member_id)
 
     if not creds:
-        return Errors.generate(request, 404, "User Not Found")
+        creds = {}
 
     # Get user data
     dynamodb = boto3.resource('dynamodb')
@@ -90,7 +90,7 @@ A reminder that you can use these credentials at {options.get('infra', {}).get('
 
 ```yaml
 Username: {creds.get('username', 'Not Set')}
-Password: {creds.get('password', 'Please email ops@hackucf.org for credentials.')}
+Password: {creds.get('password', f"Please visit https://{options.get('http', {}).get('domain')}/profile and under Danger Zone, reset your Infra creds.")}
 ```
 
 The password for the `Cyberlab` WiFi is currently `{options.get('infra', {}).get('wifi')}`, but this is subject to change (and we'll let you know when that happens).

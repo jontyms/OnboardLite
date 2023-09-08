@@ -55,6 +55,8 @@ async def get_infra(request: Request, token: Optional[str] = Cookie(None), membe
         }
 
     creds = Approve.provision_infra(member_id)
+    if creds == None:
+        creds = {}
 
     if not creds:
         return Errors.generate(request, 404, "User Not Found")
@@ -78,7 +80,7 @@ These credentials can be used to the Hack@UCF Private Cloud. This can be accesse
 
 ```yaml
 Username: {creds.get('username', 'Not Set')}
-Password: {creds.get('password', 'Please email ops@hackucf.org for credentials.')}
+Password: {creds.get('password', f"Please visit https://{options.get('http', {}).get('domain')}/profile and under Danger Zone, reset your Infra creds.")}
 ```
 
 The password for the `Cyberlab` WiFi is currently `{options.get('infra', {}).get('wifi')}`, but this is subject to change (and we'll let you know when that happens).
