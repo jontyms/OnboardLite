@@ -45,6 +45,7 @@ shitty_database = {
 
 
 async def create_resource(project):
+    global shitty_database
     proj_name = project.name
 
     print(f"Creating resources for {proj_name}...")
@@ -202,6 +203,8 @@ API endpoint to SET the one-click deploy settings.
 @router.get("/options/get")
 @Authentication.member
 async def get_options(request: Request, token: Optional[str] = Cookie(None), payload: Optional[object] = {}, gbmName: Optional[str] = None, imageId: Optional[str] = None):
+    global shitty_database
+    
     return shitty_database
 
 
