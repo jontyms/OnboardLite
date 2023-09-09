@@ -13,3 +13,4 @@ python-terraform
 airpress
 cffi
 openstacksdk
+asyncio

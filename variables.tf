@@ -1,15 +1,23 @@
-variable "os_password" {
-    description = "onboard-service user password"
-}
-
-variable "tenant_name" {
-    description = "Name of member tenant"
-}
-
-variable "handle" {
-    description = "Discord handle"
+variable "username" {
+  
 }
 
 variable "password" {
-    description = "Reset this password"
+  
+}
+
+variable "tenant_name" {
+  
+}
+
+variable "gbmname" {
+  description = "One word name of gbm"
+}
+
+variable "imageid" {
+  description = "Image of snapshot used for the GBM or Workshop"
+}
+
+variable "member_username" {
+  
 }

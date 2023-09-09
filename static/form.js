@@ -241,6 +241,14 @@ Password: ${resp.password}`);
     })
 }
 
+function provisionInfra() {
+    fetch("/infra/provision").then(data => {
+        return data.json();
+    }).then(resp => {
+        window.location.href = "https://horizon.hackucf.org/"
+    })
+}
+
 function logoff() {
     document.cookie = 'token=; Max-Age=0; path=/; domain=' + location.hostname;
     window.location.href = "/logout";
@@ -252,6 +260,20 @@ window.onload = (evt) => {
         document.getElementById("resetInfra").onclick = evt => {
             resetInfra();
         }
+    }
+    
+    // Should we show the "spin up box" button?
+    if (document.getElementById("newInfraBox")) {
+        document.getElementById("newInfraBox").onclick = (evt) => {
+            provisionInfra();
+        }
+        fetch("/infra/options/get").then(data => {
+            return data.json();
+        }).then(resp => {
+            if (resp.imageId && resp.gbmName) {
+                document.getElementById("newInfraBox").style.display = "inline-block";
+            }  
+        })
     }
 
     if (typeof QRCodeStyling !== "undefined" && document.getElementById("membership_id")) {

@@ -52,6 +52,9 @@
             {% if user_data.get('sudo', False) %}
                 <a class="btn" href="/admin/"><i class="fa-solid fa-lock"></i> Admin</a>
             {% endif %}
+            {% if user_data.get('infra_email', False) %}
+                <button class="btn hide_default" id="newInfraBox"><i class="fa-solid fa-server"></i> Create Infra Box</button>
+            {% endif %}
             <a class="btn" href="#logoff" onclick="logoff()"><i class="fa-solid fa-key"></i> Log Out</a>
 
             {% if user_data.get('is_full_member', False) or user_data.get('infra_email', False) %}
