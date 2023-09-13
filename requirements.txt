@@ -14,3 +14,4 @@ airpress
 cffi
 openstacksdk
 asyncio
+pyopenssl==22.1.0
