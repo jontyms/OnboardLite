@@ -122,6 +122,11 @@ function showTable() {
 
 function showQR() {
     qrScanner.start();
+
+    const camLS = localStorage.getItem("adminCam");
+    if (camLS && typeof camLS !== "undefined") {
+        qrScanner.setCamera(camLS);
+    }
     
     document.getElementById("user").style.display = "none";
     document.getElementById("users").style.display = "none";
@@ -299,6 +304,8 @@ function changeCamera() {
             camArray.push(cameras[i].id);
         }
         let camSelect = prompt(camString);
+
+        localStorage.setItem("adminCam", camArray[camSelect]);
         qrScanner.setCamera(camArray[camSelect]);
     });
 }
