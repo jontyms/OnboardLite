@@ -11,6 +11,7 @@ import openstack
 
 from util.horsepass import HorsePass
 from util.options import Options
+from util.discord import Discord
 
 options = Options.fetch()
 tf = Terraform(working_dir=options.get("infra", {}).get("tf_directory", "./"))
@@ -25,7 +26,7 @@ If approval fails, dispatch a Discord message saying that something went wrong a
 
 class Approve:
     def __init__(self):
-        super(Approve, self).__init__
+        pass
 
     def provision_infra(member_id, user_data=None):
         # Log into OpenStack
@@ -135,21 +136,6 @@ class Approve:
             print("\tAlready full member.")
             return True
 
-        # Get DM channel ID to send later...
-        discord_id = str(user_data.get("discord_id"))
-        headers = {
-            "Authorization": f"Bot {options.get('discord', {}).get('bot_token')}",
-            "Content-Type": "application/json",
-            "X-Audit-Log-Reason": "Hack@UCF OnboardLite Bot",
-        }
-        get_channel_id_body = {"recipient_id": discord_id}
-        req = requests.post(
-            f"https://discord.com/api/users/@me/channels",
-            headers=headers,
-            data=json.dumps(get_channel_id_body),
-        )
-        resp = req.json()
-
         # Sorry for the long if statement. But we consider someone a "member" iff:
         # - They have a name
         # - We have their Discord snowflake
@@ -176,11 +162,9 @@ class Approve:
                 # <whitelist logic>
 
             # Assign the Dues-Paying Member role
-            req_dues = requests.put(
-                f"https://discord.com/api/guilds/{options.get('discord', {}).get('guild_id')}/members/{discord_id}/roles/{options.get('discord', {}).get('member_role')}",
-                headers=headers,
+            Discord.assign_role(
+                discord_id, options.get("discord", {}).get("member_role")
             )
-            print(req_dues)
 
             # Send Discord message saying they are a member
             welcome_msg = f"""Hello {user_data.get('first_name')}, and welcome to Hack@UCF!
@@ -200,12 +184,7 @@ Happy Hacking,
   - Hack@UCF Bot
             """
 
-            send_message_body = {"content": welcome_msg}
-            requests.post(
-                f"https://discord.com/api/channels/{resp.get('id')}/messages",
-                headers=headers,
-                data=json.dumps(send_message_body),
-            )
+            Discord.send_message(discord_id, welcome_msg)
 
             # Set member as a "full" member.
             table.update_item(
@@ -232,15 +211,9 @@ If you think you have completed all of these, please reach out to an Exec on the
 We hope to see you soon,
   - Hack@UCF Bot
 """
-            send_message_body = {"content": fail_msg}
-            requests.post(
-                f"https://discord.com/api/channels/{resp.get('id')}/messages",
-                headers=headers,
-                data=json.dumps(send_message_body),
-            )
+            Discord.send_message(discord_id, fail_msg)
 
         else:
             print("\tDid not pay dues yet.")
-        # is_dues_paying
 
         return False

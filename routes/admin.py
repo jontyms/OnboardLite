@@ -3,14 +3,14 @@ from boto3.dynamodb.conditions import Key, Attr
 
 from jose import JWTError, jwt
 
-from fastapi import APIRouter, Cookie, Request, Response
+from fastapi import APIRouter, Cookie, Request, Response, Body
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.encoders import jsonable_encoder
 
 from pydantic import validator, error_wrappers
 
-from typing import Optional
+from typing import Optional, Any
 from models.user import UserModelMutable
 from models.info import InfoModel
 
@@ -18,6 +18,7 @@ from util.authentication import Authentication
 from util.errors import Errors
 from util.options import Options
 from util.approve import Approve
+from util.discord import Discord
 from util.kennelish import Kennelish, Transformer
 
 options = Options.fetch()
@@ -27,14 +28,12 @@ templates = Jinja2Templates(directory="templates")
 router = APIRouter(prefix="/admin", tags=["Admin"], responses=Errors.basic_http())
 
 
-"""
-Renders the Admin home page.
-"""
-
-
 @router.get("/")
 @Authentication.admin
 async def admin(request: Request, token: Optional[str] = Cookie(None)):
+    """
+    Renders the Admin home page.
+    """
     payload = jwt.decode(
         token,
         options.get("jwt").get("secret"),
@@ -51,11 +50,6 @@ async def admin(request: Request, token: Optional[str] = Cookie(None)):
     )
 
 
-"""
-API endpoint to FORCE-provision Infra credentials (even without membership!!!)
-"""
-
-
 @router.get("/infra/")
 @Authentication.admin
 async def get_infra(
@@ -63,6 +57,9 @@ async def get_infra(
     token: Optional[str] = Cookie(None),
     member_id: Optional[str] = "FAIL",
 ):
+    """
+    API endpoint to FORCE-provision Infra credentials (even without membership!!!)
+    """
     if member_id == "FAIL":
         return {"username": "", "password": "", "error": "Missing ?member_id"}
 
@@ -97,34 +94,10 @@ Happy Hacking,
   - Hack@UCF Bot
             """
 
-    # Get DM channel ID to send later...
-    discord_id = str(user_data.get("discord_id"))
-    headers = {
-        "Authorization": f"Bot {options.get('discord', {}).get('bot_token')}",
-        "Content-Type": "application/json",
-        "X-Audit-Log-Reason": "Hack@UCF OnboardLite Bot",
-    }
-    get_channel_id_body = {"recipient_id": discord_id}
-    req = requests.post(
-        f"https://discord.com/api/users/@me/channels",
-        headers=headers,
-        data=json.dumps(get_channel_id_body),
-    )
-    resp = req.json()
-
-    send_message_body = {"content": new_creds_msg}
-    requests.post(
-        f"https://discord.com/api/channels/{resp.get('id')}/messages",
-        headers=headers,
-        data=json.dumps(send_message_body),
-    )
+    # Send Discord message
+    Discord.send_message(user_data.get("discord_id"), new_creds_msg)
 
     return {"username": creds.get("username"), "password": creds.get("password")}
-
-
-"""
-API endpoint that re-runs the member verification workflow
-"""
 
 
 @router.get("/refresh/")
@@ -134,6 +107,9 @@ async def get_refresh(
     token: Optional[str] = Cookie(None),
     member_id: Optional[str] = "FAIL",
 ):
+    """
+    API endpoint that re-runs the member verification workflow
+    """
     if member_id == "FAIL":
         return {"data": {}, "error": "Missing ?member_id"}
 
@@ -149,11 +125,6 @@ async def get_refresh(
     return {"data": data}
 
 
-"""
-API endpoint that gets a specific user's data as JSON
-"""
-
-
 @router.get("/get/")
 @Authentication.admin
 async def admin_get_single(
@@ -161,6 +132,9 @@ async def admin_get_single(
     token: Optional[str] = Cookie(None),
     member_id: Optional[str] = "FAIL",
 ):
+    """
+    API endpoint that gets a specific user's data as JSON
+    """
     if member_id == "FAIL":
         return {"data": {}, "error": "Missing ?member_id"}
 
@@ -174,9 +148,35 @@ async def admin_get_single(
     return {"data": data}
 
 
-"""
-API endpoint that modifies a given user's data
-"""
+@router.post("/message/")
+@Authentication.admin
+async def admin_post_discord_message(
+    request: Request,
+    token: Optional[str] = Cookie(None),
+    member_id: Optional[str] = "FAIL",
+    payload: dict = Body(None),
+):
+    """
+    API endpoint that gets a specific user's data as JSON
+    """
+    if member_id == "FAIL":
+        return {"data": {}, "error": "Missing ?member_id"}
+
+    dynamodb = boto3.resource("dynamodb")
+    table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
+    data = table.get_item(Key={"id": member_id}).get("Item", None)
+
+    if not data:
+        return Errors.generate(request, 404, "User Not Found")
+
+    message_text = payload.get("msg")
+
+    res = Discord.send_message(data.get("discord_id"), message_text)
+
+    if res:
+        return {"msg": "Message sent."}
+    else:
+        return {"msg": "An error occured!"}
 
 
 @router.post("/get/")
@@ -186,6 +186,9 @@ async def admin_edit(
     token: Optional[str] = Cookie(None),
     input_data: Optional[UserModelMutable] = {},
 ):
+    """
+    API endpoint that modifies a given user's data
+    """
     member_id = input_data.id
 
     dynamodb = boto3.resource("dynamodb")
@@ -212,28 +215,24 @@ async def admin_edit(
     return {"data": union, "msg": "Updated successfully!"}
 
 
-"""
-API endpoint that dumps all users as JSON.
-"""
-
-
 @router.get("/list")
 @Authentication.admin
 async def admin_list(request: Request, token: Optional[str] = Cookie(None)):
+    """
+    API endpoint that dumps all users as JSON.
+    """
     dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
     data = table.scan().get("Items", None)
     return {"data": data}
 
 
-"""
-API endpoint that dumps all users as CSV.
-"""
-
-
 @router.get("/csv")
 @Authentication.admin
 async def admin_list(request: Request, token: Optional[str] = Cookie(None)):
+    """
+    API endpoint that dumps all users as CSV.
+    """
     dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
     data = table.scan().get("Items", None)

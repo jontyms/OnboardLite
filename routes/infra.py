@@ -19,6 +19,7 @@ from util.authentication import Authentication
 from util.errors import Errors
 from util.options import Options
 from util.approve import Approve
+from util.discord import Discord
 from util.kennelish import Kennelish, Transformer
 
 from python_terraform import *
@@ -281,27 +282,8 @@ Happy Hacking,
   - Hack@UCF Bot
             """
 
-    # Get DM channel ID to send later...
-    discord_id = str(user_data.get("discord_id"))
-    headers = {
-        "Authorization": f"Bot {options.get('discord', {}).get('bot_token')}",
-        "Content-Type": "application/json",
-        "X-Audit-Log-Reason": "Hack@UCF OnboardLite Bot",
-    }
-    get_channel_id_body = {"recipient_id": discord_id}
-    req = requests.post(
-        f"https://discord.com/api/users/@me/channels",
-        headers=headers,
-        data=json.dumps(get_channel_id_body),
-    )
-    resp = req.json()
-
-    send_message_body = {"content": new_creds_msg}
-    requests.post(
-        f"https://discord.com/api/channels/{resp.get('id')}/messages",
-        headers=headers,
-        data=json.dumps(send_message_body),
-    )
+    # Send Discord message
+    Discord.send_message(discord_id, new_creds_msg)
 
     return {"username": creds.get("username"), "password": creds.get("password")}
 

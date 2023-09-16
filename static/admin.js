@@ -226,6 +226,12 @@ function showUser(userId) {
     };
     document.getElementById("assignMentor").style.display = (user.mentee && user.mentee.time_in_cyber) ? "inline-block" : "none";
 
+
+    document.getElementById("sendMessage").onclick = (evt) => {
+        const message = prompt("Please enter message to send to user:");
+        sendDiscordDM(user.id, message);
+    }
+
     // Set page visibilities
     document.getElementById("users").style.display = "none";
     document.getElementById("scanner").style.display = "none";
@@ -254,6 +260,24 @@ function editUser(payload) {
 
         userDict[user_id] = member;
         showUser(user_id);
+    })
+}
+
+function sendDiscordDM(user_id, message) {
+    const payload = {
+        "msg": message
+    }
+    const options = {
+        method: "POST",
+        body: JSON.stringify(payload),
+        headers: {
+            "Content-Type": "application/json"
+        }
+    }
+    fetch("/admin/message?member_id=" + user_id, options).then(data => {
+        return data.json();
+    }).then(data2 => {
+        alert(data2.msg);
     })
 }
 
