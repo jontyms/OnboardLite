@@ -4,3 +4,4 @@ config/
 .terraform*
 terraform.*
 clouds.yaml
+infra_options.json

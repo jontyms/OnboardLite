@@ -35,11 +35,24 @@ router = APIRouter(prefix="/infra", tags=["Infra"], responses=Errors.basic_http(
 tf = Terraform(working_dir="./")
 
 
-shitty_database = {"gbmName": None, "imageId": None}
+def get_shitty_database():
+    """
+    Dump contents of the file that stores infra options.
+    I lovingly call this the "shitty database."
+    """
+    data = {}
+    try:
+        with open('infra_options.json', 'r') as f:
+            data = json.loads(f.read())
+    except Exception as e:
+        print(e)
+        data = {"gbmName": None, "imageId": None}
+
+    return data
 
 
-async def create_resource(project):
-    global shitty_database
+async def create_resource(project, callback_discord_id=None):
+    shitty_database = get_shitty_database()
     proj_name = project.name
 
     print(f"Creating resources for {proj_name}...")
@@ -68,6 +81,16 @@ async def create_resource(project):
         os.remove("terraform.tfstate.backup")
     except Exception as e:
         pass
+
+    if callback_discord_id:
+        resource_create_msg = f"""Hello!
+
+Your requested virtual machine has been created! You can now view it at {options.get('infra', {}).get('horizon')}.
+
+Enjoy,
+    - Hack@UCF Bot
+"""
+        Discord.send_message(callback_discord_id, resource_create_msg)
 
     print("\tDone!")
 
@@ -178,7 +201,9 @@ async def get_provision(
     project = conn.identity.get_project(user.default_project_id)
 
     # Provision everything
-    asyncio.create_task(create_resource(project))  # runs teardown async
+    asyncio.create_task(
+        create_resource(project, payload.get("discord_id"))
+    )  # runs teardown async
     return {"msg": "Queued."}
 
 
@@ -204,13 +229,9 @@ API endpoint to SET the one-click deploy settings.
 async def get_options(
     request: Request,
     token: Optional[str] = Cookie(None),
-    payload: Optional[object] = {},
-    gbmName: Optional[str] = None,
-    imageId: Optional[str] = None,
+    payload: Optional[object] = {}
 ):
-    global shitty_database
-
-    return shitty_database
+    return get_shitty_database()
 
 
 """
@@ -226,8 +247,10 @@ async def set_options(
     gbmName: Optional[str] = None,
     imageId: Optional[str] = None,
 ):
-    global shitty_database
     shitty_database = {"gbmName": gbmName, "imageId": imageId}
+
+    with open('infra_options.json', 'w') as f:
+        f.write(json.dumps(shitty_database))
 
     return shitty_database
 
@@ -286,145 +309,3 @@ Happy Hacking,
     Discord.send_message(discord_id, new_creds_msg)
 
     return {"username": creds.get("username"), "password": creds.get("password")}
-
-
-"""
-API endpoint that re-runs the member verification workflow
-"""
-
-
-@router.get("/refresh/")
-@Authentication.admin
-async def get_refresh(
-    request: Request,
-    token: Optional[str] = Cookie(None),
-    member_id: Optional[str] = "FAIL",
-):
-    if member_id == "FAIL":
-        return {"data": {}, "error": "Missing ?member_id"}
-
-    Approve.approve_member(member_id)
-
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
-    data = table.get_item(Key={"id": member_id}).get("Item", None)
-
-    if not data:
-        return Errors.generate(request, 404, "User Not Found")
-
-    return {"data": data}
-
-
-"""
-API endpoint that gets a specific user's data as JSON
-"""
-
-
-@router.get("/get/")
-@Authentication.admin
-async def admin_get_single(
-    request: Request,
-    token: Optional[str] = Cookie(None),
-    member_id: Optional[str] = "FAIL",
-):
-    if member_id == "FAIL":
-        return {"data": {}, "error": "Missing ?member_id"}
-
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
-    data = table.get_item(Key={"id": member_id}).get("Item", None)
-
-    if not data:
-        return Errors.generate(request, 404, "User Not Found")
-
-    return {"data": data}
-
-
-"""
-API endpoint that modifies a given user's data
-"""
-
-
-@router.post("/get/")
-@Authentication.admin
-async def admin_edit(
-    request: Request,
-    token: Optional[str] = Cookie(None),
-    input_data: Optional[UserModelMutable] = {},
-):
-    member_id = input_data.id
-
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
-    old_data = table.get_item(Key={"id": member_id}).get("Item", None)
-
-    if not old_data:
-        return Errors.generate(request, 404, "User Not Found")
-
-    # Take Pydantic data -> dict -> strip null values
-    new_data = {k: v for k, v in jsonable_encoder(input_data).items() if v is not None}
-
-    # Existing  U  Provided
-    union = {**old_data, **new_data}
-
-    # This is how this works:
-    # 1. Get old data
-    # 2. Get new data (pydantic-validated)
-    # 3. Union the two
-    # 4. Put back as one giant entry
-
-    table.put_item(Item=union)
-
-    return {"data": union, "msg": "Updated successfully!"}
-
-
-"""
-API endpoint that dumps all users as JSON.
-"""
-
-
-@router.get("/list")
-@Authentication.admin
-async def admin_list(request: Request, token: Optional[str] = Cookie(None)):
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
-    data = table.scan().get("Items", None)
-    return {"data": data}
-
-
-"""
-API endpoint that dumps all users as CSV.
-"""
-
-
-@router.get("/csv")
-@Authentication.admin
-async def admin_list(request: Request, token: Optional[str] = Cookie(None)):
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
-    data = table.scan().get("Items", None)
-
-    output = "Membership ID, First Name, Last Name, NID, Is Returning, Gender, Major, Class Standing, Shirt Size, Discord Username, Experience, Cyber Interests, Event Interest, Is C3 Interest, Comments, Ethics Form Timestamp, Minecraft, Infra Email\n"
-    for user in data:
-        output += f'"{user.get("id")}", '
-        output += f'"{user.get("first_name")}", '
-        output += f'"{user.get("surname")}", '
-        output += f'"{user.get("nid")}", '
-        output += f'"{user.get("is_returning")}", '
-        output += f'"{user.get("gender")}", '
-        output += f'"{user.get("major")}", '
-        output += f'"{user.get("class_standing")}", '
-        output += f'"{user.get("shirt_size")}", '
-        output += f'"{user.get("discord", {}).get("username")}", '
-        output += f'"{user.get("experience")}", '
-        output += f'"{user.get("curiosity")}", '
-        output += f'"{user.get("attending")}", '
-        output += f'"{user.get("c3_interest")}", '
-
-        output += f'"{user.get("comments")}", '
-
-        output += f'"{user.get("ethics_form", {}).get("signtime")}", '
-        output += f'"{user.get("minecraft")}", '
-        output += f'"{user.get("infra_email")}"\n'
-
-    return Response(content=output, headers={"Content-Type": "text/csv"})
