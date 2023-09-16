@@ -21,13 +21,15 @@ Infra account + whitelist them to the Hack@UCF Minecraft server.
 
 If approval fails, dispatch a Discord message saying that something went wrong and how to fix it.
 """
+
+
 class Approve:
     def __init__(self):
         super(Approve, self).__init__
 
     def provision_infra(member_id, user_data=None):
         # Log into OpenStack
-        conn = openstack.connect(cloud='hackucf_infra')
+        conn = openstack.connect(cloud="hackucf_infra")
 
         try:
             os.remove("terraform.tfstate")
@@ -40,15 +42,10 @@ class Approve:
             pass
 
         try:
-            dynamodb = boto3.resource('dynamodb')
+            dynamodb = boto3.resource("dynamodb")
             table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
             if not user_data:
-
-                user_data = table.get_item(
-                    Key={
-                        'id': member_id
-                    }
-                ).get("Item", None)
+                user_data = table.get_item(Key={"id": member_id}).get("Item", None)
 
             # See if existing email.
             username = user_data.get("infra_email", False)
@@ -67,18 +64,17 @@ class Approve:
                     print(f"{username}: No user.")
 
             else:
-                username = user_data.get("discord", {}).get("username").replace(" ", "_") + "@infra.hackucf.org"
+                username = (
+                    user_data.get("discord", {}).get("username").replace(" ", "_")
+                    + "@infra.hackucf.org"
+                )
                 # Add username to Onboard database
                 table.update_item(
-                    Key={
-                        'id': member_id
-                    },
-                    UpdateExpression='SET infra_email = :val',
-                    ExpressionAttributeValues={
-                        ':val': username
-                    }
+                    Key={"id": member_id},
+                    UpdateExpression="SET infra_email = :val",
+                    ExpressionAttributeValues={":val": username},
                 )
-            
+
             password = HorsePass.gen()
 
             ###
@@ -89,7 +85,7 @@ class Approve:
             try:
                 new_proj = conn.identity.create_project(
                     name=member_id,
-                    description="Automatically provisioning with Hack@UCF Onboard"
+                    description="Automatically provisioning with Hack@UCF Onboard",
                 )
             except openstack.exceptions.ConflictException as e:
                 # This happens sometimes.
@@ -100,15 +96,13 @@ class Approve:
                 default_project_id=new_proj.id,
                 name=username,
                 description="Hack@UCF Dues Paying Member",
-                password=password
+                password=password,
             )
 
             # Find member role + assign it to user and project
             member_role = conn.identity.find_role("member")
             conn.identity.assign_project_role_to_user(
-                project=new_proj,
-                user=new_user,
-                role=member_role
+                project=new_proj, user=new_user, role=member_role
             )
 
             # Find admin role + assign it to Onboard user + user project
@@ -116,33 +110,25 @@ class Approve:
             conn.identity.assign_project_role_to_user(
                 project=new_proj,
                 user=conn.identity.find_user("onboard-service"),
-                role=admin_role
+                role=admin_role,
             )
-            
+
             ## Push account to OpenStack via Terraform magics (not used rn)
             # tf_vars = {'os_password': options.get('infra', {}).get('ad', {}).get('password'), 'tenant_name': member_id, 'handle': username, 'password': password}
             # tf.apply(var=tf_vars, skip_plan=True)
 
-            return {
-                "username": username,
-                "password": password
-            }
+            return {"username": username, "password": password}
         except Exception as e:
             print(e)
             return None
 
-
     # !TODO finish the post-sign-up stuff + testing
     def approve_member(member_id):
         print(f"Re-running approval for {member_id}")
-        dynamodb = boto3.resource('dynamodb')
+        dynamodb = boto3.resource("dynamodb")
         table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
 
-        user_data = table.get_item(
-            Key={
-                'id': member_id
-            }
-        ).get("Item", None)
+        user_data = table.get_item(Key={"id": member_id}).get("Item", None)
 
         # If a member was already approved, kill process.
         if user_data.get("is_full_member", False):
@@ -154,12 +140,14 @@ class Approve:
         headers = {
             "Authorization": f"Bot {options.get('discord', {}).get('bot_token')}",
             "Content-Type": "application/json",
-            "X-Audit-Log-Reason": "Hack@UCF OnboardLite Bot"
+            "X-Audit-Log-Reason": "Hack@UCF OnboardLite Bot",
         }
-        get_channel_id_body = {
-            'recipient_id': discord_id
-        }
-        req = requests.post(f"https://discord.com/api/users/@me/channels", headers=headers, data=json.dumps(get_channel_id_body))
+        get_channel_id_body = {"recipient_id": discord_id}
+        req = requests.post(
+            f"https://discord.com/api/users/@me/channels",
+            headers=headers,
+            data=json.dumps(get_channel_id_body),
+        )
         resp = req.json()
 
         # Sorry for the long if statement. But we consider someone a "member" iff:
@@ -167,24 +155,34 @@ class Approve:
         # - We have their Discord snowflake
         # - They paid dues
         # - They signed their ethics form
-        if user_data.get("first_name") and user_data.get("discord_id") and user_data.get("did_pay_dues") and user_data.get("ethics_form", {}).get("signtime", 0) != 0:
+        if (
+            user_data.get("first_name")
+            and user_data.get("discord_id")
+            and user_data.get("did_pay_dues")
+            and user_data.get("ethics_form", {}).get("signtime", 0) != 0
+        ):
             print("\tNewly-promoted full member!")
 
             # Create an Infra account.
-            creds = Approve.provision_infra(member_id, user_data=user_data)  # TODO(err): sometimes this is None
+            creds = Approve.provision_infra(
+                member_id, user_data=user_data
+            )  # TODO(err): sometimes this is None
             if creds == None:
                 creds = {}
-            
+
             # Minecraft server
             if user_data.get("minecraft", False):
                 pass
                 # <whitelist logic>
-            
+
             # Assign the Dues-Paying Member role
-            req_dues = requests.put(f"https://discord.com/api/guilds/{options.get('discord', {}).get('guild_id')}/members/{discord_id}/roles/{options.get('discord', {}).get('member_role')}", headers=headers)
+            req_dues = requests.put(
+                f"https://discord.com/api/guilds/{options.get('discord', {}).get('guild_id')}/members/{discord_id}/roles/{options.get('discord', {}).get('member_role')}",
+                headers=headers,
+            )
             print(req_dues)
-            
-            # Send Discord message saying they are a member 
+
+            # Send Discord message saying they are a member
             welcome_msg = f"""Hello {user_data.get('first_name')}, and welcome to Hack@UCF!
 
 This message is to confirm that your membership has processed successfully. You can access and edit your membership ID at https://{options.get('http', {}).get('domain')}/profile.
@@ -202,23 +200,21 @@ Happy Hacking,
   - Hack@UCF Bot
             """
 
-            send_message_body = {
-                "content": welcome_msg
-            }
-            requests.post(f"https://discord.com/api/channels/{resp.get('id')}/messages", headers=headers, data=json.dumps(send_message_body))
+            send_message_body = {"content": welcome_msg}
+            requests.post(
+                f"https://discord.com/api/channels/{resp.get('id')}/messages",
+                headers=headers,
+                data=json.dumps(send_message_body),
+            )
 
             # Set member as a "full" member.
             table.update_item(
-                Key={
-                    'id': member_id
-                },
-                UpdateExpression='SET is_full_member = :val',
-                ExpressionAttributeValues={
-                    ':val': True
-                }
+                Key={"id": member_id},
+                UpdateExpression="SET is_full_member = :val",
+                ExpressionAttributeValues={":val": True},
             )
 
-        elif user_data.get('did_pay_dues'):
+        elif user_data.get("did_pay_dues"):
             print("\tPaid dues but did not do other step!")
             # Send a message on why this check failed.
             fail_msg = f"""Hello {user_data.get('first_name')},
@@ -236,10 +232,12 @@ If you think you have completed all of these, please reach out to an Exec on the
 We hope to see you soon,
   - Hack@UCF Bot
 """
-            send_message_body = {
-                "content": fail_msg
-            }
-            requests.post(f"https://discord.com/api/channels/{resp.get('id')}/messages", headers=headers, data=json.dumps(send_message_body))
+            send_message_body = {"content": fail_msg}
+            requests.post(
+                f"https://discord.com/api/channels/{resp.get('id')}/messages",
+                headers=headers,
+                data=json.dumps(send_message_body),
+            )
 
         else:
             print("\tDid not pay dues yet.")

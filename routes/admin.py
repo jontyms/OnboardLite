@@ -24,35 +24,47 @@ options = Options.fetch()
 
 templates = Jinja2Templates(directory="templates")
 
-router = APIRouter(
-    prefix="/admin",
-    tags=["Admin"],
-    responses=Errors.basic_http()
-)
+router = APIRouter(prefix="/admin", tags=["Admin"], responses=Errors.basic_http())
 
 
 """
 Renders the Admin home page.
 """
+
+
 @router.get("/")
 @Authentication.admin
 async def admin(request: Request, token: Optional[str] = Cookie(None)):
-    payload = jwt.decode(token, options.get("jwt").get("secret"), algorithms=options.get("jwt").get("algorithm"))
-    return templates.TemplateResponse("admin_searcher.html", {"request": request, "icon": payload['pfp'], "name": payload['name'], "id": payload['id']})
+    payload = jwt.decode(
+        token,
+        options.get("jwt").get("secret"),
+        algorithms=options.get("jwt").get("algorithm"),
+    )
+    return templates.TemplateResponse(
+        "admin_searcher.html",
+        {
+            "request": request,
+            "icon": payload["pfp"],
+            "name": payload["name"],
+            "id": payload["id"],
+        },
+    )
 
 
 """
 API endpoint to FORCE-provision Infra credentials (even without membership!!!)
 """
+
+
 @router.get("/infra/")
 @Authentication.admin
-async def get_infra(request: Request, token: Optional[str] = Cookie(None), member_id: Optional[str] = "FAIL"):
+async def get_infra(
+    request: Request,
+    token: Optional[str] = Cookie(None),
+    member_id: Optional[str] = "FAIL",
+):
     if member_id == "FAIL":
-        return {
-            "username": "",
-            "password": "",
-            "error": "Missing ?member_id"
-        }
+        return {"username": "", "password": "", "error": "Missing ?member_id"}
 
     creds = Approve.provision_infra(member_id)
     if creds == None:
@@ -62,14 +74,10 @@ async def get_infra(request: Request, token: Optional[str] = Cookie(None), membe
         return Errors.generate(request, 404, "User Not Found")
 
     # Get user data
-    dynamodb = boto3.resource('dynamodb')
+    dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
 
-    user_data = table.get_item(
-        Key={
-            'id': member_id
-        }
-    ).get("Item", None)
+    user_data = table.get_item(Key={"id": member_id}).get("Item", None)
 
     # Send DM...
     new_creds_msg = f"""Hello {user_data.get('first_name')},
@@ -88,105 +96,101 @@ The password for the `Cyberlab` WiFi is currently `{options.get('infra', {}).get
 Happy Hacking,
   - Hack@UCF Bot
             """
-    
+
     # Get DM channel ID to send later...
     discord_id = str(user_data.get("discord_id"))
     headers = {
         "Authorization": f"Bot {options.get('discord', {}).get('bot_token')}",
         "Content-Type": "application/json",
-        "X-Audit-Log-Reason": "Hack@UCF OnboardLite Bot"
+        "X-Audit-Log-Reason": "Hack@UCF OnboardLite Bot",
     }
-    get_channel_id_body = {
-        'recipient_id': discord_id
-    }
-    req = requests.post(f"https://discord.com/api/users/@me/channels", headers=headers, data=json.dumps(get_channel_id_body))
+    get_channel_id_body = {"recipient_id": discord_id}
+    req = requests.post(
+        f"https://discord.com/api/users/@me/channels",
+        headers=headers,
+        data=json.dumps(get_channel_id_body),
+    )
     resp = req.json()
 
-    send_message_body = {
-        "content": new_creds_msg
-    }
-    requests.post(f"https://discord.com/api/channels/{resp.get('id')}/messages", headers=headers, data=json.dumps(send_message_body))
+    send_message_body = {"content": new_creds_msg}
+    requests.post(
+        f"https://discord.com/api/channels/{resp.get('id')}/messages",
+        headers=headers,
+        data=json.dumps(send_message_body),
+    )
 
-    return {
-        "username": creds.get('username'),
-        "password": creds.get('password')
-    }
+    return {"username": creds.get("username"), "password": creds.get("password")}
 
 
 """
 API endpoint that re-runs the member verification workflow
 """
+
+
 @router.get("/refresh/")
 @Authentication.admin
-async def get_refresh(request: Request, token: Optional[str] = Cookie(None), member_id: Optional[str] = "FAIL"):
+async def get_refresh(
+    request: Request,
+    token: Optional[str] = Cookie(None),
+    member_id: Optional[str] = "FAIL",
+):
     if member_id == "FAIL":
-        return {
-            "data": {},
-            "error": "Missing ?member_id"
-        }
+        return {"data": {}, "error": "Missing ?member_id"}
 
     Approve.approve_member(member_id)
 
-    dynamodb = boto3.resource('dynamodb')
+    dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
-    data = table.get_item(
-        Key={
-            'id': member_id
-        }
-    ).get("Item", None)
+    data = table.get_item(Key={"id": member_id}).get("Item", None)
 
     if not data:
         return Errors.generate(request, 404, "User Not Found")
 
-    return {
-        "data": data
-    }
+    return {"data": data}
 
 
 """
 API endpoint that gets a specific user's data as JSON
 """
+
+
 @router.get("/get/")
 @Authentication.admin
-async def admin_get_single(request: Request, token: Optional[str] = Cookie(None), member_id: Optional[str] = "FAIL"):
+async def admin_get_single(
+    request: Request,
+    token: Optional[str] = Cookie(None),
+    member_id: Optional[str] = "FAIL",
+):
     if member_id == "FAIL":
-        return {
-            "data": {},
-            "error": "Missing ?member_id"
-        }
+        return {"data": {}, "error": "Missing ?member_id"}
 
-    dynamodb = boto3.resource('dynamodb')
+    dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
-    data = table.get_item(
-        Key={
-            'id': member_id
-        }
-    ).get("Item", None)
+    data = table.get_item(Key={"id": member_id}).get("Item", None)
 
     if not data:
         return Errors.generate(request, 404, "User Not Found")
 
-    return {
-        "data": data
-    }
+    return {"data": data}
 
 
 """
 API endpoint that modifies a given user's data
 """
+
+
 @router.post("/get/")
 @Authentication.admin
-async def admin_edit(request: Request, token: Optional[str] = Cookie(None), input_data: Optional[UserModelMutable] = {}):
-
+async def admin_edit(
+    request: Request,
+    token: Optional[str] = Cookie(None),
+    input_data: Optional[UserModelMutable] = {},
+):
     member_id = input_data.id
 
-    dynamodb = boto3.resource('dynamodb')
+    dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
-    old_data = table.get_item(
-        Key={
-            'id': member_id
-        }
-    ).get("Item", None)
+    old_data = table.get_item(Key={"id": member_id}).get("Item", None)
 
     if not old_data:
         return Errors.generate(request, 404, "User Not Found")
@@ -202,39 +206,38 @@ async def admin_edit(request: Request, token: Optional[str] = Cookie(None), inpu
     # 2. Get new data (pydantic-validated)
     # 3. Union the two
     # 4. Put back as one giant entry
-    
+
     table.put_item(Item=union)
 
-    return {
-        "data": union,
-        "msg": "Updated successfully!"
-    }
+    return {"data": union, "msg": "Updated successfully!"}
 
 
 """
 API endpoint that dumps all users as JSON.
 """
+
+
 @router.get("/list")
 @Authentication.admin
 async def admin_list(request: Request, token: Optional[str] = Cookie(None)):
-    dynamodb = boto3.resource('dynamodb')
+    dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
     data = table.scan().get("Items", None)
-    return {
-        "data": data
-    }
+    return {"data": data}
 
 
 """
 API endpoint that dumps all users as CSV.
 """
+
+
 @router.get("/csv")
 @Authentication.admin
 async def admin_list(request: Request, token: Optional[str] = Cookie(None)):
-    dynamodb = boto3.resource('dynamodb')
+    dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
     data = table.scan().get("Items", None)
-    
+
     output = "Membership ID, First Name, Last Name, NID, Is Returning, Gender, Major, Class Standing, Shirt Size, Discord Username, Experience, Cyber Interests, Event Interest, Is C3 Interest, Comments, Ethics Form Timestamp, Minecraft, Infra Email\n"
     for user in data:
         output += f'"{user.get("id")}", '
@@ -251,13 +254,11 @@ async def admin_list(request: Request, token: Optional[str] = Cookie(None)):
         output += f'"{user.get("curiosity")}", '
         output += f'"{user.get("attending")}", '
         output += f'"{user.get("c3_interest")}", '
-        
+
         output += f'"{user.get("comments")}", '
 
         output += f'"{user.get("ethics_form", {}).get("signtime")}", '
         output += f'"{user.get("minecraft")}", '
         output += f'"{user.get("infra_email")}"\n'
 
-    return Response(content=output, headers={
-        "Content-Type": "text/csv"
-    })
+    return Response(content=output, headers={"Content-Type": "text/csv"})

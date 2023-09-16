@@ -1,6 +1,7 @@
 from typing import Literal, Set
 from pydantic import BaseModel, create_model, constr
 
+
 # Known bug: You cannot pre-fill data stored in second-level DynamoDB levels.
 # So "parent.child" won't retrieve a value.
 class Kennelish:
@@ -14,36 +15,35 @@ class Kennelish:
     def __init__(self):
         super(Kennelish, self).__init__()
 
-
     def parse(obj, user_data=None):
         output = ""
         for entry in obj:
             try:
-                if entry['input'] == 'h1':
+                if entry["input"] == "h1":
                     output += Kennelish.header(entry, user_data)
-                elif entry['input'] == 'h2':
+                elif entry["input"] == "h2":
                     output += Kennelish.header(entry, user_data, "h2")
-                elif entry['input'] == 'h3':
+                elif entry["input"] == "h3":
                     output += Kennelish.header(entry, user_data, "h3")
-                elif entry['input'] == 'p':
+                elif entry["input"] == "p":
                     output += Kennelish.header(entry, user_data, "p")
-                elif entry['input'] == 'email':
+                elif entry["input"] == "email":
                     output += Kennelish.text(entry, user_data, "email")
-                elif entry['input'] == 'nid':
+                elif entry["input"] == "nid":
                     output += Kennelish.text(entry, user_data, "nid")
-                elif entry['input'] == 'text':
+                elif entry["input"] == "text":
                     output += Kennelish.text(entry, user_data)
-                elif entry['input'] == 'radio':
+                elif entry["input"] == "radio":
                     output += Kennelish.radio(entry, user_data)
-                elif entry['input'] == 'checkbox':
+                elif entry["input"] == "checkbox":
                     output += Kennelish.checkbox(entry, user_data)
-                elif entry['input'] == 'dropdown':
+                elif entry["input"] == "dropdown":
                     output += Kennelish.dropdown(entry, user_data)
-                elif entry['input'] == 'slider':
+                elif entry["input"] == "slider":
                     output += Kennelish.slider(entry, user_data)
-                elif entry['input'] == 'signature':
+                elif entry["input"] == "signature":
                     output += Kennelish.signature(entry, user_data)
-                elif entry['input'] == 'navigation':
+                elif entry["input"] == "navigation":
                     output += Kennelish.navigation(entry)
                 else:
                     output += Kennelish.invalid(entry)
@@ -61,7 +61,7 @@ class Kennelish:
 
     def header(entry, user_data=None, tag="h1"):
         output = f"<{tag}>{entry.get('label', '')}</{tag}>"
-        output += Kennelish.parse(entry.get('elements', []), user_data)
+        output += Kennelish.parse(entry.get("elements", []), user_data)
         return output
 
     def signature(entry, user_data=None):
@@ -70,15 +70,15 @@ class Kennelish:
 
     def text(entry, user_data=None, inp_type="text"):
         # Pre-filling of data from database (+ special rule for email discovery)
-        if entry.get('prefill', True):
-            key = entry.get('key', '')
-            if key == 'email':
-                if user_data.get('email'):
-                    prefill = user_data.get('email')
+        if entry.get("prefill", True):
+            key = entry.get("key", "")
+            if key == "email":
+                if user_data.get("email"):
+                    prefill = user_data.get("email")
                 else:
-                    prefill = user_data.get('discord').get('email')
+                    prefill = user_data.get("discord").get("email")
             else:
-                prefill = user_data.get(key, '')
+                prefill = user_data.get(key, "")
 
             if prefill == None:
                 prefill = ""
@@ -86,11 +86,13 @@ class Kennelish:
             prefill = ""
 
         regex_pattern = " "
-        if inp_type == 'email' and entry.get('domain', False):
-            regex_pattern = ' pattern="([A-Za-z0-9.-_+]+)@' + entry.get('domain') + '"'
-        elif inp_type == 'email':
-            regex_pattern = ' pattern="([A-Za-z0-9.-_+]+)@[A-Za-z0-9-]+(.[A-Za-z-]{2,})"'
-        elif inp_type == 'nid':
+        if inp_type == "email" and entry.get("domain", False):
+            regex_pattern = ' pattern="([A-Za-z0-9.-_+]+)@' + entry.get("domain") + '"'
+        elif inp_type == "email":
+            regex_pattern = (
+                ' pattern="([A-Za-z0-9.-_+]+)@[A-Za-z0-9-]+(.[A-Za-z-]{2,})"'
+            )
+        elif inp_type == "nid":
             regex_pattern = ' pattern="^([a-z]{2}[0-9]{6})$"'
 
         output = f"<input class='kennelish_input'{' required' if entry.get('required') else ' '}{regex_pattern} name='{entry.get('key', '')}' type='{'text' if inp_type == 'nid' else inp_type}' value='{prefill}' placeholder='{entry.get('label', '')}' />"
@@ -98,18 +100,17 @@ class Kennelish:
 
     def radio(entry, user_data=None):
         # Pre-filling of data from database
-        if entry.get('prefill', True):
-            prefill = user_data.get(entry.get('key', ''), '')
+        if entry.get("prefill", True):
+            prefill = user_data.get(entry.get("key", ""), "")
             if str(prefill) == "True":
                 prefill = "Yes"
             elif str(prefill) == "False":
                 prefill = "No"
         else:
             prefill = ""
-        
-        
+
         output = f"<fieldset name='{entry.get('key', '')}'{' required' if entry.get('required') else ' '} class='kennelish_input radio'>"
-        for option in entry['options']:
+        for option in entry["options"]:
             selected = "" if option != prefill else "checked"
             output += f"<div><input type='radio' {selected} name='{entry.get('key', '')}' id='radio_{entry.get('key', '').replace('.', '_').replace(' ', '_')}_{option}' value='{option}'><label for='radio_{entry.get('key', '').replace('.', '_').replace(' ', '_')}_{option}'>{option}</label></div>"
         output += "</fieldset>"
@@ -117,11 +118,11 @@ class Kennelish:
 
     def checkbox(entry, user_data=None):
         # Checkboxes do not support pre-filling!
-        
+
         output = f"<fieldset name='{entry.get('key', '')}'{' required' if entry.get('required') else ' '} class='kennelish_input checkbox'>"
-        for option in entry.get('options'):
+        for option in entry.get("options"):
             output += f"<div><input type='checkbox' name='{entry.get('key', '')}' id='checkbox_{entry.get('key', '').replace('.', '_').replace(' ', '_')}_{option}' value='{option}'><label for='checkbox_{entry.get('key', '').replace('.', '_').replace(' ', '_')}_{option}'>{option}</label></div>"
-        
+
         # Other
         output += f"<div><input type='checkbox' name='{entry.get('key', '')}' id='checkbox_{entry.get('key', '').replace('.', '_').replace(' ', '_')}_OTHER' value='_other'><label for='checkbox_{entry.get('key', '').replace('.', '_').replace(' ', '_')}_OTHER'>Other</label></div>"
         output += f"<input id='{entry.get('key', '').replace('.', '_').replace(' ', '_')}' class='other_checkbox' type='text' placeholder='{entry.get('label', 'Other')}...'>"
@@ -130,15 +131,15 @@ class Kennelish:
 
     def dropdown(entry, user_data=None):
         # Pre-filling of data from database
-        if entry.get('prefill', True):
-            prefill = user_data.get(entry.get('key', ''), '_default')
+        if entry.get("prefill", True):
+            prefill = user_data.get(entry.get("key", ""), "_default")
             if prefill == "":
                 prefill = "_default"
         else:
-            prefill = "_default"        
-        
+            prefill = "_default"
+
         output = f"<select class='kennelish_input'{' required' if entry.get('required') else ' '} name='{entry.get('key', '')}'><option disabled {'selected ' if prefill == '_default' else ''}value='_default'>Select...</option>"
-        for option in entry.get('options'):
+        for option in entry.get("options"):
             output += f"<option {'selected ' if prefill == option else ''}value='{option}'>{option}</option>"
 
         if entry.get("other"):
@@ -151,16 +152,14 @@ class Kennelish:
         # This is pretty much radio, but modified.
 
         # Pre-filling of data from database
-        if entry.get('prefill', True):
-            prefill = user_data.get(entry.get('key', ''), '')
+        if entry.get("prefill", True):
+            prefill = user_data.get(entry.get("key", ""), "")
         else:
             prefill = ""
 
+        novice_label = entry.get("novice_label", "Novice")
+        expert_label = entry.get("expert_label", "Expert")
 
-        novice_label = entry.get('novice_label', "Novice")
-        expert_label = entry.get('expert_label', "Expert")
-        
-        
         output = f"<span class='caption'>{novice_label}</span><span class='right caption'>{expert_label}</span><br>"
         output += f"<fieldset name='{entry.get('key', '')}'{' required' if entry.get('required') else ' '} class='kennelish_input radio gridded'>"
         for option in range(1, 6):
@@ -170,7 +169,7 @@ class Kennelish:
         return Kennelish.label(entry, output)
 
     def navigation(entry):
-        if entry.get('prev'):
+        if entry.get("prev"):
             # back = f"<a class='btn wide grey' href='{entry.get('prev', '#')}'>{entry.get('prev_label', 'Back')}</a>"
             back = f"<button type='button' class='btn wide grey' onclick='submit_and_nav(\"{entry.get('prev', '#')}\")'>{entry.get('prev_label', 'Back')}</button>"
         else:
@@ -195,7 +194,6 @@ class Transformer:
     def __init__(self):
         super(Transformer, self).__init__()
 
-
     def kwargs_to_str(kwargs):
         print(dir(kwargs))
         for k, v in kwargs.items():
@@ -203,7 +201,6 @@ class Transformer:
             kwargs[k] = str(v)
 
         return kwargs
-
 
     def kennelish_to_form(json):
         obj = {}
@@ -219,17 +216,23 @@ class Transformer:
                 obj = {**obj, **Transformer.kennelish_to_form(el.get("elements"))}
 
             # For when a choice is REQUIRED.
-            elif element_type == "radio" or (element_type == "dropdown" and not el.get("other", True)):
+            elif element_type == "radio" or (
+                element_type == "dropdown" and not el.get("other", True)
+            ):
                 obj[el.get("key")] = (Literal[tuple(el.get("options"))], None)
-            
+
             # For emails (specified domain)
             elif element_type == "email" and el.get("domain", False):
-                regex_constr = constr(regex="([A-Za-z0-9.-_+]+)@" + el.get("domain").lower())
+                regex_constr = constr(
+                    regex="([A-Za-z0-9.-_+]+)@" + el.get("domain").lower()
+                )
                 obj[el.get("key")] = (regex_constr, None)
 
             # For emails (any domain)
             elif element_type == "email":
-                regex_constr = constr(regex="([A-Za-z0-9.-_+]+)@[A-Za-z0-9-]+(.[A-Za-z-]{2,})")
+                regex_constr = constr(
+                    regex="([A-Za-z0-9.-_+]+)@[A-Za-z0-9-]+(.[A-Za-z-]{2,})"
+                )
                 obj[el.get("key")] = (regex_constr, None)
 
             # For NIDs
@@ -247,11 +250,9 @@ class Transformer:
 
         return obj
 
-
     def form_to_pydantic(json):
         model = create_model("KennelishGeneratedModel", **json)
         return model
-
 
     def kennelish_to_pydantic(json):
         form = Transformer.kennelish_to_form(json)

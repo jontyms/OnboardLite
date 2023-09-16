@@ -17,28 +17,26 @@ from util.kennelish import Kennelish, Transformer
 
 options = Options.fetch()
 
-router = APIRouter(
-    prefix="/api",
-    tags=["API"],
-    responses=Errors.basic_http()
-)
+router = APIRouter(prefix="/api", tags=["API"], responses=Errors.basic_http())
 
 
 """
 Get API information.
 """
+
+
 @router.get("/")
 async def get_root():
     return InfoModel(
         name="OnboardLite",
-        description = "Hack@UCF's in-house membership management suite.",
+        description="Hack@UCF's in-house membership management suite.",
         credits=[
             PublicContact(
-            first_name="Jeffrey",
-            surname="DiVincent",
-            ops_email="jdivincent@hackucf.org"
+                first_name="Jeffrey",
+                surname="DiVincent",
+                ops_email="jdivincent@hackucf.org",
             )
-        ]
+        ],
     )
 
 
@@ -46,6 +44,8 @@ async def get_root():
 Gets the JSON markup for a Kennelish file. For client-side rendering (if that ever becomes a thing).
 Note that Kennelish form files are NOT considered sensitive.
 """
+
+
 @router.get("/form/{num}")
 async def get_form(num: str):
     return Options.get_form_body(num)
@@ -54,23 +54,26 @@ async def get_form(num: str):
 """
 Renders a Kennelish form file as HTML (with user data). Intended for AJAX applications.
 """
+
+
 @router.get("/form/{num}/html", response_class=HTMLResponse)
 @Authentication.member
-async def get_form_html(request: Request, token: Optional[str] = Cookie(None), payload: Optional[object] = {}, num: str = 1):
+async def get_form_html(
+    request: Request,
+    token: Optional[str] = Cookie(None),
+    payload: Optional[object] = {},
+    num: str = 1,
+):
     # AWS dependencies
-    dynamodb = boto3.resource('dynamodb')
+    dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
 
     # Get form object
     data = Options.get_form_body(num)
 
     # Get data from DynamoDB
-    user_data = table.get_item(
-        Key={
-            'id': payload.get('id')
-        }
-    ).get("Item", None)
-    
+    user_data = table.get_item(Key={"id": payload.get("id")}).get("Item", None)
+
     # Have Kennelish parse the data.
     body = Kennelish.parse(data, user_data)
 
@@ -80,9 +83,16 @@ async def get_form_html(request: Request, token: Optional[str] = Cookie(None), p
 """
 Allows updating the user's database using a schema assumed by the Kennelish file.
 """
+
+
 @router.post("/form/{num}")
 @Authentication.member
-async def post_form(request: Request, token: Optional[str] = Cookie(None), payload: Optional[object] = {}, num: str = 1):
+async def post_form(
+    request: Request,
+    token: Optional[str] = Cookie(None),
+    payload: Optional[object] = {},
+    num: str = 1,
+):
     # Get Kennelish data
     kennelish_data = Options.get_form_body(num)
     model = Transformer.kennelish_to_pydantic(kennelish_data)
@@ -105,7 +115,11 @@ async def post_form(request: Request, token: Optional[str] = Cookie(None), paylo
             # English -> Boolean
             if item[1] == "Yes" or item[1] == "I promise not to do this.":
                 item = (item[0], True)
-            elif item[1] == "No" or item[1] == "I disagree with this and do not wish to be part of Hack@UCF":
+            elif (
+                item[1] == "No"
+                or item[1]
+                == "I disagree with this and do not wish to be part of Hack@UCF"
+            ):
                 item = (item[0], False)
 
             items_to_keep.append(item)
@@ -114,7 +128,7 @@ async def post_form(request: Request, token: Optional[str] = Cookie(None), paylo
     expression_attribute_values = {}
 
     # Here, the variable 'items_to_keep' is validated input. We can update the user's profile from here.
-    
+
     # Prepare to update to DynamoDB
     for item in items_to_keep:
         update_expression += f"{item[0]} = :{item[0].replace('.', '_')}, "
@@ -124,17 +138,15 @@ async def post_form(request: Request, token: Optional[str] = Cookie(None), paylo
     update_expression = update_expression[:-2]
 
     # AWS dependencies
-    dynamodb = boto3.resource('dynamodb')
+    dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
 
     # Push data back to DynamoDB
     try:
         table.update_item(
-            Key={
-                'id': payload.get('id')
-            },
+            Key={"id": payload.get("id")},
             UpdateExpression=update_expression,
-            ExpressionAttributeValues=expression_attribute_values
+            ExpressionAttributeValues=expression_attribute_values,
         )
     except ClientError as e:
         # We need to do a migration on *something*. We know it's a subtype.
@@ -153,25 +165,18 @@ async def post_form(request: Request, token: Optional[str] = Cookie(None), paylo
 
                 # Create dictionary
                 table.update_item(
-                    Key={
-                        'id': payload.get('id')
-                    },
+                    Key={"id": payload.get("id")},
                     # key_to_make is not user-supplied, rather, it's from the form JSON.
                     # if this noSQLi's, then it's because of an insider threat.
                     UpdateExpression=f"SET {key_to_make} = :dicty",
-                    ExpressionAttributeValues={
-                        ":dicty": {}
-                    }
+                    ExpressionAttributeValues={":dicty": {}},
                 )
 
         # After all dicts are a thing, re-run query.
         table.update_item(
-            Key={
-                'id': payload.get('id')
-            },
+            Key={"id": payload.get("id")},
             UpdateExpression=update_expression,
-            ExpressionAttributeValues=expression_attribute_values
+            ExpressionAttributeValues=expression_attribute_values,
         )
-
 
     return validated

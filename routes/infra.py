@@ -29,19 +29,12 @@ options = Options.fetch()
 
 templates = Jinja2Templates(directory="templates")
 
-router = APIRouter(
-    prefix="/infra",
-    tags=["Infra"],
-    responses=Errors.basic_http()
-)
+router = APIRouter(prefix="/infra", tags=["Infra"], responses=Errors.basic_http())
 
 tf = Terraform(working_dir="./")
 
 
-shitty_database = {
-    "gbmName": None,
-    "imageId": None
-}
+shitty_database = {"gbmName": None, "imageId": None}
 
 
 async def create_resource(project):
@@ -51,12 +44,12 @@ async def create_resource(project):
     print(f"Creating resources for {proj_name}...")
 
     tf_vars = {
-        "username": options.get('infra', {}).get('ad', {}).get('username'),
-        "password": options.get('infra', {}).get('ad', {}).get('password'),
+        "username": options.get("infra", {}).get("ad", {}).get("username"),
+        "password": options.get("infra", {}).get("ad", {}).get("password"),
         "tenant_name": proj_name,
         "gbmname": shitty_database.get("gbmName"),
         "imageid": shitty_database.get("imageId"),
-        "member_username": project.id
+        "member_username": project.id,
     }
     return_code, stdout, stderr = tf.apply(var=tf_vars, skip_plan=True)
     if return_code != 0:
@@ -82,7 +75,7 @@ async def teardown():
     print("Initializing post-GBM teardown...")
     death_word = "gbm"
 
-    conn = openstack.connect(cloud='hackucf_infra')
+    conn = openstack.connect(cloud="hackucf_infra")
 
     print("\tServers...")
     for resource in conn.compute.servers(all_projects=True):
@@ -91,14 +84,12 @@ async def teardown():
             print(f"\t\tdelete {resource.name}")
             conn.compute.delete_server(resource)
 
-
     print("\tSec Groups...")
     for resource in conn.network.security_groups():
         # print("\t" + resource.name)
         if death_word in resource.name.lower():
             print(f"\t\tdelete {resource.name}")
-            conn.network.delete_security_group(resource)              
-
+            conn.network.delete_security_group(resource)
 
     print("\tRouters...")
     for resource in conn.network.routers():
@@ -117,7 +108,6 @@ async def teardown():
                     conn.network.delete_router(resource)
                 except:
                     print("\t\t\t\tFailed and gave up.")
-
 
     print("\tNetworks...")
     for resource in conn.network.networks():
@@ -144,82 +134,99 @@ async def teardown():
 """
 Get API information.
 """
+
+
 @router.get("/")
 async def get_root():
     return InfoModel(
         name="Onboard Infra",
-        description = "Infrastructure Management via Onboard.",
+        description="Infrastructure Management via Onboard.",
         credits=[
             PublicContact(
-            first_name="Jeffrey",
-            surname="DiVincent",
-            ops_email="jdivincent@hackucf.org"
+                first_name="Jeffrey",
+                surname="DiVincent",
+                ops_email="jdivincent@hackucf.org",
             ),
             PublicContact(
-            first_name="Caleb",
-            surname="Sjostedt",
-            ops_email="csjostedt@hackucf.org"
-            )
-        ]
+                first_name="Caleb",
+                surname="Sjostedt",
+                ops_email="csjostedt@hackucf.org",
+            ),
+        ],
     )
 
 
 """
 API endpoint to self-service create a GBM environment.
 """
+
+
 @router.get("/provision/")
 @Authentication.member
-async def get_provision(request: Request, token: Optional[str] = Cookie(None), payload: Optional[object] = {}):
-    conn = openstack.connect(cloud='hackucf_infra')
+async def get_provision(
+    request: Request,
+    token: Optional[str] = Cookie(None),
+    payload: Optional[object] = {},
+):
+    conn = openstack.connect(cloud="hackucf_infra")
 
     # Get single user
-    user = conn.identity.find_user(payload.get('infra_email'))
+    user = conn.identity.find_user(payload.get("infra_email"))
 
     # Get project
     project = conn.identity.get_project(user.default_project_id)
 
     # Provision everything
     asyncio.create_task(create_resource(project))  # runs teardown async
-    return {
-        "msg": "Queued."
-    }
+    return {"msg": "Queued."}
 
 
 """
 API endpoint to trigger tear-down of GBM-provisioned stuff.
 """
+
+
 @router.get("/teardown/")
 @Authentication.admin
 async def get_teardown(request: Request, token: Optional[str] = Cookie(None)):
     asyncio.create_task(teardown())  # runs teardown async
-    return {
-        "msg": "Queued."
-    }
+    return {"msg": "Queued."}
 
 
 """
 API endpoint to SET the one-click deploy settings.
 """
+
+
 @router.get("/options/get")
 @Authentication.member
-async def get_options(request: Request, token: Optional[str] = Cookie(None), payload: Optional[object] = {}, gbmName: Optional[str] = None, imageId: Optional[str] = None):
+async def get_options(
+    request: Request,
+    token: Optional[str] = Cookie(None),
+    payload: Optional[object] = {},
+    gbmName: Optional[str] = None,
+    imageId: Optional[str] = None,
+):
     global shitty_database
-    
+
     return shitty_database
 
 
-
 """
 API endpoint to SET the one-click deploy settings.
 """
+
+
 @router.get("/options/set")
 @Authentication.admin
-async def set_options(request: Request, token: Optional[str] = Cookie(None), gbmName: Optional[str] = None, imageId: Optional[str] = None):
+async def set_options(
+    request: Request,
+    token: Optional[str] = Cookie(None),
+    gbmName: Optional[str] = None,
+    imageId: Optional[str] = None,
+):
     global shitty_database
-    shitty_database = {
-        "gbmName": gbmName,
-        "imageId": imageId
-    }
+    shitty_database = {"gbmName": gbmName, "imageId": imageId}
 
     return shitty_database
 
@@ -227,13 +234,21 @@ async def set_options(request: Request, token: Optional[str] = Cookie(None), gbm
 """
 API endpoint to self-service reset Infra credentials (membership-validating)
 """
+
+
 @router.get("/reset/")
 @Authentication.member
-async def get_infra(request: Request, token: Optional[str] = Cookie(None), payload: Optional[object] = {}):
-    member_id = payload.get('id')
+async def get_infra(
+    request: Request,
+    token: Optional[str] = Cookie(None),
+    payload: Optional[object] = {},
+):
+    member_id = payload.get("id")
 
-    if not (payload.get('is_full_member') or payload.get('infra_email')):
-        return Errors.generate(request, 403, "This API endpoint is restricted to Dues-Paying Members.")
+    if not (payload.get("is_full_member") or payload.get("infra_email")):
+        return Errors.generate(
+            request, 403, "This API endpoint is restricted to Dues-Paying Members."
+        )
 
     # This also reprovisions Infra access if an account already exists.
     # This is useful for cleaning up things + nuking in case of an error.
@@ -243,14 +258,10 @@ async def get_infra(request: Request, token: Optional[str] = Cookie(None), paylo
         creds = {}
 
     # Get user data
-    dynamodb = boto3.resource('dynamodb')
+    dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
 
-    user_data = table.get_item(
-        Key={
-            'id': member_id
-        }
-    ).get("Item", None)
+    user_data = table.get_item(Key={"id": member_id}).get("Item", None)
 
     # Send DM...
     new_creds_msg = f"""Hello {user_data.get('first_name')},
@@ -269,105 +280,101 @@ The password for the `Cyberlab` WiFi is currently `{options.get('infra', {}).get
 Happy Hacking,
   - Hack@UCF Bot
             """
-    
+
     # Get DM channel ID to send later...
     discord_id = str(user_data.get("discord_id"))
     headers = {
         "Authorization": f"Bot {options.get('discord', {}).get('bot_token')}",
         "Content-Type": "application/json",
-        "X-Audit-Log-Reason": "Hack@UCF OnboardLite Bot"
+        "X-Audit-Log-Reason": "Hack@UCF OnboardLite Bot",
     }
-    get_channel_id_body = {
-        'recipient_id': discord_id
-    }
-    req = requests.post(f"https://discord.com/api/users/@me/channels", headers=headers, data=json.dumps(get_channel_id_body))
+    get_channel_id_body = {"recipient_id": discord_id}
+    req = requests.post(
+        f"https://discord.com/api/users/@me/channels",
+        headers=headers,
+        data=json.dumps(get_channel_id_body),
+    )
     resp = req.json()
 
-    send_message_body = {
-        "content": new_creds_msg
-    }
-    requests.post(f"https://discord.com/api/channels/{resp.get('id')}/messages", headers=headers, data=json.dumps(send_message_body))
+    send_message_body = {"content": new_creds_msg}
+    requests.post(
+        f"https://discord.com/api/channels/{resp.get('id')}/messages",
+        headers=headers,
+        data=json.dumps(send_message_body),
+    )
 
-    return {
-        "username": creds.get('username'),
-        "password": creds.get('password')
-    }
+    return {"username": creds.get("username"), "password": creds.get("password")}
 
 
 """
 API endpoint that re-runs the member verification workflow
 """
+
+
 @router.get("/refresh/")
 @Authentication.admin
-async def get_refresh(request: Request, token: Optional[str] = Cookie(None), member_id: Optional[str] = "FAIL"):
+async def get_refresh(
+    request: Request,
+    token: Optional[str] = Cookie(None),
+    member_id: Optional[str] = "FAIL",
+):
     if member_id == "FAIL":
-        return {
-            "data": {},
-            "error": "Missing ?member_id"
-        }
+        return {"data": {}, "error": "Missing ?member_id"}
 
     Approve.approve_member(member_id)
 
-    dynamodb = boto3.resource('dynamodb')
+    dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
-    data = table.get_item(
-        Key={
-            'id': member_id
-        }
-    ).get("Item", None)
+    data = table.get_item(Key={"id": member_id}).get("Item", None)
 
     if not data:
         return Errors.generate(request, 404, "User Not Found")
 
-    return {
-        "data": data
-    }
+    return {"data": data}
 
 
 """
 API endpoint that gets a specific user's data as JSON
 """
+
+
 @router.get("/get/")
 @Authentication.admin
-async def admin_get_single(request: Request, token: Optional[str] = Cookie(None), member_id: Optional[str] = "FAIL"):
+async def admin_get_single(
+    request: Request,
+    token: Optional[str] = Cookie(None),
+    member_id: Optional[str] = "FAIL",
+):
     if member_id == "FAIL":
-        return {
-            "data": {},
-            "error": "Missing ?member_id"
-        }
+        return {"data": {}, "error": "Missing ?member_id"}
 
-    dynamodb = boto3.resource('dynamodb')
+    dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
-    data = table.get_item(
-        Key={
-            'id': member_id
-        }
-    ).get("Item", None)
+    data = table.get_item(Key={"id": member_id}).get("Item", None)
 
     if not data:
         return Errors.generate(request, 404, "User Not Found")
 
-    return {
-        "data": data
-    }
+    return {"data": data}
 
 
 """
 API endpoint that modifies a given user's data
 """
+
+
 @router.post("/get/")
 @Authentication.admin
-async def admin_edit(request: Request, token: Optional[str] = Cookie(None), input_data: Optional[UserModelMutable] = {}):
-
+async def admin_edit(
+    request: Request,
+    token: Optional[str] = Cookie(None),
+    input_data: Optional[UserModelMutable] = {},
+):
     member_id = input_data.id
 
-    dynamodb = boto3.resource('dynamodb')
+    dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
-    old_data = table.get_item(
-        Key={
-            'id': member_id
-        }
-    ).get("Item", None)
+    old_data = table.get_item(Key={"id": member_id}).get("Item", None)
 
     if not old_data:
         return Errors.generate(request, 404, "User Not Found")
@@ -383,39 +390,38 @@ async def admin_edit(request: Request, token: Optional[str] = Cookie(None), inpu
     # 2. Get new data (pydantic-validated)
     # 3. Union the two
     # 4. Put back as one giant entry
-    
+
     table.put_item(Item=union)
 
-    return {
-        "data": union,
-        "msg": "Updated successfully!"
-    }
+    return {"data": union, "msg": "Updated successfully!"}
 
 
 """
 API endpoint that dumps all users as JSON.
 """
+
+
 @router.get("/list")
 @Authentication.admin
 async def admin_list(request: Request, token: Optional[str] = Cookie(None)):
-    dynamodb = boto3.resource('dynamodb')
+    dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
     data = table.scan().get("Items", None)
-    return {
-        "data": data
-    }
+    return {"data": data}
 
 
 """
 API endpoint that dumps all users as CSV.
 """
+
+
 @router.get("/csv")
 @Authentication.admin
 async def admin_list(request: Request, token: Optional[str] = Cookie(None)):
-    dynamodb = boto3.resource('dynamodb')
+    dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
     data = table.scan().get("Items", None)
-    
+
     output = "Membership ID, First Name, Last Name, NID, Is Returning, Gender, Major, Class Standing, Shirt Size, Discord Username, Experience, Cyber Interests, Event Interest, Is C3 Interest, Comments, Ethics Form Timestamp, Minecraft, Infra Email\n"
     for user in data:
         output += f'"{user.get("id")}", '
@@ -432,13 +438,11 @@ async def admin_list(request: Request, token: Optional[str] = Cookie(None)):
         output += f'"{user.get("curiosity")}", '
         output += f'"{user.get("attending")}", '
         output += f'"{user.get("c3_interest")}", '
-        
+
         output += f'"{user.get("comments")}", '
 
         output += f'"{user.get("ethics_form", {}).get("signtime")}", '
         output += f'"{user.get("minecraft")}", '
         output += f'"{user.get("infra_email")}"\n'
 
-    return Response(content=output, headers={
-        "Content-Type": "text/csv"
-    })
+    return Response(content=output, headers={"Content-Type": "text/csv"})
