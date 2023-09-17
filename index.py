@@ -225,8 +225,6 @@ async def oauth_transformer_new(
                 ExpressionAttributeValues={":discord_id": str(discordData["id"])},
             )
 
-
-
     is_new = False
     print(query_for_id)
 

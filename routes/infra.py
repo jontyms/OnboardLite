@@ -42,7 +42,7 @@ def get_shitty_database():
     """
     data = {}
     try:
-        with open('infra_options.json', 'r') as f:
+        with open("infra_options.json", "r") as f:
             data = json.loads(f.read())
     except Exception as e:
         print(e)
@@ -229,7 +229,7 @@ API endpoint to SET the one-click deploy settings.
 async def get_options(
     request: Request,
     token: Optional[str] = Cookie(None),
-    payload: Optional[object] = {}
+    payload: Optional[object] = {},
 ):
     return get_shitty_database()
 
@@ -249,7 +249,7 @@ async def set_options(
 ):
     shitty_database = {"gbmName": gbmName, "imageId": imageId}
 
-    with open('infra_options.json', 'w') as f:
+    with open("infra_options.json", "w") as f:
         f.write(json.dumps(shitty_database))
 
     return shitty_database

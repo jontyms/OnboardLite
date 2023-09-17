@@ -164,17 +164,17 @@ async def admin_get_snowflake(
 
     dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
-    data = table.scan(
-        FilterExpression=Attr("discord_id").eq(str(discord_id))
-    ).get("Items")
+    data = table.scan(FilterExpression=Attr("discord_id").eq(str(discord_id))).get(
+        "Items"
+    )
 
     print(data)
 
     if not data:
         # Try a legacy-user-ID search (deprecated, but still neccesary)
-        data = table.scan(
-            FilterExpression=Attr("discord_id").eq(int(discord_id))
-        ).get("Items")
+        data = table.scan(FilterExpression=Attr("discord_id").eq(int(discord_id))).get(
+            "Items"
+        )
         print(data)
 
         if not data:
