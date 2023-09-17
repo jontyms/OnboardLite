@@ -46,7 +46,7 @@ class MenteeModel(BaseModel):
 class UserModel(BaseModel):
     # Identifiers
     id: str
-    discord_id: int
+    discord_id: str
     ucf_id: Optional[int] = None
     nid: Optional[str] = None
     ops_email: Optional[str] = None
@@ -99,7 +99,7 @@ class UserModel(BaseModel):
 class UserModelMutable(BaseModel):
     # Identifiers
     id: str
-    discord_id: Optional[int]
+    discord_id: Optional[str]
     ucf_id: Optional[int]
     nid: Optional[str]
     ops_email: Optional[str]

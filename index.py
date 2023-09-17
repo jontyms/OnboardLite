@@ -205,10 +205,27 @@ async def oauth_transformer_new(
 
     # Generate a new user ID or reuse an existing one.
     query_for_id = table.scan(
-        FilterExpression=Attr("discord_id").eq(int(discordData["id"]))
+        FilterExpression=Attr("discord_id").eq(str(discordData["id"]))
     )
-
     query_for_id = query_for_id.get("Items")
+
+    # BACKPORT: I didn't realize that Snowflakes were strings because of an integer overflow bug.
+    # So this will do a query for the "mistaken" value and then fix its data.
+    if not query_for_id:
+        print("Beginning Discord ID attribute migration...")
+        query_for_id = table.scan(
+            FilterExpression=Attr("discord_id").eq(int(discordData["id"]))
+        )
+        query_for_id = query_for_id.get("Items")
+
+        if query_for_id:
+            table.update_item(
+                Key={"id": query_for_id[0].get("id")},
+                UpdateExpression="SET discord_id = :discord_id",
+                ExpressionAttributeValues={":discord_id": str(discordData["id"])},
+            )
+
+
 
     is_new = False
     print(query_for_id)

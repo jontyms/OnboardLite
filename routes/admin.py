@@ -148,6 +148,43 @@ async def admin_get_single(
     return {"data": data}
 
 
+@router.get("/get_by_snowflake/")
+@Authentication.admin
+async def admin_get_snowflake(
+    request: Request,
+    token: Optional[str] = Cookie(None),
+    discord_id: Optional[str] = "FAIL",
+):
+    """
+    API endpoint that gets a specific user's data as JSON, given a Discord snowflake.
+    Designed for trusted federated systems to exchange data.
+    """
+    if discord_id == "FAIL":
+        return {"data": {}, "error": "Missing ?discord_id"}
+
+    dynamodb = boto3.resource("dynamodb")
+    table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
+    data = table.scan(
+        FilterExpression=Attr("discord_id").eq(str(discord_id))
+    ).get("Items")
+
+    print(data)
+
+    if not data:
+        # Try a legacy-user-ID search (deprecated, but still neccesary)
+        data = table.scan(
+            FilterExpression=Attr("discord_id").eq(int(discord_id))
+        ).get("Items")
+        print(data)
+
+        if not data:
+            return Errors.generate(request, 404, "User Not Found")
+
+    data = data[0]
+
+    return {"data": data}
+
+
 @router.post("/message/")
 @Authentication.admin
 async def admin_post_discord_message(
