@@ -149,6 +149,8 @@ class Approve:
         ):
             print("\tNewly-promoted full member!")
 
+            discord_id = user_data.get("discord_id")
+
             # Create an Infra account.
             creds = Approve.provision_infra(
                 member_id, user_data=user_data
