@@ -306,6 +306,6 @@ Happy Hacking,
             """
 
     # Send Discord message
-    Discord.send_message(discord_id, new_creds_msg)
+    Discord.send_message(user_data.get("discord_id"), new_creds_msg)
 
     return {"username": creds.get("username"), "password": creds.get("password")}
