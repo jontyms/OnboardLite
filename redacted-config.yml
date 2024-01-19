@@ -1,0 +1,40 @@
+# Options for Onboard.
+jwt:
+    secret:
+    algorithm: "HS256"
+    lifetime:  # (in seconds)
+        user: 9072000  # 15 weeks
+        sudo: 86400    # 1 day
+
+http:
+    domain: join.hackucf.org
+
+infra:
+    wifi: ""
+    horizon: "https://horizon.hackucf.org"
+    ad:
+      username: "onboard-service"
+      password: 
+    tf_directory: "./"
+
+discord:
+    client_id: 
+    secret: 
+    redirect_base: "https://join.hackucf.org/api/oauth/?redir="
+    scope: "email identify guilds.join"
+    bot_token: 
+    guild_id: 
+    member_role: 
+
+
+stripe:
+    api_key: 
+    webhook_secret: 
+    price_id: 
+    url:
+        success: "https://join.hackucf.org/final/"
+        failure: "https://join.hackucf.org/pay/"
+
+aws:
+    dynamodb:
+        table: "hackucf_members"

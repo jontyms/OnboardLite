@@ -59,6 +59,10 @@
 
             {% if user_data.get('is_full_member', False) or user_data.get('infra_email', False) %}
                 <details>
+                    <summary><h2>OpenVPN Profile</h2></summary>
+                    <span>Download your OpenVPN Profile here. This will expire eventually. <a href="/infra/openvpn" download>Download link</a> </span>                
+                </details>
+                <details>
                     <summary><h2>Danger Zone</h2></summary>
                     <span>Need to reset your Hack@UCF Private Cloud account? Do so here. This <i>WILL</i> cause data loss!</span>
                     <button id="resetInfra" class="btn"><i class="fa-solid fa-trash"></i> Reset Infra Account</button>

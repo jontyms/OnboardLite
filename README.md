@@ -36,9 +36,9 @@ After=network.target
 [Service]
 User=ubuntu
 Group=www-data
-WorkingDirectory=/home/ubuntu/OnboardLite/
-Environment="PATH=/home/ubuntu/OnboardLite/"
-ExecStart=/home/ubuntu/.local/bin/uvicorn index:app --host 127.0.0.1 --port 8000 --workers 2
+WorkingDirectory=/home/onboard-user/OnboardLite/
+Environment="PATH=/home/onboard-user/OnboardLite/"
+ExecStart=/home/onboard-user/.local/bin/uvicorn index:app --host 127.0.0.1 --port 8000 --workers 2
 
 [Install]
 WantedBy=multi-user.target

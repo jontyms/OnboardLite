@@ -7,6 +7,7 @@ from fastapi import APIRouter, Cookie, Request, Response
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.encoders import jsonable_encoder
+from fastapi.responses import FileResponse
 
 from pydantic import validator, error_wrappers
 
@@ -309,3 +310,22 @@ Happy Hacking,
     Discord.send_message(user_data.get("discord_id"), new_creds_msg)
 
     return {"username": creds.get("username"), "password": creds.get("password")}
+
+
+"""
+An endpoint to Download OpenVPN profile
+"""
+
+
+@router.get("/openvpn")
+@Authentication.member
+async def download_file(
+    request: Request,
+    token: Optional[str] = Cookie(None),
+    payload: Optional[object] = {},
+):
+    # Replace 'path/to/your/file.txt' with the actual path to your file
+    file_path = "./HackUCF.ovpn"
+    return FileResponse(
+        file_path, filename="HackUCF.ovpn", media_type="application/octet-stream"
+    )
