@@ -309,9 +309,9 @@ Happy Hacking,
             """
 
     # Send Discord message
-    #Discord.send_message(user_data.get("discord_id"), new_creds_msg)
+    # Discord.send_message(user_data.get("discord_id"), new_creds_msg)
     # Send Email
-    Email.send_email("Reset Infra Credentials", new_creds_msg, user_data.get("email") )
+    Email.send_email("Reset Infra Credentials", new_creds_msg, user_data.get("email"))
 
     return {"username": creds.get("username"), "password": creds.get("password")}
 
