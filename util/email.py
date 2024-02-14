@@ -1,6 +1,7 @@
 import smtplib, ssl
 from email.mime.text import MIMEText
 from util.options import Options
+from subprocess import Popen, PIPE
 
 options = Options.fetch()
 
@@ -9,11 +10,6 @@ options = Options.fetch()
 options = Options.fetch()
 
 email = options.get("email", {}).get("email", {})
-password = options.get("email", {}).get("password", {})
-smtp_host = options.get("email", {}).get("smtp_server", {})
-print(email)
-print(password)
-print(smtp_host)
 
 
 class Email:
