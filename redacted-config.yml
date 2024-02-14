@@ -38,3 +38,8 @@ stripe:
 aws:
     dynamodb:
         table: "hackucf_members"
+
+email:
+    smtp_server: smtp.gmail.com
+    email: *****@hackucf.org
+    password: 
