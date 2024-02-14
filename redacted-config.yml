@@ -13,8 +13,8 @@ infra:
     wifi: ""
     horizon: "https://horizon.hackucf.org"
     ad:
-      username: "onboard-service"
-      password: 
+      application_credential_id: 
+      application_credential_secret: 
     tf_directory: "./"
 
 discord:
