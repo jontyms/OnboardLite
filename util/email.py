@@ -26,6 +26,5 @@ class Email:
         msg["From"] = email
         msg["To"] = recipient
         with smtplib.SMTP_SSL(smtp_host, 465) as smtp_server:
-            print(msg.as_string())
             smtp_server.login(email, password)
             smtp_server.sendmail(email, recipient, msg.as_string())
