@@ -7,6 +7,7 @@ from fastapi import APIRouter, Cookie, Request, Response
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.encoders import jsonable_encoder
+from fastapi.responses import FileResponse
 
 from pydantic import validator, error_wrappers
 
@@ -20,6 +21,8 @@ from util.errors import Errors
 from util.options import Options
 from util.approve import Approve
 from util.discord import Discord
+from util.email import Email
+
 from util.kennelish import Kennelish, Transformer
 
 from python_terraform import *
@@ -306,6 +309,27 @@ Happy Hacking,
             """
 
     # Send Discord message
-    Discord.send_message(user_data.get("discord_id"), new_creds_msg)
+    # Discord.send_message(user_data.get("discord_id"), new_creds_msg)
+    # Send Email
+    Email.send_email("Reset Infra Credentials", new_creds_msg, user_data.get("email"))
 
     return {"username": creds.get("username"), "password": creds.get("password")}
+
+
+"""
+An endpoint to Download OpenVPN profile
+"""
+
+
+@router.get("/openvpn")
+@Authentication.member
+async def download_file(
+    request: Request,
+    token: Optional[str] = Cookie(None),
+    payload: Optional[object] = {},
+):
+    # Replace 'path/to/your/file.txt' with the actual path to your file
+    file_path = "./HackUCF.ovpn"
+    return FileResponse(
+        file_path, filename="HackUCF.ovpn", media_type="application/octet-stream"
+    )

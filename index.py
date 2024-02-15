@@ -66,14 +66,12 @@ with open("clouds.yaml", "w", encoding="utf-8") as f:
   hackucf_infra:
     auth:
       auth_url: {options.get('infra', {}).get('horizon', '')}:5000
-      username: {options.get('infra', {}).get('ad', {}).get('username', '')}
-      password: {options.get('infra', {}).get('ad', {}).get('password', '')}
-      project_id: 464dc8d09d9a457cba2cd1efd737d538
-      project_name: "admin"
-      user_domain_name: "Default"
+      application_credential_id: {options.get('infra', {}).get('ad', {}).get('application_credential_id', '')}
+      application_credential_secret: {options.get('infra', {}).get('ad', {}).get('application_credential_secret', '')}
     region_name: "hack-ucf-0"
     interface: "public"
     identity_api_version: 3
+    auth_type: "v3applicationcredential"
 """
     )
 

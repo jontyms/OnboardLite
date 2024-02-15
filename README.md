@@ -23,8 +23,8 @@ python3 index.py
 - Create the webhook at the desired domain. Include the events `checkout.session.*`.
 - Create a product to represent dues payments in the dashboard. This should be $10 + $0.60 to account for Stripe fees.
 4. Request a configuration file with all the neccesary secrets/configurations for AWS, Stripe, Discord, and others.
-5. Install dependencies: `sudo apt install -y nginx certbot build-essential python3.8 python3.8-dev` (or later versions of python3). You may need to use [get-pip.py](https://bootstrap.pypa.io/get-pip.py) to install `pip3.8` as well.
-6. Install Python dependencies: `python3.8 -m pip install -r requirements.txt` 
+5. Install dependencies: `sudo apt install -y nginx certbot build-essential python3.11 python3.11-dev` (or later versions of python3). You may need to use [get-pip.py](https://bootstrap.pypa.io/get-pip.py) to install `pip3.11` as well.
+6. Install Python dependencies: `python3.11 -m pip install -r requirements.txt` 
 7. Configure `nginx` (recommended) to proxy to port 80/443 + enable HTTPS. Set headers like `Content-Security-Policy`.
 - If you use nginx, PLEASE use HTTPS (if you can; Cloudflare will probably disagree and want to use its own cert).
 8. Drop the following `systemd` service, replacing values as appropiate:
@@ -36,9 +36,9 @@ After=network.target
 [Service]
 User=ubuntu
 Group=www-data
-WorkingDirectory=/home/ubuntu/OnboardLite/
-Environment="PATH=/home/ubuntu/OnboardLite/"
-ExecStart=/home/ubuntu/.local/bin/uvicorn index:app --host 127.0.0.1 --port 8000 --workers 2
+WorkingDirectory=/home/onboard-user/OnboardLite/
+Environment="PATH=/home/onboard-user/OnboardLite/"
+ExecStart=/home/onboard-user/.local/bin/uvicorn index:app --host 127.0.0.1 --port 8000 --workers 2
 
 [Install]
 WantedBy=multi-user.target
@@ -81,3 +81,11 @@ Administrators are classified as trusted Operations members and are *not* the sa
 ## Security Concerns
 
 Please report security vulnerabilities to `execs@hackucf.org`.
+
+
+## Discord 
+add redirect for http://localhost:8000/api/oauth/?redir=_redir
+
+
+## Teraform
+Run teraform init
