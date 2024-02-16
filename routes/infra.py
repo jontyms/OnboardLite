@@ -297,7 +297,7 @@ You have requested to reset your Hack@UCF Infrastructure credentials. This chang
 
 A reminder that you can use these credentials at {options.get('infra', {}).get('horizon')} while on the CyberLab WiFi.
 
-```yaml
+```
 Username: {creds.get('username', 'Not Set')}
 Password: {creds.get('password', f"Please visit https://{options.get('http', {}).get('domain')}/profile and under Danger Zone, reset your Infra creds.")}
 ```
@@ -305,7 +305,8 @@ Password: {creds.get('password', f"Please visit https://{options.get('http', {})
 The password for the `Cyberlab` WiFi is currently `{options.get('infra', {}).get('wifi')}`, but this is subject to change (and we'll let you know when that happens).
 
 Happy Hacking,
-  - Hack@UCF Bot
+
+ - Hack@UCF Bot
             """
 
     # Send Discord message
