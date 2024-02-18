@@ -266,6 +266,7 @@ function logoff() {
 window.onload = (evt) => {
     if (document.getElementById("resetInfra")) {
         document.getElementById("resetInfra").onclick = evt => {
+            document.getElementById("resetInfra").disabled = true;
             resetInfra();
         }
     }
