@@ -11,7 +11,7 @@ from fastapi import Depends, FastAPI, HTTPException, status, Request, Response, 
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, FileResponse
 from pydantic import BaseModel
 
 from jose import JWTError, jwt
@@ -400,6 +400,10 @@ async def logout(request: Request):
     rr = RedirectResponse("/", status_code=status.HTTP_302_FOUND)
     rr.delete_cookie(key="token")
     return rr
+
+@app.get('/favicon.ico', include_in_schema=False)
+async def favicon():
+    return FileResponse("./static/favicon.ico")
 
 
 if __name__ == "__main__":
