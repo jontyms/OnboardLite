@@ -43,3 +43,8 @@ email:
     smtp_server: smtp.gmail.com
     email: *****@hackucf.org
     password: 
+
+redis:   
+    host: "localhost"
+    port: 6379
+    db: 0

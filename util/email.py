@@ -13,9 +13,10 @@ options = Options.fetch()
 
 email = options.get("email", {}).get("email", {})
 
-email = options.get('email', {}).get('email', {})
-password = options.get('email', {}).get('password', {})
-smtp_host = options.get('email', {}).get('smtp_server', {})
+email = options.get("email", {}).get("email", {})
+password = options.get("email", {}).get("password", {})
+smtp_host = options.get("email", {}).get("smtp_server", {})
+
 
 class Email:
     """
