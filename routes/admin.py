@@ -19,6 +19,8 @@ from util.errors import Errors
 from util.options import Options
 from util.approve import Approve
 from util.discord import Discord
+from util.email import Email
+
 from util.kennelish import Kennelish, Transformer
 
 options = Options.fetch()
@@ -83,10 +85,12 @@ We are happy to grant you Hack@UCF Private Cloud access!
 
 These credentials can be used to the Hack@UCF Private Cloud. This can be accessed at {options.get('infra', {}).get('horizon')} while on the CyberLab WiFi.
 
-```yaml
+```
 Username: {creds.get('username', 'Not Set')}
 Password: {creds.get('password', f"Please visit https://{options.get('http', {}).get('domain')}/profile and under Danger Zone, reset your Infra creds.")}
 ```
+
+By using the Hack@UCF Infrastructure, you agree to the following EULA located at https://help.hackucf.org/misc/eula
 
 The password for the `Cyberlab` WiFi is currently `{options.get('infra', {}).get('wifi')}`, but this is subject to change (and we'll let you know when that happens).
 
@@ -95,8 +99,8 @@ Happy Hacking,
             """
 
     # Send Discord message
-    Discord.send_message(user_data.get("discord_id"), new_creds_msg)
-
+    #Discord.send_message(user_data.get("discord_id"), new_creds_msg)
+    Email.send_email("Hack@UCF Private Cloud Credentials", new_creds_msg, user_data.get("email"))
     return {"username": creds.get("username"), "password": creds.get("password")}
 
 
