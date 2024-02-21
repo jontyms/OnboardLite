@@ -12,6 +12,7 @@ import openstack
 from util.horsepass import HorsePass
 from util.options import Options
 from util.discord import Discord
+from util.email import Email
 
 options = Options.fetch()
 tf = Terraform(working_dir=options.get("infra", {}).get("tf_directory", "./"))
@@ -189,7 +190,7 @@ Happy Hacking,
             """
 
             Discord.send_message(discord_id, welcome_msg)
-
+            Email.send_email("Welcome to Hack@UCF", welcome_msg, user_data.get("email"))
             # Set member as a "full" member.
             table.update_item(
                 Key={"id": member_id},
