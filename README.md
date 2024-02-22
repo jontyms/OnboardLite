@@ -27,7 +27,8 @@ python3 index.py
 6. Install Python dependencies: `python3.11 -m pip install -r requirements.txt` 
 7. Configure `nginx` (recommended) to proxy to port 80/443 + enable HTTPS. Set headers like `Content-Security-Policy`.
 - If you use nginx, PLEASE use HTTPS (if you can; Cloudflare will probably disagree and want to use its own cert).
-8. Drop the following `systemd` service, replacing values as appropiate:
+8. Install redis ``sudo apt install redis``
+9. Drop the following `systemd` service, replacing values as appropiate:
 ```conf
 [Unit]
 Description=Uvicorn instance to serve OnboardLite
@@ -63,10 +64,10 @@ server {
         }
 }
 ```
-9. Start and enable the service using `systemctl`. Do the same for `nginx` if installed.
-10. Put the service behind Cloudflare (optional).
-11. Generate the Apple Wallet secrets and place them in `config/pki`. See [this tutorial](https://github.com/alexandercerutti/passkit-generator/wiki/Generating-Certificates) for details.
-12. Profit!
+11. Start and enable the service using `systemctl`. Do the same for `nginx` if installed.
+12. Put the service behind Cloudflare (optional).
+13. Generate the Apple Wallet secrets and place them in `config/pki`. See [this tutorial](https://github.com/alexandercerutti/passkit-generator/wiki/Generating-Certificates) for details.
+14. Profit!
 
 ## Editing Form Data
 
