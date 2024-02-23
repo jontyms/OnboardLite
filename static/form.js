@@ -227,19 +227,30 @@ function submit_and_nav(target_url) {
 }
 
 function resetInfra() {
-    fetch("/infra/reset").then(data => {
-        return data.json();
-    }).then(resp => {
-        // Update user data.
-        alert(`Your account has been RESET. Your new credentials are below (and sent to your Discord):
-
-Username: ${resp.username}
-Password: ${resp.password}`);
-
-        userDict[user_id].infra_email = resp.username;
-        showUser(user_id);
-    })
+var confirmation = confirm("Are you sure you want to delete your account? If you don't have an account this will create one. If you just need a password reset create a thread in #infra-helpdesk on Discord. THIS WILL DELETE ALL THE DATA ASSOCIATED WITH YOUR ACCOUNT.");
+    if (!confirmation) {
+        // If the user clicked Cancel, stop the function
+        return;
+    }
+    fetch("/infra/reset")
+        .then(response => {
+            if (response.status === 429) {
+                alert("You have reset your account this week already. If this is in error or you need more support create a thread in #infra-helpdesk on Discord.");
+                return;
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data) {
+                const { user_id, user_password } = data;
+                alert(`
+                You have reset your infra credentials. These should have been emailed to you. If you did not receive an email, please create a thread in #infra-helpdesk on Discord.\n
+                Username: ${user_id}\n
+                Password: ${user_password}`);
+            }
+        });
 }
+
 function downloadProfile() {
     const downloadEndpoint = '/infra/OpenVPN';
     const anchor = document.createElement('a');

@@ -3,7 +3,7 @@ from boto3.dynamodb.conditions import Key, Attr
 
 from jose import JWTError, jwt
 
-from fastapi import APIRouter, Cookie, Request, Response
+from fastapi import APIRouter, Cookie, Request, Response, HTTPException, status
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.encoders import jsonable_encoder
@@ -22,7 +22,8 @@ from util.options import Options
 from util.approve import Approve
 from util.discord import Discord
 from util.email import Email
-
+from util.limiter import RateLimiter
+import util.limiter as limiter
 from util.kennelish import Kennelish, Transformer
 
 from python_terraform import *
@@ -36,6 +37,14 @@ templates = Jinja2Templates(directory="templates")
 router = APIRouter(prefix="/infra", tags=["Infra"], responses=Errors.basic_http())
 
 tf = Terraform(working_dir="./")
+
+rate_limiter = RateLimiter(
+    options.get("redis").get("host"),
+    options.get("redis").get("port"),
+    options.get("redis").get("db"),
+)
+
+rate_limiter.get_redis()
 
 
 def get_shitty_database():
@@ -265,6 +274,7 @@ API endpoint to self-service reset Infra credentials (membership-validating)
 
 @router.get("/reset/")
 @Authentication.member
+@rate_limiter.rate_limit(1, 604800, "reset")
 async def get_infra(
     request: Request,
     token: Optional[str] = Cookie(None),
@@ -326,6 +336,7 @@ An endpoint to Download OpenVPN profile
 
 @router.get("/openvpn")
 @Authentication.member
+@rate_limiter.rate_limit(2, 18000, "ovpn")
 async def download_file(
     request: Request,
     token: Optional[str] = Cookie(None),

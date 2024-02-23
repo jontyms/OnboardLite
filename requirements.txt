@@ -18,3 +18,4 @@ pyopenssl==22.1.0
 black==23.9.1
 jinja2
 commonmark
+redis
