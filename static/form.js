@@ -227,7 +227,7 @@ function submit_and_nav(target_url) {
 }
 
 function resetInfra() {
-var confirmation = confirm("Are you sure you want to delete your account? If you don't have an account this will create one. If you just need a password reset create a thread in #infra-helpdesk on Discord. THIS WILL DELETE ALL THE DATA ASSOCIATED WITH YOUR ACCOUNT.");
+var confirmation = confirm("Are you sure you want to delete your account? If you just need a password reset create a thread in #infra-helpdesk on Discord. THIS WILL DELETE ALL THE DATA ASSOCIATED WITH YOUR ACCOUNT.");
     if (!confirmation) {
         // If the user clicked Cancel, stop the function
         return;

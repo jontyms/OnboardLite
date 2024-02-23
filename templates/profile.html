@@ -59,19 +59,19 @@
             <a class="btn" href="#logoff" onclick="logoff()"><i class="fa-solid fa-key"></i> Log Out</a>
 
             {% if user_data.get('is_full_member', False) or user_data.get('infra_email', False) %}
-            <div class="infra_modal">
-             <h3>Infra EULA</h3>
-                <p>By using the Hack@UCF Private Cloud, you agree to the following EULA <a href="https://help.hackucf.org/misc/eula">Located here</a> </p>
+            <h2>Infra Settings</h2>
+            <p> By accessing the Hack@UCF private cloud platform you agree to the EULA located <a href="https://help.hackucf.org/misc/eula">here.</a> </p>
                 <details>
                     <summary><h2>OpenVPN Profile</h2></summary>
-                    <span>Download your OpenVPN Profile here. This will expire eventually. <a href="/infra/openvpn" download>Download link</a> </span>                
+                    <span> <p>Download your OpenVPN Profile here. This will expire eventually. </p>  
+                        <button href="/infra/openvpn" class="btn"><i class="fa-solid fa-download"></i> Download VPN</button>     
+                    </span>        
                 </details>
                 <details>
                     <summary><h2>Danger Zone</h2></summary>
-                    <span>Need to reset your Hack@UCF Private Cloud account? Do so here. This <i>WILL</i> cause data loss! If you just need a password reset create in thread in #infra-helpdesk.</span>
+                    <span><p>Need to reset your Hack@UCF Private Cloud account? Do so here. This <i>WILL</i> cause data loss! If you just need a password reset create in thread in #infra-helpdesk.</p></span>
                     <button id="resetInfra" class="btn"><i class="fa-solid fa-trash"></i> Reset Infra Account</button>
-                </details>
-            </div>  
+                </details>  
             {% endif %}
 
             <h1>Your Personal Information</h1>
