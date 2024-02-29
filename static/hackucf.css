@@ -471,3 +471,8 @@ td.nid:hover, td.email:hover {
     color:  #1C1C1C; 
     cursor: not-allowed; 
 }
+
+#membership_id {
+    -webkit-user-select: all; 
+    user-select: all
+}
