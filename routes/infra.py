@@ -336,7 +336,7 @@ An endpoint to Download OpenVPN profile
 
 @router.get("/openvpn")
 @Authentication.member
-@rate_limiter.rate_limit(2, 18000, "ovpn")
+@rate_limiter.rate_limit(5, 60, "ovpn")
 async def download_file(
     request: Request,
     token: Optional[str] = Cookie(None),
