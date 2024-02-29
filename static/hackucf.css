@@ -474,5 +474,5 @@ td.nid:hover, td.email:hover {
 
 #membership_id {
     -webkit-user-select: all; 
-    user-select: all
+    user-select: all;
 }
