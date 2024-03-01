@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, user-scalable=0">
+
+    <title>Mass Verify -Hack@UCF </title>
+    <link rel="stylesheet" type="text/css" href="/static/hackucf.css">
+    <link rel="icon" href="/static/favicon.svg">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@900&family=Roboto:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap" rel="stylesheet">
+
+    <!-- QR Code library -->
+    <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+
+    <!-- Font Awesome -->
+    <link href="https://use.fontawesome.com/releases/v6.1.1/css/all.css" rel="stylesheet">
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
+</head>
+
+<body>
+    <h1>Mass Verify</h1>
+    <p>Upload a CSV file to verify multiple members at once. 
+        <ol>
+            <li> Upload csv </li>
+            <li> Select the column with member id </li>
+            <li> Click Process</li>
+            <li>Download the results</li>
+        </ol>
+    </p>    
+    <div>
+        <input class="btn searchbtn" type="file" id="csvFile" accept=".csv">
+    </div>
+    <div>
+        <select id="columnDropdown">
+            <option value="column1">Column 1</option>
+            <option value="column2">Column 2</option>
+            <option value="column3">Column 3</option>
+        </select>
+    </div>
+    <div>
+        <button class="btn searchbtn" onclick="processData()" id="processButton">Process</button>
+    </div>
+    <div>
+        <button class="btn searchbtn" onclick="downloadCSV()" id="processButton">Download Results</button>
+    </div>
+<div class="hide_default" id="results">
+    <h2>Results</h2>
+    <div id="userTable">
+    </div>
+    <h2>Not Found</h2>
+    <div id="notFoundTable">
+    </div>
+</div>
+
+    <script type="text/javascript" src="/static/mass-verify.js"></script>
+</body>
+</html>

@@ -421,11 +421,22 @@ video {
 td.nid, td.email {
     filter: blur(5px);
     transition: filter 0.15s ease-in-out;
+    -webkit-user-select: all; 
+    user-select: all;
 }
 
 td.nid:hover, td.email:hover {
     filter: blur(0px);
 }
+
+td.id-truncate {
+    max-width: 10ch;
+    white-space: nowrap;
+    overflow: hidden;
+    -webkit-user-select: all; 
+    user-select: all;
+}
+
 
 .center {
     display: block;
