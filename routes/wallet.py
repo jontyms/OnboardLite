@@ -1,25 +1,18 @@
 import json
-import requests
 import os
 import uuid
+from typing import Optional
 
 import boto3
-from botocore.exceptions import ClientError
-
+import requests
+from airpress import PKPass
 from fastapi import APIRouter, Cookie, Request, Response
-from fastapi.responses import HTMLResponse
 
-from pydantic import validator, error_wrappers
-
-from typing import Optional
-from models.user import PublicContact
 from models.info import InfoModel
-
+from models.user import PublicContact
 from util.authentication import Authentication
 from util.errors import Errors
 from util.options import Options
-
-from airpress import PKPass
 
 options = Options.fetch()
 

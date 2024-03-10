@@ -1,22 +1,16 @@
-import boto3
-from boto3.dynamodb.conditions import Key, Attr
+from typing import Optional
 
-from fastapi import APIRouter, Cookie, Request, HTTPException, Header
-from fastapi.responses import HTMLResponse, RedirectResponse
+import boto3
+import stripe
+from boto3.dynamodb.conditions import Attr
+from fastapi import APIRouter, Cookie, HTTPException, Request
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from pydantic import validator, error_wrappers
-
-from typing import Optional, Union
-from models.user import PublicContact
-from models.info import InfoModel
-
+from util.approve import Approve
 from util.authentication import Authentication
 from util.errors import Errors
 from util.options import Options
-from util.approve import Approve
-
-import stripe
 
 options = Options.fetch()
 templates = Jinja2Templates(directory="templates")

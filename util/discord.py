@@ -1,4 +1,5 @@
 import json
+
 import requests
 
 from util.options import Options
@@ -36,7 +37,7 @@ class Discord:
         # Get DM channel ID.
         get_channel_id_body = {"recipient_id": discord_id}
         req = requests.post(
-            f"https://discord.com/api/users/@me/channels",
+            "https://discord.com/api/users/@me/channels",
             headers=headers,
             data=json.dumps(get_channel_id_body),
         )

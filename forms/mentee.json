@@ -101,7 +101,7 @@
                 "key": "mentee.hope_to_gain",
                 "required": true
             },
-            
+
             {
                 "input": "navigation",
                 "next": "/join/signed",

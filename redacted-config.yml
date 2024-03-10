@@ -13,24 +13,24 @@ infra:
     wifi: ""
     horizon: "https://horizon.hackucf.org"
     ad:
-      application_credential_id: 
-      application_credential_secret: 
+      application_credential_id:
+      application_credential_secret:
     tf_directory: "./"
 
 discord:
-    client_id: 
-    secret: 
+    client_id:
+    secret:
     redirect_base: "https://join.hackucf.org/api/oauth/?redir="
     scope: "email identify guilds.join"
-    bot_token: 
-    guild_id: 
-    member_role: 
+    bot_token:
+    guild_id:
+    member_role:
 
 
 stripe:
-    api_key: 
-    webhook_secret: 
-    price_id: 
+    api_key:
+    webhook_secret:
+    price_id:
     url:
         success: "https://join.hackucf.org/final/"
         failure: "https://join.hackucf.org/pay/"
@@ -42,9 +42,9 @@ aws:
 email:
     smtp_server: smtp.gmail.com
     email: *****@hackucf.org
-    password: 
+    password:
 
-redis:   
+redis:
     host: "localhost"
     port: 6379
     db: 0

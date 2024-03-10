@@ -1,13 +1,13 @@
 variable "username" {
-  
+
 }
 
 variable "password" {
-  
+
 }
 
 variable "tenant_name" {
-  
+
 }
 
 variable "gbmname" {
@@ -19,5 +19,5 @@ variable "imageid" {
 }
 
 variable "member_username" {
-  
+
 }

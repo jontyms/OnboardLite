@@ -1,5 +1,6 @@
-from typing import Literal, Set
-from pydantic import BaseModel, create_model, constr
+from typing import Literal
+
+from pydantic import constr, create_model
 
 
 # Known bug: You cannot pre-fill data stored in second-level DynamoDB levels.
@@ -80,7 +81,7 @@ class Kennelish:
             else:
                 prefill = user_data.get(key, "")
 
-            if prefill == None:
+            if prefill is None:
                 prefill = ""
         else:
             prefill = ""
@@ -205,7 +206,7 @@ class Transformer:
     def kennelish_to_form(json):
         obj = {}
 
-        if json == None:
+        if json is None:
             return {}
 
         for el in json:
@@ -245,7 +246,7 @@ class Transformer:
                 obj[el.get("key")] = (int, None)
 
             # For arbitrary strings.
-            elif el.get("key") != None:
+            elif el.get("key") is not None:
                 obj[el.get("key")] = (str, None)
 
         return obj

@@ -1,9 +1,10 @@
-import smtplib, ssl
-from email.mime.text import MIMEText
+import smtplib
 from email.mime.multipart import MIMEMultipart
-from util.options import Options
-from subprocess import Popen, PIPE
+from email.mime.text import MIMEText
+
 import commonmark
+
+from util.options import Options
 
 options = Options.fetch()
 

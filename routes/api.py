@@ -1,19 +1,18 @@
+import json
+from typing import Optional
+
 import boto3
 from botocore.exceptions import ClientError
-
 from fastapi import APIRouter, Cookie, Request
 from fastapi.responses import HTMLResponse
+from pydantic import error_wrappers
 
-from pydantic import validator, error_wrappers
-
-from typing import Optional
-from models.user import PublicContact
 from models.info import InfoModel
-
+from models.user import PublicContact
 from util.authentication import Authentication
 from util.errors import Errors
-from util.options import Options
 from util.kennelish import Kennelish, Transformer
+from util.options import Options
 
 options = Options.fetch()
 
@@ -99,19 +98,19 @@ async def post_form(
 
     try:
         inp = await request.json()
-    except:
+    except json.JSONDecodeError:
         return {"description": "Malformed JSON input."}
 
     try:
         validated = model(**inp)
-    except error_wrappers.ValidationError as e:
+    except error_wrappers.ValidationError:
         return {"description": "Malformed input."}
 
     # Remove items we did not update
     items_to_update = list(validated.dict().items())
     items_to_keep = []
     for item in items_to_update:
-        if item[1] != None:
+        if item[1] is not None:
             # English -> Boolean
             if item[1] == "Yes" or item[1] == "I promise not to do this.":
                 item = (item[0], True)

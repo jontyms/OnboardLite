@@ -6,6 +6,7 @@ requests_oauthlib
 gspread
 boto3
 botocore
+pre-commit
 stripe
 uvicorn[standard]
 passwordgenerator

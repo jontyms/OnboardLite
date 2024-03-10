@@ -14,7 +14,7 @@ provider "openstack" {
     region      = "hack-ucf-0"
 }
 
-# Creating networks 
+# Creating networks
 
 resource "openstack_networking_network_v2" "gbm_net" {
     name = "${var.member_username}-${var.gbmname}-gbm-network"

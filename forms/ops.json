@@ -15,7 +15,7 @@
                 "key": "ops_email",
                 "required": true
             },
-            
+
             {
                 "input": "navigation",
                 "next": "/join/signed",

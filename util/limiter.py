@@ -1,13 +1,8 @@
-import redis
 import time
 from functools import wraps
-from pydantic import validator, error_wrappers
-from typing import Optional
-from fastapi import APIRouter, Cookie, Request, Response, HTTPException, status
-from typing import Optional
-from fastapi import Request, HTTPException, status
+
 import redis
-from fastapi import HTTPException, status
+from fastapi import HTTPException, Request, status
 
 
 class RateLimiter:

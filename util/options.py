@@ -1,5 +1,6 @@
 import json
 import os
+
 import yaml
 
 
@@ -17,8 +18,8 @@ class Options:
 
         return options
 
-    def get(arg=None):
-        options = this.fetch()
+    def get(self, arg=None):
+        options = self.fetch()
 
         return options.get(arg, None)
 

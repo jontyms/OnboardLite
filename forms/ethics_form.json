@@ -2,7 +2,7 @@
     {
         "label": "Your Information",
         "input": "h1",
-        "elements": [ 
+        "elements": [
             {
                 "label": "First Name",
                 "caption": "Your (preferred) first name.",
@@ -96,7 +96,7 @@
                 "input": "signature",
                 "key": "ethics_form.signtime"
             },
-            
+
             {
                 "input": "navigation",
                 "next": "/join/signed",

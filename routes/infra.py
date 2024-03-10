@@ -1,34 +1,24 @@
-import boto3, json, requests
-from boto3.dynamodb.conditions import Key, Attr
-
-from jose import JWTError, jwt
-
-from fastapi import APIRouter, Cookie, Request, Response, HTTPException, status
-from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import FileResponse
-
-from pydantic import validator, error_wrappers
-
+import asyncio
+import json
+import os
 from typing import Optional
-from models.user import UserModelMutable
+
+import boto3
+import openstack
+from fastapi import APIRouter, Cookie, Request
+from fastapi.responses import FileResponse
+from fastapi.templating import Jinja2Templates
+from python_terraform import Terraform
+
 from models.info import InfoModel
 from models.user import PublicContact
-
-from util.authentication import Authentication
-from util.errors import Errors
-from util.options import Options
 from util.approve import Approve
+from util.authentication import Authentication
 from util.discord import Discord
 from util.email import Email
+from util.errors import Errors
 from util.limiter import RateLimiter
-import util.limiter as limiter
-from util.kennelish import Kennelish, Transformer
-
-from python_terraform import *
-import openstack
-import asyncio
+from util.options import Options
 
 options = Options.fetch()
 
@@ -86,12 +76,12 @@ async def create_resource(project, callback_discord_id=None):
     # clean up
     try:
         os.remove("terraform.tfstate")
-    except Exception as e:
+    except Exception:
         pass
 
     try:
         os.remove("terraform.tfstate.backup")
-    except Exception as e:
+    except Exception:
         pass
 
     if callback_discord_id:
@@ -142,7 +132,7 @@ async def teardown():
                     conn.network.delete_port(port_id)
                 try:
                     conn.network.delete_router(resource)
-                except:
+                except: # noqa
                     print("\t\t\t\tFailed and gave up.")
 
     print("\tNetworks...")
@@ -158,11 +148,11 @@ async def teardown():
                     print(f"\t\t\tdelete port: {port_id}")
                     try:
                         conn.network.delete_port(port_id)
-                    except:
+                    except: # noqa
                         pass
                 try:
                     conn.network.delete_network(resource)
-                except:
+                except: #noqa
                     print("\t\t\t\tFailed and gave up.")
     print("\tDone!")
 

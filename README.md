@@ -24,7 +24,7 @@ python3 index.py
 - Create a product to represent dues payments in the dashboard. This should be $10 + $0.60 to account for Stripe fees.
 4. Request a configuration file with all the neccesary secrets/configurations for AWS, Stripe, Discord, and others.
 5. Install dependencies: `sudo apt install -y nginx certbot build-essential python3.11 python3.11-dev` (or later versions of python3). You may need to use [get-pip.py](https://bootstrap.pypa.io/get-pip.py) to install `pip3.11` as well.
-6. Install Python dependencies: `python3.11 -m pip install -r requirements.txt` 
+6. Install Python dependencies: `python3.11 -m pip install -r requirements.txt`
 7. Configure `nginx` (recommended) to proxy to port 80/443 + enable HTTPS. Set headers like `Content-Security-Policy`.
 - If you use nginx, PLEASE use HTTPS (if you can; Cloudflare will probably disagree and want to use its own cert).
 8. Install redis ``sudo apt install redis``
@@ -84,7 +84,7 @@ Administrators are classified as trusted Operations members and are *not* the sa
 Please report security vulnerabilities to `execs@hackucf.org`.
 
 
-## Discord 
+## Discord
 add redirect for http://localhost:8000/api/oauth/?redir=_redir
 
 

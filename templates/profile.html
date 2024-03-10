@@ -63,17 +63,17 @@
             <p> By accessing the Hack@UCF private cloud platform you agree to the EULA located <a href="https://help.hackucf.org/misc/eula">here.</a> </p>
                 <details>
                     <summary><h2>OpenVPN Profile</h2></summary>
-                    <span> <p>Download your OpenVPN Profile here. This will expire eventually. </p>  
+                    <span> <p>Download your OpenVPN Profile here. This will expire eventually. </p>
                         <a href="/infra/openvpn" download="hackucf.ovpn">
-                        <button class="btn"><i class="fa-solid fa-download"></i> Download VPN</button>    
-                        </a> 
-                    </span>        
+                        <button class="btn"><i class="fa-solid fa-download"></i> Download VPN</button>
+                        </a>
+                    </span>
                 </details>
                 <details>
                     <summary><h2>Danger Zone</h2></summary>
                     <span><p>Need to reset your Hack@UCF Private Cloud account? Do so here. This <i>WILL</i> cause data loss! If you just need a password reset create in thread in #infra-helpdesk.</p></span>
                     <button id="resetInfra" class="btn"><i class="fa-solid fa-trash"></i> Reset Infra Account</button>
-                </details>  
+                </details>
             {% endif %}
 
             <h1>Your Personal Information</h1>
@@ -197,7 +197,7 @@
                 <div>{{ user_data.get('experience', 'Unknown') }}</div>
             </div>
         </div>
-        
+
         <details>
             <summary>See Machine-Readable Data (Advanced)</summary>
             <code>{{user_data}}</code>

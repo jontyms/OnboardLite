@@ -1,18 +1,13 @@
-import json
 import os
-import datetime
 
 import boto3
-import requests
-from python_terraform import *
-from boto3.dynamodb.conditions import Key, Attr
-import yaml
 import openstack
+from python_terraform import Terraform
 
-from util.horsepass import HorsePass
-from util.options import Options
 from util.discord import Discord
 from util.email import Email
+from util.horsepass import HorsePass
+from util.options import Options
 
 options = Options.fetch()
 tf = Terraform(working_dir=options.get("infra", {}).get("tf_directory", "./"))
@@ -35,12 +30,12 @@ class Approve:
 
         try:
             os.remove("terraform.tfstate")
-        except Exception as e:
+        except Exception:
             pass
 
         try:
             os.remove("terraform.tfstate.backup")
-        except Exception as e:
+        except Exception:
             pass
 
         try:
@@ -89,7 +84,7 @@ class Approve:
                     name=member_id,
                     description="Automatically provisioning with Hack@UCF Onboard",
                 )
-            except openstack.exceptions.ConflictException as e:
+            except openstack.exceptions.ConflictException:
                 # This happens sometimes.
                 new_proj = conn.identity.find_project("member_id")
 
@@ -156,7 +151,7 @@ class Approve:
             creds = Approve.provision_infra(
                 member_id, user_data=user_data
             )  # TODO(err): sometimes this is None
-            if creds == None:
+            if creds is None:
                 creds = {}
 
             # Minecraft server

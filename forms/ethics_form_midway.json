@@ -70,7 +70,7 @@
                 "input": "signature",
                 "key": "ethics_form.signtime"
             },
-            
+
             {
                 "input": "navigation",
                 "next": "/pay",

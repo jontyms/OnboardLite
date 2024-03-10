@@ -1,51 +1,40 @@
-import json, re, uuid
+import json
 import os
-import requests
-
-from datetime import datetime, timedelta
 import time
-from typing import Optional, Union
-
-# FastAPI
-from fastapi import Depends, FastAPI, HTTPException, status, Request, Response, Cookie
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse, FileResponse
-from pydantic import BaseModel
-
-from jose import JWTError, jwt
+import uuid
+from typing import Optional
 from urllib.parse import urlparse
-from requests_oauthlib import OAuth2Session
 
 import boto3
-from boto3.dynamodb.conditions import Key, Attr
-
-# Import the page rendering library
-from util.kennelish import Kennelish
-
-# Import middleware
-from util.authentication import Authentication
-
-# Import error handling
-from util.errors import Errors
-from util.approve import Approve
-
-# Import options
-from util.options import Options
-
-options = Options.fetch()
+import requests
+from boto3.dynamodb.conditions import Attr
+# FastAPI
+from fastapi import Cookie, FastAPI, Request, Response, status
+from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from jose import jwt
+from requests_oauthlib import OAuth2Session
 
 # Import data types
 from models.user import UserModel
-
 # Import routes
-from routes import api, stripe, admin, wallet, infra
+from routes import admin, api, infra, stripe, wallet
+from util.approve import Approve
+# Import middleware
+from util.authentication import Authentication
+# Import error handling
+from util.errors import Errors
+# Import the page rendering library
+from util.kennelish import Kennelish
+# Import options
+from util.options import Options
 
 ### TODO: TEMP
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "0"
 ###
 
+options = Options.fetch()
 
 # Initiate FastAPI.
 app = FastAPI()
@@ -247,7 +236,7 @@ async def oauth_transformer_new(
             "X-Audit-Log-Reason": "Hack@UCF OnboardLite Bot",
         }
         put_join_guild = {"access_token": token["access_token"]}
-        req = requests.put(
+        requests.put(
             f"https://discordapp.com/api/guilds/{options.get('discord', {}).get('guild_id')}/members/{discord_id}",
             headers=headers,
             data=json.dumps(put_join_guild),
@@ -316,7 +305,7 @@ Renders the landing page for the sign-up flow.
 
 @app.get("/join/")
 async def join(request: Request, token: Optional[str] = Cookie(None)):
-    if token == None:
+    if token is None:
         return templates.TemplateResponse("signup.html", {"request": request})
     else:
         return RedirectResponse("/join/2/", status_code=status.HTTP_302_FOUND)
