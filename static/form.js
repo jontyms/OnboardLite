@@ -242,11 +242,11 @@ var confirmation = confirm("Are you sure you want to delete your account? If you
         })
         .then(data => {
             if (data) {
-                const { user_id, user_password } = data;
+                const { username, password } = data;
                 alert(`
                 You have reset your infra credentials. These should have been emailed to you. If you did not receive an email, please create a thread in #infra-helpdesk on Discord.\n
-                Username: ${user_id}\n
-                Password: ${user_password}`);
+                Username: ${username}\n
+                Password: ${password}`);
             }
         });
 }
