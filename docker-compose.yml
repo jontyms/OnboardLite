@@ -1,0 +1,11 @@
+version: '3'
+services:
+  fastapi:
+    build: .
+    ports:
+      - 8000:8000
+    environment:
+      - REDIS_HOST=redis
+
+  redis:
+    image: redis:7.2
