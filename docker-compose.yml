@@ -4,8 +4,6 @@ services:
     build: .
     ports:
       - 8000:8000
-    # environment:
-      # - REDIS_HOST=redis
     volumes:
       - ./config.yml:/app/config/options.yml
 
