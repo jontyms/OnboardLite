@@ -20,6 +20,7 @@ router = APIRouter(prefix="/pay", tags=["API"], responses=Errors.basic_http())
 # Set Stripe API key.
 stripe.api_key = options.get("stripe").get("api_key")
 
+
 """
 Get API information.
 """
@@ -109,16 +110,14 @@ async def webhook(request: Request):
         print(e)
         return HTTPException(status_code=400, detail="Malformed payload.")
 
-    # Handle the checkout.session.completed event
+    # Event Handling
     if event["type"] == "checkout.session.completed":
-        session = event["data"]["object"]
         # Retrieve the session. If you require line items in the response, you may include them by expanding line_items.
+        session = event["data"]["object"]
 
         if session.payment_status == "paid":
             # Mark as paid.
             pay_dues(session)
-
-        print(session)
 
     elif event["type"] == "checkout.session.async_payment_succeeded":
         session = event["data"]["object"]
@@ -126,14 +125,10 @@ async def webhook(request: Request):
 
     # Passed signature verification
     return HTTPException(status_code=200, detail="Success.")
-    # print(await request.json())
-    # return "yeet"
 
 
 def pay_dues(session):
     customer_email = session.get("customer_email")
-
-    print(customer_email)
 
     # AWS dependencies
     dynamodb = boto3.resource("dynamodb")
