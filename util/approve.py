@@ -60,9 +60,9 @@ class Approve:
 
                     # Delete user
                     conn.identity.delete_user(user)
-                    print(f"{username}: User deleted.")
+                    logger.debug(f"{username}: User deleted.")
                 else:
-                    print(f"{username}: No user.")
+                    logger.debug(f"{username}: No user.")
 
             else:
                 username = (
@@ -120,12 +120,12 @@ class Approve:
 
             return {"username": username, "password": password}
         except Exception as e:
-            print(e)
+            logger.exception(e)
             return None
 
     # !TODO finish the post-sign-up stuff + testing
     def approve_member(member_id):
-        print(f"Re-running approval for {member_id}")
+        logger.info(f"Re-running approval for {member_id}")
         dynamodb = boto3.resource("dynamodb")
         table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
 
@@ -133,7 +133,7 @@ class Approve:
 
         # If a member was already approved, kill process.
         if user_data.get("is_full_member", False):
-            print("\tAlready full member.")
+            logger.info("\tAlready full member.")
             return True
 
         # Sorry for the long if statement. But we consider someone a "member" iff:
@@ -147,7 +147,7 @@ class Approve:
             and user_data.get("did_pay_dues")
             and user_data.get("ethics_form", {}).get("signtime", 0) != 0
         ):
-            print("\tNewly-promoted full member!")
+            logger.info("\tNewly-promoted full member!")
 
             discord_id = user_data.get("discord_id")
 
@@ -198,7 +198,7 @@ Happy Hacking,
             )
 
         elif user_data.get("did_pay_dues"):
-            print("\tPaid dues but did not do other step!")
+            logger.info("\tPaid dues but did not do other step!")
             # Send a message on why this check failed.
             fail_msg = f"""Hello {user_data.get('first_name')},
 
@@ -218,6 +218,6 @@ We hope to see you soon,
             Discord.send_message(discord_id, fail_msg)
 
         else:
-            print("\tDid not pay dues yet.")
+            logger.info("\tDid not pay dues yet.")
 
         return False
