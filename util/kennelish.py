@@ -1,8 +1,7 @@
+import logging
 from typing import Literal
 
 from pydantic import constr, create_model
-
-import logging
 
 logger = logging.getLogger(__name__)
 

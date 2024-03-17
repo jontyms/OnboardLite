@@ -1,10 +1,10 @@
 import json
+import logging
 import os
 import time
 import uuid
 from typing import Optional
 from urllib.parse import urlparse
-import logging
 
 import boto3
 import requests

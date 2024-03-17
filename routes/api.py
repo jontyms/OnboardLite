@@ -151,7 +151,7 @@ async def post_form(
             UpdateExpression=update_expression,
             ExpressionAttributeValues=expression_attribute_values,
         )
-    except ClientError as e:
+    except ClientError:
         # We need to do a migration on *something*. We know it's a subtype.
         # So we will find it and migrate it.
         for item in items_to_keep:

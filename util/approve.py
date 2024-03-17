@@ -1,3 +1,4 @@
+import logging
 import os
 
 import boto3
@@ -8,8 +9,6 @@ from util.discord import Discord
 from util.email import Email
 from util.horsepass import HorsePass
 from util.options import Options
-
-import logging
 
 logger = logging.getLogger()
 

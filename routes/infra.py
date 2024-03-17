@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import os
 from typing import Optional
 
@@ -20,7 +21,6 @@ from util.errors import Errors
 from util.limiter import RateLimiter
 from util.options import Options
 
-import logging
 logger = logging.getLogger(__name__)
 
 options = Options.fetch()
@@ -51,7 +51,7 @@ def get_shitty_database():
         with open(opts_path, "r") as f:
             data = json.loads(f.read())
     except Exception as e:
-        logger.exception(f"Invalid config file at {opts_path}")
+        logger.exception(f"Invalid config file at {opts_path}", e)
         data = {"gbmName": None, "imageId": None}
 
     return data

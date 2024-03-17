@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 import boto3
@@ -15,7 +16,7 @@ from util.options import Options
 options = Options.fetch()
 templates = Jinja2Templates(directory="templates")
 
-import logging
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/pay", tags=["API"], responses=Errors.basic_http())
