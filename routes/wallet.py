@@ -237,13 +237,13 @@ async def get_root():
 async def aapl_gen(
     request: Request,
     token: Optional[str] = Cookie(None),
-    payload: Optional[object] = {},
+    user_jwt: Optional[object] = {},
 ):
     dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
 
     # Get data from DynamoDB
-    user_data = table.get_item(Key={"id": payload.get("id")}).get("Item", None)
+    user_data = table.get_item(Key={"id": user_jwt.get("id")}).get("Item", None)
 
     p = apple_wallet(user_data)
 

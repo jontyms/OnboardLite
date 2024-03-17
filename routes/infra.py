@@ -192,19 +192,19 @@ API endpoint to self-service create a GBM environment.
 async def get_provision(
     request: Request,
     token: Optional[str] = Cookie(None),
-    payload: Optional[object] = {},
+    user_jwt: Optional[object] = {},
 ):
     conn = openstack.connect(cloud="hackucf_infra")
 
     # Get single user
-    user = conn.identity.find_user(payload.get("infra_email"))
+    user = conn.identity.find_user(user_jwt.get("infra_email"))
 
     # Get project
     project = conn.identity.get_project(user.default_project_id)
 
     # Provision everything
     asyncio.create_task(
-        create_resource(project, payload.get("discord_id"))
+        create_resource(project, user_jwt.get("discord_id"))
     )  # runs teardown async
     return {"msg": "Queued."}
 
@@ -231,7 +231,7 @@ API endpoint to SET the one-click deploy settings.
 async def get_options(
     request: Request,
     token: Optional[str] = Cookie(None),
-    payload: Optional[object] = {},
+    user_jwt: Optional[object] = {},
 ):
     return get_shitty_database()
 
@@ -268,11 +268,11 @@ API endpoint to self-service reset Infra credentials (membership-validating)
 async def get_infra(
     request: Request,
     token: Optional[str] = Cookie(None),
-    payload: Optional[object] = {},
+    user_jwt: Optional[object] = {},
 ):
-    member_id = payload.get("id")
+    member_id = user_jwt.get("id")
 
-    if not (payload.get("is_full_member") or payload.get("infra_email")):
+    if not (user_jwt.get("is_full_member") or user_jwt.get("infra_email")):
         return Errors.generate(
             request, 403, "This API endpoint is restricted to Dues-Paying Members."
         )
@@ -330,7 +330,7 @@ An endpoint to Download OpenVPN profile
 async def download_file(
     request: Request,
     token: Optional[str] = Cookie(None),
-    payload: Optional[object] = {},
+    user_jwt: Optional[object] = {},
 ):
     # Replace 'path/to/your/file.txt' with the actual path to your file
     file_path = "./HackUCF.ovpn"

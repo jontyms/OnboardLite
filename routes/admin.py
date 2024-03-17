@@ -187,7 +187,7 @@ async def admin_post_discord_message(
     request: Request,
     token: Optional[str] = Cookie(None),
     member_id: Optional[str] = "FAIL",
-    payload: dict = Body(None),
+    user_jwt: dict = Body(None),
 ):
     """
     API endpoint that gets a specific user's data as JSON
@@ -202,7 +202,7 @@ async def admin_post_discord_message(
     if not data:
         return Errors.generate(request, 404, "User Not Found")
 
-    message_text = payload.get("msg")
+    message_text = user_jwt.get("msg")
 
     res = Discord.send_message(data.get("discord_id"), message_text)
 
