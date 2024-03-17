@@ -9,6 +9,10 @@ from util.email import Email
 from util.horsepass import HorsePass
 from util.options import Options
 
+import logging
+
+logger = logging.getLogger()
+
 options = Options.fetch()
 tf = Terraform(working_dir=options.get("infra", {}).get("tf_directory", "./"))
 
@@ -50,7 +54,7 @@ class Approve:
                 user = conn.identity.find_user(username)
                 if user:
                     # Delete user's default project
-                    print(f"user // {user.default_project_id}")
+                    logger.debug(f"user // {user.default_project_id}")
                     proj = conn.identity.get_project(user.default_project_id)
                     proj = conn.identity.delete_project(proj)
 

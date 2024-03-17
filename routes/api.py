@@ -60,7 +60,7 @@ Renders a Kennelish form file as HTML (with user data). Intended for AJAX applic
 async def get_form_html(
     request: Request,
     token: Optional[str] = Cookie(None),
-    payload: Optional[object] = {},
+    user_jwt: Optional[object] = {},
     num: str = 1,
 ):
     # AWS dependencies
@@ -71,7 +71,7 @@ async def get_form_html(
     data = Options.get_form_body(num)
 
     # Get data from DynamoDB
-    user_data = table.get_item(Key={"id": payload.get("id")}).get("Item", None)
+    user_data = table.get_item(Key={"id": user_jwt.get("id")}).get("Item", None)
 
     # Have Kennelish parse the data.
     body = Kennelish.parse(data, user_data)
@@ -89,19 +89,22 @@ Allows updating the user's database using a schema assumed by the Kennelish file
 async def post_form(
     request: Request,
     token: Optional[str] = Cookie(None),
-    payload: Optional[object] = {},
+    user_jwt: Optional[object] = {},
     num: str = 1,
 ):
     # Get Kennelish data
     kennelish_data = Options.get_form_body(num)
     model = Transformer.kennelish_to_pydantic(kennelish_data)
 
+    # Parse and Validate inputs
     try:
         inp = await request.json()
     except json.JSONDecodeError:
         return {"description": "Malformed JSON input."}
 
     try:
+        # this only parses the data into an arbitrary pydantic model,
+        # it doesn't actually validate form field completion as far as I can tell
         validated = model(**inp)
     except error_wrappers.ValidationError:
         return {"description": "Malformed input."}
@@ -110,6 +113,7 @@ async def post_form(
     items_to_update = list(validated.dict().items())
     items_to_keep = []
     for item in items_to_update:
+        # What is Item[0] and Item[1]???
         if item[1] is not None:
             # English -> Boolean
             if item[1] == "Yes" or item[1] == "I promise not to do this.":
@@ -143,28 +147,21 @@ async def post_form(
     # Push data back to DynamoDB
     try:
         table.update_item(
-            Key={"id": payload.get("id")},
+            Key={"id": user_jwt.get("id")},
             UpdateExpression=update_expression,
             ExpressionAttributeValues=expression_attribute_values,
         )
     except ClientError as e:
         # We need to do a migration on *something*. We know it's a subtype.
         # So we will find it and migrate it.
-        print("MIGRATION TIEM")
-        print(e)
-
         for item in items_to_keep:
             if "." in item[0]:
                 dot_loc = item[0].find(".")
                 key_to_make = item[0][:dot_loc]
 
-                print(update_expression)
-                print(":3")
-                print(expression_attribute_values)
-
                 # Create dictionary
                 table.update_item(
-                    Key={"id": payload.get("id")},
+                    Key={"id": user_jwt.get("id")},
                     # key_to_make is not user-supplied, rather, it's from the form JSON.
                     # if this noSQLi's, then it's because of an insider threat.
                     UpdateExpression=f"SET {key_to_make} = :dicty",
@@ -173,7 +170,7 @@ async def post_form(
 
         # After all dicts are a thing, re-run query.
         table.update_item(
-            Key={"id": payload.get("id")},
+            Key={"id": user_jwt.get("id")},
             UpdateExpression=update_expression,
             ExpressionAttributeValues=expression_attribute_values,
         )

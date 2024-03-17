@@ -164,14 +164,11 @@ async def admin_get_snowflake(
         "Items"
     )
 
-    print(data)
-
     if not data:
         # Try a legacy-user-ID search (deprecated, but still neccesary)
         data = table.scan(FilterExpression=Attr("discord_id").eq(int(discord_id))).get(
             "Items"
         )
-        print(data)
 
         if not data:
             return Errors.generate(request, 404, "User Not Found")

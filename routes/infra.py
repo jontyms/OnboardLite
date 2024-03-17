@@ -20,6 +20,9 @@ from util.errors import Errors
 from util.limiter import RateLimiter
 from util.options import Options
 
+import logging
+logger = logging.getLogger(__name__)
+
 options = Options.fetch()
 
 templates = Jinja2Templates(directory="templates")
@@ -43,11 +46,12 @@ def get_shitty_database():
     I lovingly call this the "shitty database."
     """
     data = {}
+    opts_path = "infra_options.json"
     try:
-        with open("infra_options.json", "r") as f:
+        with open(opts_path, "r") as f:
             data = json.loads(f.read())
     except Exception as e:
-        print(e)
+        logger.exception(f"Invalid config file at {opts_path}")
         data = {"gbmName": None, "imageId": None}
 
     return data
@@ -57,7 +61,7 @@ async def create_resource(project, callback_discord_id=None):
     shitty_database = get_shitty_database()
     proj_name = project.name
 
-    print(f"Creating resources for {proj_name}...")
+    logger.info(f"Creating resources for {proj_name}...")
 
     tf_vars = {
         "username": options.get("infra", {}).get("ad", {}).get("username"),
@@ -69,9 +73,9 @@ async def create_resource(project, callback_discord_id=None):
     }
     return_code, stdout, stderr = tf.apply(var=tf_vars, skip_plan=True)
     if return_code != 0:
-        print("Terraform failed!")
-        print(f"\treturn: {return_code}")
-        print(f"\tstderr: {stderr}\n")
+        logger.exception("Terraform failed!")
+        logger.debug(f"\treturn: {return_code}")
+        logger.debug(f"\tstderr: {stderr}\n")
 
     # clean up
     try:
@@ -94,58 +98,58 @@ Enjoy,
 """
         Discord.send_message(callback_discord_id, resource_create_msg)
 
-    print("\tDone!")
+    logger.info("\tDone!")
 
 
 async def teardown():
-    print("Initializing post-GBM teardown...")
+    logger.debug("Initializing post-GBM teardown...")
     death_word = "gbm"
 
     conn = openstack.connect(cloud="hackucf_infra")
 
-    print("\tServers...")
+    logger.debug("\tServers...")
     for resource in conn.compute.servers(all_projects=True):
-        # print("\t" + resource.name)
+        # logger.debug("\t" + resource.name)
         if death_word in resource.name.lower():
-            print(f"\t\tdelete {resource.name}")
+            logger.debug(f"\t\tdelete {resource.name}")
             conn.compute.delete_server(resource)
 
-    print("\tSec Groups...")
+    logger("\tSec Groups...")
     for resource in conn.network.security_groups():
-        # print("\t" + resource.name)
+        # logger.debug("\t" + resource.name)
         if death_word in resource.name.lower():
-            print(f"\t\tdelete {resource.name}")
+            logger.debug(f"\t\tdelete {resource.name}")
             conn.network.delete_security_group(resource)
 
-    print("\tRouters...")
+    logger.debug("\tRouters...")
     for resource in conn.network.routers():
-        # print("\t" + resource.name)
+        # logger.debug("\t" + resource.name)
         if death_word in resource.name.lower():
-            print(f"\t\tdelete {resource.name}")
+            logger.debug(f"\t\tdelete {resource.name}")
             try:
                 conn.network.delete_router(resource)
             except openstack.exceptions.ConflictException as e:
                 port_id_list = str(e).split(": ")[-1].split(",")
                 for port_id in port_id_list:
-                    print(f"\t\t\tdelete/abandon port: {port_id}")
+                    logger.debug(f"\t\t\tdelete/abandon port: {port_id}")
                     conn.network.remove_interface_from_router(resource, port_id=port_id)
                     conn.network.delete_port(port_id)
                 try:
                     conn.network.delete_router(resource)
                 except: # noqa
-                    print("\t\t\t\tFailed and gave up.")
+                    logger.debug("\t\t\t\tFailed and gave up.")
 
-    print("\tNetworks...")
+    logger.debug("\tNetworks...")
     for resource in conn.network.networks():
-        # print("\t" + resource.name)
+        # logger.debug("\t" + resource.name)
         if death_word in resource.name.lower():
-            print(f"\t\tdelete {resource.name}")
+            logger.debug(f"\t\tdelete {resource.name}")
             try:
                 conn.network.delete_network(resource)
             except openstack.exceptions.ConflictException as e:
                 port_id_list = str(e).split(": ")[-1][:-1].split(",")
                 for port_id in port_id_list:
-                    print(f"\t\t\tdelete port: {port_id}")
+                    logger.debug(f"\t\t\tdelete port: {port_id}")
                     try:
                         conn.network.delete_port(port_id)
                     except: # noqa
@@ -153,8 +157,8 @@ async def teardown():
                 try:
                     conn.network.delete_network(resource)
                 except: #noqa
-                    print("\t\t\t\tFailed and gave up.")
-    print("\tDone!")
+                    logger.debug("\t\t\t\tFailed and gave up.")
+    logger.debug("\tDone!")
 
 
 """
