@@ -120,7 +120,6 @@ This is what is linked to by Onboard.
 async def oauth_transformer(redir: str = "/join/2"):
     # Open redirect check
     hostname = urlparse(redir).netloc
-    print(hostname)
     if hostname != "" and hostname != Settings().http.domain:
         redir = "/join/2"
 

@@ -4,7 +4,9 @@ from pydantic_settings import BaseSettings
 import yaml
 import json
 import subprocess
+import logging
 
+logger = logging.getLogger(__name__)
 
 def BitwardenConfig(settings_dict: dict):
     '''
@@ -12,11 +14,12 @@ def BitwardenConfig(settings_dict: dict):
     The bitwarden secrets are mapped to the settings dict using the bitwarden_mapping dict.
     The secrets are sourced based on a project id in the settings dict.
     '''
+    logger.debug("Loading secrets from Bitwarden")
     try:
         command = f"bws secret list {settings_dict['bws']['project_id']}"
         bitwarden_raw = subprocess.check_output(command, shell=True, text=True)
     except Exception as e:
-        print(e)
+        logger.error(e)
     bitwarden_settings = parse_json_to_dict(bitwarden_raw)
     
     bitwarden_mapping = {
