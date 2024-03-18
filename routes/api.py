@@ -12,9 +12,9 @@ from models.user import PublicContact
 from util.authentication import Authentication
 from util.errors import Errors
 from util.kennelish import Kennelish, Transformer
-from util.options import Options
+from util.options import Settings
 
-options = Options.fetch()
+
 
 router = APIRouter(prefix="/api", tags=["API"], responses=Errors.basic_http())
 
@@ -47,7 +47,7 @@ Note that Kennelish form files are NOT considered sensitive.
 
 @router.get("/form/{num}")
 async def get_form(num: str):
-    return Options.get_form_body(num)
+    return Forms.get_form_body(num)(num)
 
 
 """
@@ -65,10 +65,10 @@ async def get_form_html(
 ):
     # AWS dependencies
     dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
+    table = dynamodb.Table(Settings().aws.table)
 
     # Get form object
-    data = Options.get_form_body(num)
+    data = Forms.get_form_body(num)(num)
 
     # Get data from DynamoDB
     user_data = table.get_item(Key={"id": user_jwt.get("id")}).get("Item", None)
@@ -93,7 +93,7 @@ async def post_form(
     num: str = 1,
 ):
     # Get Kennelish data
-    kennelish_data = Options.get_form_body(num)
+    kennelish_data = Forms.get_form_body(num)(num)
     model = Transformer.kennelish_to_pydantic(kennelish_data)
 
     # Parse and Validate inputs
@@ -142,7 +142,7 @@ async def post_form(
 
     # AWS dependencies
     dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
+    table = dynamodb.Table(Settings().aws.table)
 
     # Push data back to DynamoDB
     try:

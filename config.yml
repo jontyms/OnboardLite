@@ -2,9 +2,8 @@
 jwt:
     secret:
     algorithm: "HS256"
-    lifetime:  # (in seconds)
-        user: 9072000  # 15 weeks
-        sudo: 86400    # 1 day
+    lifetime_user: 9072000  # 15 weeks
+    lifetime_sudo: 86400    # 1 day
 
 http:
     domain: join.hackucf.org
@@ -28,12 +27,11 @@ discord:
 
 
 stripe:
-    api_key: ""
-    webhook_secret: ""
-    price_id: ""
-    url:
-        success: "https://join.hackucf.org/final/"
-        failure: "https://join.hackucf.org/pay/"
+    api_key:
+    webhook_secret:
+    price_id:
+    url_success: "https://join.hackucf.org/final/"
+    url_failure: "https://join.hackucf.org/pay/"
 
 aws:
     dynamodb:

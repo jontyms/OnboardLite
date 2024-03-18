@@ -2,12 +2,12 @@ import json
 
 import requests
 
-from util.options import Options
+from util.options import Settings
 
-options = Options.fetch()
+
 
 headers = {
-    "Authorization": f"Bot {options.get('discord', {}).get('bot_token')}",
+    "Authorization": f"Bot {Settings().discord.bot_token.get_secret_value()}",
     "Content-Type": "application/json",
     "X-Audit-Log-Reason": "Hack@UCF OnboardLite Bot",
 }
@@ -25,7 +25,7 @@ class Discord:
         discord_id = str(discord_id)
 
         req = requests.put(
-            f"https://discord.com/api/guilds/{options.get('discord', {}).get('guild_id')}/members/{discord_id}/roles/{role_id}",
+            f"https://discord.com/api/guilds/{Settings().discord.guild_id}/members/{discord_id}/roles/{role_id}",
             headers=headers,
         )
 

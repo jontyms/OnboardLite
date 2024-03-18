@@ -8,12 +8,12 @@ from python_terraform import Terraform
 from util.discord import Discord
 from util.email import Email
 from util.horsepass import HorsePass
-from util.options import Options
+from util.options import Settings
 
 logger = logging.getLogger()
 
-options = Options.fetch()
-tf = Terraform(working_dir=options.get("infra", {}).get("tf_directory", "./"))
+
+tf = Terraform(working_dir=Settings().infra.tf_directory)
 
 """
 This function will ensure a member meets all requirements to be a member, and if so, creates an
@@ -43,7 +43,7 @@ class Approve:
 
         try:
             dynamodb = boto3.resource("dynamodb")
-            table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
+            table = dynamodb.Table(Settings().aws.table)
             if not user_data:
                 user_data = table.get_item(Key={"id": member_id}).get("Item", None)
 
@@ -126,7 +126,7 @@ class Approve:
     def approve_member(member_id):
         logger.info(f"Re-running approval for {member_id}")
         dynamodb = boto3.resource("dynamodb")
-        table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
+        table = dynamodb.Table(Settings().aws.table)
 
         user_data = table.get_item(Key={"id": member_id}).get("Item", None)
 
@@ -164,22 +164,22 @@ class Approve:
 
             # Assign the Dues-Paying Member role
             Discord.assign_role(
-                discord_id, options.get("discord", {}).get("member_role")
+                discord_id, Settings().discord.member_role
             )
 
             # Send Discord message saying they are a member
             welcome_msg = f"""Hello {user_data.get('first_name')}, and welcome to Hack@UCF!
 
-This message is to confirm that your membership has processed successfully. You can access and edit your membership ID at https://{options.get('http', {}).get('domain')}/profile.
+This message is to confirm that your membership has processed successfully. You can access and edit your membership ID at https://{Settings().http.domain}/profile.
 
-These credentials can be used to the Hack@UCF Private Cloud, one of our many benefits of paying dues. This can be accessed at {options.get('infra', {}).get('horizon')} while on the CyberLab WiFi.
+These credentials can be used to the Hack@UCF Private Cloud, one of our many benefits of paying dues. This can be accessed at {Settings().infra.horizon} while on the CyberLab WiFi.
 
 ```yaml
 Username: {creds.get('username', 'Not Set')}
-Password: {creds.get('password', f"Please visit https://{options.get('http', {}).get('domain')}/profile and under Danger Zone, reset your Infra creds.")}
+Password: {creds.get('password', f"Please visit https://{Settings().http.domain}/profile and under Danger Zone, reset your Infra creds.")}
 ```
 
-The password for the `Cyberlab` WiFi is currently `{options.get('infra', {}).get('wifi')}`, but this is subject to change (and we'll let you know when that happens).
+The password for the `Cyberlab` WiFi is currently `{Settings().infra.wifi}`, but this is subject to change (and we'll let you know when that happens).
 
 By using the Hack@UCF Infrastructure, you agree to the following EULA located at https://help.hackucf.org/misc/eula
 
@@ -207,7 +207,7 @@ We wanted to let you know that you **did not** complete all of the steps for bei
 - Signed Ethics Form: {'✅' if user_data.get('ethics_form', {}).get('signtime', 0) != 0 else '❌'}
 - Paid $10 dues: ✅
 
-Please complete all of these to become a full member. Once you do, visit https://{options.get('http', {}).get('domain')}/profile to re-run this check.
+Please complete all of these to become a full member. Once you do, visit https://{Settings().http.domain}/profile to re-run this check.
 
 If you think you have completed all of these, please reach out to an Exec on the Hack@UCF Discord.
 

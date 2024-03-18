@@ -8,9 +8,9 @@ from jose import jwt
 
 # Import options and errors
 from util.errors import Errors
-from util.options import Options
+from util.options import Settings
 
-options = Options.fetch()
+
 
 
 class Authentication:
@@ -28,13 +28,13 @@ class Authentication:
                 )
 
             try:
-                payload = jwt.decode(
+                user_jwt = jwt.decode(
                     token,
-                    options.get("jwt").get("secret"),
-                    algorithms=options.get("jwt").get("algorithm"),
+                    Settings().jwt.secret.get_secret_value(),
+                    algorithms=Settings().jwt.algorithm,
                 )
-                is_admin: bool = payload.get("sudo", False)
-                creation_date: float = payload.get("issued", -1)
+                is_admin: bool = user_jwt.get("sudo", False)
+                creation_date: float = user_jwt.get("issued", -1)
             except Exception:
                 tr = Errors.generate(
                     request,
@@ -52,9 +52,7 @@ class Authentication:
                     essay="If you think this is an error, please try logging in again.",
                 )
 
-            if time.time() > creation_date + options.get("jwt").get("lifetime").get(
-                "sudo"
-            ):
+            if time.time() > creation_date + Settings().jwt.lifetime_sudo:
                 return Errors.generate(
                     request,
                     403,
@@ -72,7 +70,7 @@ class Authentication:
         async def wrapper_member(
             request: Request,
             token: Optional[str],
-            payload: Optional[object],
+            user_jwt: Optional[object],
             *args,
             **kwargs
         ):
@@ -84,12 +82,12 @@ class Authentication:
                 )
 
             try:
-                payload = jwt.decode(
+                user_jwt = jwt.decode(
                     token,
-                    options.get("jwt").get("secret"),
-                    algorithms=options.get("jwt").get("algorithm"),
+                    Settings().jwt.secret.get_secret_value(),
+                    algorithms=Settings().jwt.algorithm,
                 )
-                creation_date: float = payload.get("issued", -1)
+                creation_date: float = user_jwt.get("issued", -1)
             except Exception:
                 tr = Errors.generate(
                     request,
@@ -99,9 +97,7 @@ class Authentication:
                 tr.delete_cookie(key="token")
                 return tr
 
-            if time.time() > creation_date + options.get("jwt").get("lifetime").get(
-                "user"
-            ):
+            if time.time() > creation_date + Settings().jwt.lifetime_user:
                 return Errors.generate(
                     request,
                     403,
@@ -109,6 +105,6 @@ class Authentication:
                     essay="Sessions last for about fifteen weeks. You need to re-log-in between semesters.",
                 )
 
-            return await func(request, token, payload, *args, **kwargs)
+            return await func(request, token, user_jwt, *args, **kwargs)
 
         return wrapper_member

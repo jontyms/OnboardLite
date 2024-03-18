@@ -4,19 +4,12 @@ from email.mime.text import MIMEText
 
 import commonmark
 
-from util.options import Options
-
-options = Options.fetch()
+from util.options import Settings
 
 
-# from util.options import Options
-options = Options.fetch()
-
-email = options.get("email", {}).get("email", {})
-
-email = options.get("email", {}).get("email", {})
-password = options.get("email", {}).get("password", {})
-smtp_host = options.get("email", {}).get("smtp_server", {})
+email = Settings().email.email
+password = Settings().email.password.get_secret_value()
+smtp_host = Settings().email.smtp_server
 
 
 class Email:

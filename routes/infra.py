@@ -19,11 +19,11 @@ from util.discord import Discord
 from util.email import Email
 from util.errors import Errors
 from util.limiter import RateLimiter
-from util.options import Options
+from util.options import Settings
+
 
 logger = logging.getLogger(__name__)
 
-options = Options.fetch()
 
 templates = Jinja2Templates(directory="templates")
 
@@ -32,9 +32,7 @@ router = APIRouter(prefix="/infra", tags=["Infra"], responses=Errors.basic_http(
 tf = Terraform(working_dir="./")
 
 rate_limiter = RateLimiter(
-    options.get("redis").get("host"),
-    options.get("redis").get("port"),
-    options.get("redis").get("db"),
+    Settings().redis.host, Settings().redis.port, Settings().redis.db
 )
 
 rate_limiter.get_redis()
@@ -64,8 +62,8 @@ async def create_resource(project, callback_discord_id=None):
     logger.info(f"Creating resources for {proj_name}...")
 
     tf_vars = {
-        "username": options.get("infra", {}).get("ad", {}).get("username"),
-        "password": options.get("infra", {}).get("ad", {}).get("password"),
+        "application_credential_id": Settings().infra.application_credential_id,
+        "application_credential_secret": Settings().infra.application_credential_secret.get_secret_value(),
         "tenant_name": proj_name,
         "gbmname": shitty_database.get("gbmName"),
         "imageid": shitty_database.get("imageId"),
@@ -91,7 +89,7 @@ async def create_resource(project, callback_discord_id=None):
     if callback_discord_id:
         resource_create_msg = f"""Hello!
 
-Your requested virtual machine has been created! You can now view it at {options.get('infra', {}).get('horizon')}.
+Your requested virtual machine has been created! You can now view it at {Settings().infra.horizon}.
 
 Enjoy,
     - Hack@UCF Bot
@@ -226,7 +224,7 @@ async def get_teardown(request: Request, token: Optional[str] = Cookie(None)):
 
 
 """
-API endpoint to SET the one-click deploy settings.
+API endpoint to SET the one-click deploy Settings().
 """
 
 
@@ -241,7 +239,7 @@ async def get_options(
 
 
 """
-API endpoint to SET the one-click deploy settings.
+API endpoint to SET the one-click deploy Settings().
 """
 
 
@@ -290,7 +288,7 @@ async def get_infra(
 
     # Get user data
     dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
+    table = dynamodb.Table(Settings().aws.table)
 
     user_data = table.get_item(Key={"id": member_id}).get("Item", None)
 
@@ -299,14 +297,14 @@ async def get_infra(
 
 You have requested to reset your Hack@UCF Infrastructure credentials. This change comes with new credentials.
 
-A reminder that you can use these credentials at {options.get('infra', {}).get('horizon')} while on the CyberLab WiFi.
+A reminder that you can use these credentials at {Settings().infra.horizon} while on the CyberLab WiFi.
 
 ```
 Username: {creds.get('username', 'Not Set')}
-Password: {creds.get('password', f"Please visit https://{options.get('http', {}).get('domain')}/profile and under Danger Zone, reset your Infra creds.")}
+Password: {creds.get('password', f"Please visit https://{Settings().http.domain}/profile and under Danger Zone, reset your Infra creds.")}
 ```
 
-The password for the `Cyberlab` WiFi is currently `{options.get('infra', {}).get('wifi')}`, but this is subject to change (and we'll let you know when that happens).
+The password for the `Cyberlab` WiFi is currently `{Settings().infra.wifi}`, but this is subject to change (and we'll let you know when that happens).
 
 By using the Hack@UCF Infrastructure, you agree to the following EULA located at https://help.hackucf.org/misc/eula
 

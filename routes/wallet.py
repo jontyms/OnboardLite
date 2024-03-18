@@ -12,9 +12,9 @@ from models.info import InfoModel
 from models.user import PublicContact
 from util.authentication import Authentication
 from util.errors import Errors
-from util.options import Options
+from util.options import Settings
 
-options = Options.fetch()
+
 
 router = APIRouter(
     prefix="/wallet", tags=["API", "MobileWallet"], responses=Errors.basic_http()
@@ -240,7 +240,7 @@ async def aapl_gen(
     user_jwt: Optional[object] = {},
 ):
     dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
+    table = dynamodb.Table(Settings().aws.table)
 
     # Get data from DynamoDB
     user_data = table.get_item(Key={"id": user_jwt.get("id")}).get("Item", None)

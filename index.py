@@ -29,18 +29,19 @@ from util.errors import Errors
 # Import the page rendering library
 from util.kennelish import Kennelish
 # Import options
-from util.options import Options
+from util.options import Settings
+from util.forms import Forms
 
 ### TODO: TEMP
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "0"
 ###
+
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
 
-options = Options.fetch()
 
 # Initiate FastAPI.
 app = FastAPI()
@@ -60,9 +61,9 @@ with open("clouds.yaml", "w", encoding="utf-8") as f:
         f"""clouds:
   hackucf_infra:
     auth:
-      auth_url: {options.get('infra', {}).get('horizon', '')}:5000
-      application_credential_id: {options.get('infra', {}).get('ad', {}).get('application_credential_id', '')}
-      application_credential_secret: {options.get('infra', {}).get('ad', {}).get('application_credential_secret', '')}
+      auth_url: {Settings().infra.horizon}:5000
+      application_credential_id: {Settings().infra.application_credential_id}
+      application_credential_secret: {Settings().infra.application_credential_secret.get_secret_value()}
     region_name: "hack-ucf-0"
     interface: "public"
     identity_api_version: 3
@@ -84,15 +85,15 @@ async def index(request: Request, token: Optional[str] = Cookie(None)):
     infra_email = None
 
     try:
-        payload = jwt.decode(
+        user_jwt = jwt.decode(
             token,
-            options.get("jwt").get("secret"),
-            algorithms=options.get("jwt").get("algorithm"),
+            Settings().jwt.secret.get_secret_value(),
+            algorithms=Settings().jwt.algorithm,
         )
-        is_full_member: bool = payload.get("is_full_member", False)
-        is_admin: bool = payload.get("sudo", False)
-        user_id: bool = payload.get("id", None)
-        infra_email: bool = payload.get("infra_email", None)
+        is_full_member: bool = user_jwt.get("is_full_member", False)
+        is_admin: bool = user_jwt.get("sudo", False)
+        user_id: bool = user_jwt.get("id", None)
+        infra_email: bool = user_jwt.get("infra_email", None)
     except Exception as e:
         logger.exception(e)
         pass
@@ -119,15 +120,14 @@ This is what is linked to by Onboard.
 async def oauth_transformer(redir: str = "/join/2"):
     # Open redirect check
     hostname = urlparse(redir).netloc
-    if hostname != "" and hostname != options.get("http", {}).get(
-        "domain", "my.hackucf.org"
-    ):
+    print(hostname)
+    if hostname != "" and hostname != Settings().http.domain:
         redir = "/join/2"
 
     oauth = OAuth2Session(
-        options.get("discord").get("client_id"),
-        redirect_uri=options.get("discord").get("redirect_base") + "_redir",
-        scope=options.get("discord").get("scope"),
+        Settings().discord.client_id,
+        redirect_uri=Settings().discord.redirect_base + "_redir",
+        scope=Settings().discord.scope,
     )
     authorization_url, state = oauth.authorization_url(
         "https://discord.com/api/oauth2/authorize"
@@ -156,7 +156,7 @@ async def oauth_transformer_new(
 ):
     # AWS dependencies
     dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
+    table = dynamodb.Table(Settings().aws.table)
 
     # Open redirect check
     if redir == "_redir":
@@ -164,9 +164,7 @@ async def oauth_transformer_new(
 
     hostname = urlparse(redir).netloc
 
-    if hostname != "" and hostname != options.get("http", {}).get(
-        "domain", "my.hackucf.org"
-    ):
+    if hostname != "" and hostname != Settings().http.domain:
         redir = "/join/2"
 
     if code is None:
@@ -179,15 +177,15 @@ async def oauth_transformer_new(
 
     # Get data from Discord
     oauth = OAuth2Session(
-        options.get("discord").get("client_id"),
-        redirect_uri=options.get("discord").get("redirect_base") + "_redir",
-        scope=options.get("discord")["scope"],
+        Settings().discord.client_id,
+        redirect_uri=Settings().discord.redirect_base + "_redir",
+        scope=Settings().discord.scope,
     )
 
     token = oauth.fetch_token(
         "https://discord.com/api/oauth2/token",
-        client_id=options.get("discord").get("client_id"),
-        client_secret=options.get("discord").get("secret"),
+        client_id=Settings().discord.client_id,
+        client_secret=Settings().discord.secret.get_secret_value(),
         # authorization_response=code
         code=code,
     )
@@ -235,20 +233,20 @@ async def oauth_transformer_new(
         # Make user join the Hack@UCF Discord, if it's their first rodeo.
         discord_id = str(discordData["id"])
         headers = {
-            "Authorization": f"Bot {options.get('discord', {}).get('bot_token')}",
+            "Authorization": f"Bot {Settings().discord.bot_token.get_secret_value()}",
             "Content-Type": "application/json",
             "X-Audit-Log-Reason": "Hack@UCF OnboardLite Bot",
         }
         put_join_guild = {"access_token": token["access_token"]}
         requests.put(
-            f"https://discordapp.com/api/guilds/{options.get('discord', {}).get('guild_id')}/members/{discord_id}",
+            f"https://discordapp.com/api/guilds/{Settings().discord.guild_id}/members/{discord_id}",
             headers=headers,
             data=json.dumps(put_join_guild),
         )
 
     data = {
         "id": member_id,
-        "discord_id": int(discordData["id"]),
+        "discord_id": discordData["id"],
         "discord": {
             "email": discordData["email"],
             "mfa": discordData["mfa_enabled"],
@@ -290,8 +288,8 @@ async def oauth_transformer_new(
     }
     bearer = jwt.encode(
         jwtData,
-        options.get("jwt").get("secret"),
-        algorithm=options.get("jwt").get("algorithm"),
+        Settings().jwt.secret.get_secret_value(),
+        algorithm=Settings().jwt.algorithm,
     )
     rr = RedirectResponse(redir, status_code=status.HTTP_302_FOUND)
     rr.set_cookie(key="token", value=bearer)
@@ -325,16 +323,16 @@ Renders a basic "my membership" page
 async def profile(
     request: Request,
     token: Optional[str] = Cookie(None),
-    payload: Optional[object] = {},
+    user_jwt: Optional[object] = {},
 ):
     # Get data from DynamoDB
     dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
+    table = dynamodb.Table(Settings().aws.table)
 
-    user_data = table.get_item(Key={"id": payload.get("id")}).get("Item", None)
+    user_data = table.get_item(Key={"id": user_jwt.get("id")}).get("Item", None)
 
     # Re-run approval workflow.
-    Approve.approve_member(payload.get("id"))
+    Approve.approve_member(user_jwt.get("id"))
 
     return templates.TemplateResponse(
         "profile.html", {"request": request, "user_data": user_data}
@@ -351,20 +349,20 @@ Renders a Kennelish form page, complete with stylings and UI controls.
 async def forms(
     request: Request,
     token: Optional[str] = Cookie(None),
-    payload: Optional[object] = {},
+    user_jwt: Optional[object] = {},
     num: str = 1,
 ):
     # AWS dependencies
     dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
+    table = dynamodb.Table(Settings().aws.table)
 
     if num == "1":
         return RedirectResponse("/join/", status_code=status.HTTP_302_FOUND)
 
-    data = Options.get_form_body(num)
+    data = Forms.get_form_body(num)
 
     # Get data from DynamoDB
-    user_data = table.get_item(Key={"id": payload.get("id")}).get("Item", None)
+    user_data = table.get_item(Key={"id": user_jwt.get("id")}).get("Item", None)
 
     # Have Kennelish parse the data.
     body = Kennelish.parse(data, user_data)
@@ -374,9 +372,9 @@ async def forms(
         "form.html",
         {
             "request": request,
-            "icon": payload["pfp"],
-            "name": payload["name"],
-            "id": payload["id"],
+            "icon": user_jwt["pfp"],
+            "name": user_jwt["name"],
+            "id": user_jwt["id"],
             "body": body,
         },
     )
