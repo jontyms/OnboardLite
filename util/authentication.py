@@ -35,14 +35,17 @@ class Authentication:
                 )
                 is_admin: bool = user_jwt.get("sudo", False)
                 creation_date: float = user_jwt.get("issued", -1)
-            except Exception:
-                tr = Errors.generate(
-                    request,
-                    403,
-                    "Invalid token provided. Please log in again (refresh the page) and try again.",
-                )
-                tr.delete_cookie(key="token")
-                return tr
+            except Exception as e:
+                if isinstance(e, jwt.JWTError) or isinstance(e, jwt.JWTClaimsError):
+                    tr = Errors.generate(
+                        request,
+                        403,
+                        "Invalid token provided. Please log in again (refresh the page) and try again.",
+                    )
+                    tr.delete_cookie(key="token")
+                    return tr
+                else:
+                    raise  # Re-raise exceptions that are not related to token validation
 
             if not is_admin:
                 return Errors.generate(
@@ -88,15 +91,18 @@ class Authentication:
                     algorithms=Settings().jwt.algorithm,
                 )
                 creation_date: float = user_jwt.get("issued", -1)
-            except Exception:
-                tr = Errors.generate(
-                    request,
-                    403,
-                    "Invalid token provided. Please log in again (refresh the page) and try again.",
-                )
-                tr.delete_cookie(key="token")
-                return tr
-
+            except Exception as e:
+                if isinstance(e, jwt.JWTError) or isinstance(e, jwt.JWTClaimsError):
+                    tr = Errors.generate(
+                        request,
+                        403,
+                        "Invalid token provided. Please log in again (refresh the page) and try again.",
+                    )
+                    tr.delete_cookie(key="token")
+                    return tr
+                else:
+                    raise  # Re-raise exceptions that are not related to token validation
+    
             if time.time() > creation_date + Settings().jwt.lifetime_user:
                 return Errors.generate(
                     request,
@@ -104,7 +110,6 @@ class Authentication:
                     "Session expired.",
                     essay="Sessions last for about fifteen weeks. You need to re-log-in between semesters.",
                 )
-
             return await func(request, token, user_jwt, *args, **kwargs)
 
         return wrapper_member

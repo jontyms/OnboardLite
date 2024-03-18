@@ -3,7 +3,7 @@ from typing import Optional
 
 import boto3
 from botocore.exceptions import ClientError
-from fastapi import APIRouter, Cookie, Request
+from fastapi import APIRouter, Cookie, Request, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import error_wrappers
 
@@ -13,6 +13,7 @@ from util.authentication import Authentication
 from util.errors import Errors
 from util.kennelish import Kennelish, Transformer
 from util.options import Settings
+from util.forms import Forms
 
 
 
@@ -47,7 +48,10 @@ Note that Kennelish form files are NOT considered sensitive.
 
 @router.get("/form/{num}")
 async def get_form(num: str):
-    return Forms.get_form_body(num)(num)
+    try:
+        return Forms.get_form_body(num)
+    except FileNotFoundError:
+        return HTTPException(status_code=404, detail="Form not found")
 
 
 """
@@ -68,8 +72,10 @@ async def get_form_html(
     table = dynamodb.Table(Settings().aws.table)
 
     # Get form object
-    data = Forms.get_form_body(num)(num)
-
+    try:
+        data = Forms.get_form_body(num)
+    except FileNotFoundError:
+        return HTTPException(status_code=404, detail="Form not found")
     # Get data from DynamoDB
     user_data = table.get_item(Key={"id": user_jwt.get("id")}).get("Item", None)
 
@@ -93,7 +99,11 @@ async def post_form(
     num: str = 1,
 ):
     # Get Kennelish data
-    kennelish_data = Forms.get_form_body(num)(num)
+    try:
+        kennelish_data = Forms.get_form_body(num)
+    except FileNotFoundError:
+        return HTTPException(status_code=404, detail="Form not found")
+    
     model = Transformer.kennelish_to_pydantic(kennelish_data)
 
     # Parse and Validate inputs

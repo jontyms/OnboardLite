@@ -7,4 +7,4 @@ class Forms:
             form_file = os.path.join(os.getcwd(), "forms", f"{file}.json")
             return json.load(open(form_file, "r"))
         except FileNotFoundError:
-            return {}
+            raise
