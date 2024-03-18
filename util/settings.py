@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import re
 import subprocess
 
 import yaml
@@ -9,7 +10,7 @@ from pydantic_settings import BaseSettings
 
 logger = logging.getLogger(__name__)
 
-def BitwardenConfig(settings_dict: dict):
+def BitwardenConfig(settings: dict):
     '''
     Takes a dict of settings loaded from yaml and adds the secrets from bitwarden to the settings dict.
     The bitwarden secrets are mapped to the settings dict using the bitwarden_mapping dict.
@@ -17,10 +18,13 @@ def BitwardenConfig(settings_dict: dict):
     '''
     logger.debug("Loading secrets from Bitwarden")
     try:
-        command = f"bws secret list {settings_dict['bws']['project_id']}"
+        project_id = settings['bws']['project_id']
+        if bool(re.search('[^a-z0-9-]', project_id)):
+            raise ValueError("Invalid project id")
+        command = f"bws secret list {project_id}"
         bitwarden_raw = subprocess.check_output(command, shell=True, text=True)
     except Exception as e:
-        logger.error(e)
+        logger.exception(e)
     bitwarden_settings = parse_json_to_dict(bitwarden_raw)
 
     bitwarden_mapping = {
@@ -46,24 +50,24 @@ def BitwardenConfig(settings_dict: dict):
             bitwarden_mapped[top_key][nested_key] = bitwarden_settings[bw_key]
 
     for top_key, nested_dict in bitwarden_mapped.items():
-        if top_key in settings_dict:
+        if top_key in settings:
             for nested_key, value in nested_dict.items():
-                settings_dict[top_key][nested_key] = value
-    return settings_dict
+                settings[top_key][nested_key] = value
+    return settings
 
-settings_dict = dict()
+settings = dict()
 
 # Reads config from ../config/options.yml
 here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, "../config/options.yml")) as f:
-    settings_dict.update(yaml.load(f, Loader=yaml.FullLoader))
+    settings.update(yaml.load(f, Loader=yaml.FullLoader))
 def parse_json_to_dict(json_string):
     data = json.loads(json_string)
     return {item['key']: item['value'] for item in data}
 
-# If bitwarden is enabled, add secrets to settings_dict
-if settings_dict.get('bws').get('enable'):
-    settings_dict = BitwardenConfig(settings_dict)
+# If bitwarden is enabled, add secrets to settings
+if settings.get('bws').get('enable'):
+    settings = BitwardenConfig(settings)
 
 
 class DiscordConfig(BaseModel):
@@ -87,7 +91,7 @@ class DiscordConfig(BaseModel):
     scope: str
     secret: SecretStr
 
-discord_config = DiscordConfig(**settings_dict['discord'])
+discord_config = DiscordConfig(**settings['discord'])
 class StripeConfig(BaseModel):
     """
     Configuration class for Stripe integration.
@@ -104,7 +108,7 @@ class StripeConfig(BaseModel):
     price_id: str
     url_success: str
     url_failure: str
-stripe_config = StripeConfig(**settings_dict['stripe'])
+stripe_config = StripeConfig(**settings['stripe'])
 
 class EmailConfig(BaseModel):
     """
@@ -118,7 +122,7 @@ class EmailConfig(BaseModel):
     smtp_server: str
     email: str
     password: SecretStr
-email_config = EmailConfig(**settings_dict['email'])
+email_config = EmailConfig(**settings['email'])
 
 class JwtConfig(BaseModel):
     """
@@ -134,11 +138,11 @@ class JwtConfig(BaseModel):
     algorithm: str
     lifetime_user: int
     lifetime_sudo: int
-jwt_config = JwtConfig(**settings_dict['jwt'])
+jwt_config = JwtConfig(**settings['jwt'])
 
 class DynamodbConfig(BaseModel):
     table: str
-dynamodb_config = DynamodbConfig(**settings_dict['aws']['dynamodb'])
+dynamodb_config = DynamodbConfig(**settings['aws']['dynamodb'])
 
 class InfraConfig(BaseModel):
     """
@@ -156,17 +160,17 @@ class InfraConfig(BaseModel):
     application_credential_id: str
     application_credential_secret: SecretStr
     tf_directory: str
-infra_config = InfraConfig(**settings_dict['infra'])
+infra_config = InfraConfig(**settings['infra'])
 
 class RedisConfig(BaseModel):
     host: str
     port: int
     db: int
-redis_config = RedisConfig(**settings_dict['redis'])
+redis_config = RedisConfig(**settings['redis'])
 
 class HttpConfig(BaseModel):
     domain: str
-http_config = HttpConfig(**settings_dict['http'])
+http_config = HttpConfig(**settings['http'])
 
 class SingletonBaseSettingsMeta(type(BaseSettings), type):
     _instances = {}
