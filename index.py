@@ -84,15 +84,15 @@ async def index(request: Request, token: Optional[str] = Cookie(None)):
     infra_email = None
 
     try:
-        payload = jwt.decode(
+        user_jwt = jwt.decode(
             token,
             options.get("jwt").get("secret"),
             algorithms=options.get("jwt").get("algorithm"),
         )
-        is_full_member: bool = payload.get("is_full_member", False)
-        is_admin: bool = payload.get("sudo", False)
-        user_id: bool = payload.get("id", None)
-        infra_email: bool = payload.get("infra_email", None)
+        is_full_member: bool = user_jwt.get("is_full_member", False)
+        is_admin: bool = user_jwt.get("sudo", False)
+        user_id: bool = user_jwt.get("id", None)
+        infra_email: bool = user_jwt.get("infra_email", None)
     except Exception as e:
         logger.exception(e)
         pass
@@ -325,16 +325,16 @@ Renders a basic "my membership" page
 async def profile(
     request: Request,
     token: Optional[str] = Cookie(None),
-    payload: Optional[object] = {},
+    user_jwt: Optional[object] = {},
 ):
     # Get data from DynamoDB
     dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
 
-    user_data = table.get_item(Key={"id": payload.get("id")}).get("Item", None)
+    user_data = table.get_item(Key={"id": user_jwt.get("id")}).get("Item", None)
 
     # Re-run approval workflow.
-    Approve.approve_member(payload.get("id"))
+    Approve.approve_member(user_jwt.get("id"))
 
     return templates.TemplateResponse(
         "profile.html", {"request": request, "user_data": user_data}
@@ -351,7 +351,7 @@ Renders a Kennelish form page, complete with stylings and UI controls.
 async def forms(
     request: Request,
     token: Optional[str] = Cookie(None),
-    payload: Optional[object] = {},
+    user_jwt: Optional[object] = {},
     num: str = 1,
 ):
     # AWS dependencies
@@ -364,7 +364,7 @@ async def forms(
     data = Options.get_form_body(num)
 
     # Get data from DynamoDB
-    user_data = table.get_item(Key={"id": payload.get("id")}).get("Item", None)
+    user_data = table.get_item(Key={"id": user_jwt.get("id")}).get("Item", None)
 
     # Have Kennelish parse the data.
     body = Kennelish.parse(data, user_data)
@@ -374,9 +374,9 @@ async def forms(
         "form.html",
         {
             "request": request,
-            "icon": payload["pfp"],
-            "name": payload["name"],
-            "id": payload["id"],
+            "icon": user_jwt["pfp"],
+            "name": user_jwt["name"],
+            "id": user_jwt["id"],
             "body": body,
         },
     )
