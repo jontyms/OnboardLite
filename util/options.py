@@ -4,7 +4,6 @@ from pydantic_settings import BaseSettings
 import yaml
 import json
 import subprocess
-from functools import lru_cache
 
 
 def BitwardenConfig(settings_dict: dict):
@@ -122,12 +121,12 @@ class JwtConfig(BaseModel):
     Configuration class for JWT (JSON Web Token) settings.
 
     Attributes:
-        secret (SecretStr): The secret key used for signing and verifying JWTs.
+        secret (SecretStr): The secret key used for signing and verifying JWTs.(min_length=32)
         algorithm (str): The algorithm used for JWT encryption.
         lifetime_user (int): The lifetime (in seconds) of a user JWT.
         lifetime_sudo (int): The lifetime (in seconds) of a sudo JWT.
     """
-    secret: SecretStr
+    secret: SecretStr = constr(min_length=32)
     algorithm: str
     lifetime_user: int
     lifetime_sudo: int

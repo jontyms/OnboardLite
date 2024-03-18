@@ -2,7 +2,7 @@ from typing import Optional
 
 import boto3
 from boto3.dynamodb.conditions import Attr
-from fastapi import APIRouter, Body, Cookie, Request, Response, Depends
+from fastapi import APIRouter, Body, Cookie, Request, Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.templating import Jinja2Templates
 from jose import jwt
