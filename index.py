@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import time
 import uuid
@@ -33,6 +34,11 @@ from util.options import Options
 ### TODO: TEMP
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "0"
 ###
+
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
+logger = logging.getLogger(__name__)
 
 options = Options.fetch()
 
@@ -88,7 +94,7 @@ async def index(request: Request, token: Optional[str] = Cookie(None)):
         user_id: bool = payload.get("id", None)
         infra_email: bool = payload.get("infra_email", None)
     except Exception as e:
-        print(e)
+        logger.exception(e)
         pass
 
     return templates.TemplateResponse(
@@ -113,7 +119,6 @@ This is what is linked to by Onboard.
 async def oauth_transformer(redir: str = "/join/2"):
     # Open redirect check
     hostname = urlparse(redir).netloc
-    print(hostname)
     if hostname != "" and hostname != options.get("http", {}).get(
         "domain", "my.hackucf.org"
     ):
@@ -199,7 +204,7 @@ async def oauth_transformer_new(
     # BACKPORT: I didn't realize that Snowflakes were strings because of an integer overflow bug.
     # So this will do a query for the "mistaken" value and then fix its data.
     if not query_for_id:
-        print("Beginning Discord ID attribute migration...")
+        logger.info("Beginning Discord ID attribute migration...")
         query_for_id = table.scan(
             FilterExpression=Attr("discord_id").eq(int(discordData["id"]))
         )
@@ -213,7 +218,6 @@ async def oauth_transformer_new(
             )
 
     is_new = False
-    print(query_for_id)
 
     if query_for_id:
         query_for_id = query_for_id[0]
@@ -326,7 +330,6 @@ async def profile(
     # Get data from DynamoDB
     dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
-    print(token)
 
     user_data = table.get_item(Key={"id": payload.get("id")}).get("Item", None)
 
@@ -398,4 +401,5 @@ async def favicon():
 if __name__ == "__main__":
     import uvicorn
 
+    logger.info("Starting Server")
     uvicorn.run(app, host="0.0.0.0", port=8000)

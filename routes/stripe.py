@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 import boto3
@@ -14,6 +15,9 @@ from util.options import Options
 
 options = Options.fetch()
 templates = Jinja2Templates(directory="templates")
+
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/pay", tags=["API"], responses=Errors.basic_http())
 
@@ -103,11 +107,11 @@ async def webhook(request: Request):
         event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
     except ValueError as e:
         # Invalid payload
-        print(e)
+        logger.error("Malformed Stripe Payload", e)
         return HTTPException(status_code=400, detail="Malformed payload.")
     except stripe.error.SignatureVerificationError as e:
         # Invalid signature
-        print(e)
+        logger.error("Malformed Stripe Payload", e)
         return HTTPException(status_code=400, detail="Malformed payload.")
 
     # Event Handling

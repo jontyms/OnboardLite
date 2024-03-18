@@ -1,7 +1,9 @@
+import logging
 from typing import Literal
 
 from pydantic import constr, create_model
 
+logger = logging.getLogger(__name__)
 
 # Known bug: You cannot pre-fill data stored in second-level DynamoDB levels.
 # So "parent.child" won't retrieve a value.
@@ -49,7 +51,7 @@ class Kennelish:
                 else:
                     output += Kennelish.invalid(entry)
             except Exception as e:
-                print(e)
+                logger.exception(e)
                 output += Kennelish.invalid({"input": "Malformed object"})
                 continue
 
@@ -196,9 +198,7 @@ class Transformer:
         super(Transformer, self).__init__()
 
     def kwargs_to_str(kwargs):
-        print(dir(kwargs))
         for k, v in kwargs.items():
-            print(k, v)
             kwargs[k] = str(v)
 
         return kwargs

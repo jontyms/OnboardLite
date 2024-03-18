@@ -50,11 +50,11 @@ class Discord:
         channel_id = Discord.get_dm_channel_id(discord_id)
 
         send_message_body = {"content": message}
-        req = requests.post(
+        res = requests.post(
             f"https://discord.com/api/channels/{channel_id}/messages",
             headers=headers,
             data=json.dumps(send_message_body),
         )
-        print(req.text)
 
-        return req.status_code < 400
+        # Use res.ok()?
+        return res.status_code < 400
