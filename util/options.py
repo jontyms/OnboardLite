@@ -1,10 +1,11 @@
+import json
+import logging
 import os
+import subprocess
+
+import yaml
 from pydantic import BaseModel, SecretStr, constr
 from pydantic_settings import BaseSettings
-import yaml
-import json
-import subprocess
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ def BitwardenConfig(settings_dict: dict):
     except Exception as e:
         logger.error(e)
     bitwarden_settings = parse_json_to_dict(bitwarden_raw)
-    
+
     bitwarden_mapping = {
         'discord_bot_token': ('discord', 'bot_token'),
         'discord_client_id': ('discord', 'client_id'),
@@ -35,7 +36,7 @@ def BitwardenConfig(settings_dict: dict):
         'infra_application_credential_id': ('infra', 'application_credential_id'),
         'infra_configuration_credential_secret': ('infra', 'application_credential_secret')
     }
-    
+
     bitwarden_mapped = {}
     for bw_key, nested_keys in bitwarden_mapping.items():
         if bw_key in bitwarden_settings:
@@ -43,13 +44,13 @@ def BitwardenConfig(settings_dict: dict):
             if top_key not in bitwarden_mapped:
                 bitwarden_mapped[top_key] = {}
             bitwarden_mapped[top_key][nested_key] = bitwarden_settings[bw_key]
-    
+
     for top_key, nested_dict in bitwarden_mapped.items():
         if top_key in settings_dict:
             for nested_key, value in nested_dict.items():
                 settings_dict[top_key][nested_key] = value
     return settings_dict
-    
+
 settings_dict = dict()
 
 # Reads config from ../config/options.yml
@@ -103,7 +104,7 @@ class StripeConfig(BaseModel):
     price_id: str
     url_success: str
     url_failure: str
-stripe_config = StripeConfig(**settings_dict['stripe']) 
+stripe_config = StripeConfig(**settings_dict['stripe'])
 
 class EmailConfig(BaseModel):
     """
@@ -114,10 +115,10 @@ class EmailConfig(BaseModel):
         email (str): The email address to send from also used as the login username.
         password (SecretStr): The password for the email account.
     """
-    smtp_server: str 
+    smtp_server: str
     email: str
     password: SecretStr
-email_config = EmailConfig(**settings_dict['email']) 
+email_config = EmailConfig(**settings_dict['email'])
 
 class JwtConfig(BaseModel):
     """
@@ -164,7 +165,7 @@ class RedisConfig(BaseModel):
 redis_config = RedisConfig(**settings_dict['redis'])
 
 class HttpConfig(BaseModel):
-    domain: str 
+    domain: str
 http_config = HttpConfig(**settings_dict['http'])
 
 class SingletonBaseSettingsMeta(type(BaseSettings), type):

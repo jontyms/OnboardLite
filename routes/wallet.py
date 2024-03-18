@@ -14,8 +14,6 @@ from util.authentication import Authentication
 from util.errors import Errors
 from util.options import Settings
 
-
-
 router = APIRouter(
     prefix="/wallet", tags=["API", "MobileWallet"], responses=Errors.basic_http()
 )

@@ -13,7 +13,6 @@ from util.authentication import Authentication
 from util.errors import Errors
 from util.options import Settings
 
-
 templates = Jinja2Templates(directory="templates")
 
 

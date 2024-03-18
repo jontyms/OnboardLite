@@ -3,7 +3,7 @@ from typing import Optional
 
 import boto3
 from botocore.exceptions import ClientError
-from fastapi import APIRouter, Cookie, Request, HTTPException
+from fastapi import APIRouter, Cookie, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from pydantic import error_wrappers
 
@@ -11,11 +11,9 @@ from models.info import InfoModel
 from models.user import PublicContact
 from util.authentication import Authentication
 from util.errors import Errors
+from util.forms import Forms
 from util.kennelish import Kennelish, Transformer
 from util.options import Settings
-from util.forms import Forms
-
-
 
 router = APIRouter(prefix="/api", tags=["API"], responses=Errors.basic_http())
 
@@ -103,7 +101,7 @@ async def post_form(
         kennelish_data = Forms.get_form_body(num)
     except FileNotFoundError:
         return HTTPException(status_code=404, detail="Form not found")
-    
+
     model = Transformer.kennelish_to_pydantic(kennelish_data)
 
     # Parse and Validate inputs

@@ -11,8 +11,6 @@ from util.errors import Errors
 from util.options import Settings
 
 
-
-
 class Authentication:
     def __init__(self):
         super(Authentication, self).__init__
@@ -102,7 +100,7 @@ class Authentication:
                     return tr
                 else:
                     raise  # Re-raise exceptions that are not related to token validation
-    
+
             if time.time() > creation_date + Settings().jwt.lifetime_user:
                 return Errors.generate(
                     request,

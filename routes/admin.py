@@ -15,7 +15,6 @@ from util.email import Email
 from util.errors import Errors
 from util.options import Settings
 
-
 templates = Jinja2Templates(directory="templates")
 
 router = APIRouter(prefix="/admin", tags=["Admin"], responses=Errors.basic_http())

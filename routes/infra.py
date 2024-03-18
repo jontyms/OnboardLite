@@ -21,7 +21,6 @@ from util.errors import Errors
 from util.limiter import RateLimiter
 from util.options import Settings
 
-
 logger = logging.getLogger(__name__)
 
 

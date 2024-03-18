@@ -26,18 +26,18 @@ from util.approve import Approve
 from util.authentication import Authentication
 # Import error handling
 from util.errors import Errors
+from util.forms import Forms
 # Import the page rendering library
 from util.kennelish import Kennelish
 # Import options
 from util.options import Settings
-from util.forms import Forms
 
 ### TODO: TEMP
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "0"
 ###
 
 
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)

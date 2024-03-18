@@ -6,7 +6,6 @@ import commonmark
 
 from util.options import Settings
 
-
 email = Settings().email.email
 password = Settings().email.password.get_secret_value()
 smtp_host = Settings().email.smtp_server

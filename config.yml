@@ -1,7 +1,7 @@
 # Options for Onboard.
 bws:
-    project_id: 
-    enable: 
+    project_id: ""
+    enable: ""
 jwt:
     secret:
     algorithm: "HS256"
@@ -29,9 +29,9 @@ discord:
 
 
 stripe:
-    api_key:
-    webhook_secret:
-    price_id:
+    api_key: ""
+    webhook_secret: ""
+    price_id: ""
     url_success: "https://join.hackucf.org/final/"
     url_failure: "https://join.hackucf.org/pay/"
 

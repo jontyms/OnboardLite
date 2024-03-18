@@ -4,8 +4,6 @@ import requests
 
 from util.options import Settings
 
-
-
 headers = {
     "Authorization": f"Bot {Settings().discord.bot_token.get_secret_value()}",
     "Content-Type": "application/json",
