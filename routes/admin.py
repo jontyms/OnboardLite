@@ -21,10 +21,6 @@ templates = Jinja2Templates(directory="templates")
 router = APIRouter(prefix="/admin", tags=["Admin"], responses=Errors.basic_http())
 
 
-@router.get("/test")
-async def test(request: Request):
-    return {"msg": Settings().jwt.secret.get_secret_value()}
-
 @router.get("/")
 @Authentication.admin
 async def admin(request: Request, token: Optional[str] = Cookie(None)):

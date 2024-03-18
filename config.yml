@@ -1,4 +1,7 @@
 # Options for Onboard.
+bws:
+    project_id: 
+    enable: 
 jwt:
     secret:
     algorithm: "HS256"
@@ -11,9 +14,8 @@ http:
 infra:
     wifi: ""
     horizon: "https://horizon.hackucf.org"
-    ad:
-      application_credential_id:
-      application_credential_secret:
+    application_credential_id:
+    application_credential_secret:
     tf_directory: "./"
 
 discord:

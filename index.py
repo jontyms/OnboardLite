@@ -358,8 +358,16 @@ async def forms(
 
     if num == "1":
         return RedirectResponse("/join/", status_code=status.HTTP_302_FOUND)
+    try:
+        data = Forms.get_form_body(num)
+    except Exception:
+        return Errors.generate(
+            request,
+            404,
+            "Form not found",
+            essay="This form does not exist.",
+        )
 
-    data = Forms.get_form_body(num)
 
     # Get data from DynamoDB
     user_data = table.get_item(Key={"id": user_jwt.get("id")}).get("Item", None)
