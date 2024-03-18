@@ -11,7 +11,7 @@ from fastapi.templating import Jinja2Templates
 from util.approve import Approve
 from util.authentication import Authentication
 from util.errors import Errors
-from util.options import Settings
+from util.settings import Settings
 
 templates = Jinja2Templates(directory="templates")
 

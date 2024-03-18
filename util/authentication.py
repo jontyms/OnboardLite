@@ -8,7 +8,7 @@ from jose import jwt
 
 # Import options and errors
 from util.errors import Errors
-from util.options import Settings
+from util.settings import Settings
 
 
 class Authentication:

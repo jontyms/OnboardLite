@@ -8,7 +8,7 @@ from python_terraform import Terraform
 from util.discord import Discord
 from util.email import Email
 from util.horsepass import HorsePass
-from util.options import Settings
+from util.settings import Settings
 
 logger = logging.getLogger()
 

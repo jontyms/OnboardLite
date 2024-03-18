@@ -13,7 +13,7 @@ from util.authentication import Authentication
 from util.discord import Discord
 from util.email import Email
 from util.errors import Errors
-from util.options import Settings
+from util.settings import Settings
 
 templates = Jinja2Templates(directory="templates")
 

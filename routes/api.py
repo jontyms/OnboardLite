@@ -13,7 +13,7 @@ from util.authentication import Authentication
 from util.errors import Errors
 from util.forms import Forms
 from util.kennelish import Kennelish, Transformer
-from util.options import Settings
+from util.settings import Settings
 
 router = APIRouter(prefix="/api", tags=["API"], responses=Errors.basic_http())
 

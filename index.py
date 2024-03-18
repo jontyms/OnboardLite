@@ -30,7 +30,7 @@ from util.forms import Forms
 # Import the page rendering library
 from util.kennelish import Kennelish
 # Import options
-from util.options import Settings
+from util.settings import Settings
 
 ### TODO: TEMP
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "0"

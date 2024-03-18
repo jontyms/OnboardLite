@@ -19,7 +19,7 @@ from util.discord import Discord
 from util.email import Email
 from util.errors import Errors
 from util.limiter import RateLimiter
-from util.options import Settings
+from util.settings import Settings
 
 logger = logging.getLogger(__name__)
 
