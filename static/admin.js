@@ -38,6 +38,7 @@ function load() {
                 "id": sanitizeHTML(member.id).replaceAll("&#45;", "-"),
                 "name": sanitizeHTML(member.first_name + " " + member.surname),
                 "status": userStatus,
+                "voting_status": Boolean(member.can_vote),
                 "discord": "@" + sanitizeHTML(member.discord.username),
                 "email": sanitizeHTML(member.email),
                 "nid": sanitizeHTML(member.nid),
@@ -145,6 +146,7 @@ function showUser(userId) {
     document.getElementById("statusColor").style.color = user.is_full_member ? "#51cd7f" : "#cf565f";
 
     document.getElementById("status").innerText = user.status;
+    document.getElementById("voting_status").innerText = user.can_vote ? "✔️" : "❌";
     document.getElementById("did_pay_dues").innerText = user.did_pay_dues ? "✔️" : "❌";
     document.getElementById("ethics_form").innerText = (user.ethics_form.signtime && (Number.parseInt(user.ethics_form.signtime) !== -1)) ? (new Date(Number.parseInt(user.ethics_form.signtime))).toLocaleString() : "❌";
     document.getElementById("is_full_member").innerText = user.is_full_member ? "✔️" : "❌";
@@ -202,6 +204,12 @@ function showUser(userId) {
             "did_get_shirt": true
         })
     };
+    document.getElementById("toggleVote").onclick = (evt) => {
+        editUser({
+            "id": user.id,
+            "can_vote": !user.can_vote
+        })
+    }
     document.getElementById("claimShirt").style.display = user.did_get_shirt ? "none" : "inline-block";
 
     document.getElementById("setAdmin").onclick = (evt) => {
