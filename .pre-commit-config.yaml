@@ -23,4 +23,9 @@ repos:
       - id: trailing-whitespace
       - id: check-merge-conflict
       - id: end-of-file-fixer
-      - id: check-toml
+  - repo: https://github.com/semgrep/semgrep
+    rev: 'v1.65.0'
+    hooks:
+      - id: semgrep
+        # See https://semgrep.dev/explore to select a ruleset and copy its URL
+        args: ['--error', '--skip-unknown-extensions']
