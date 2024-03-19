@@ -8,9 +8,7 @@ from jose import jwt
 
 # Import options and errors
 from util.errors import Errors
-from util.options import Options
-
-options = Options.fetch()
+from util.settings import Settings
 
 
 class Authentication:
@@ -30,19 +28,22 @@ class Authentication:
             try:
                 user_jwt = jwt.decode(
                     token,
-                    options.get("jwt").get("secret"),
-                    algorithms=options.get("jwt").get("algorithm"),
+                    Settings().jwt.secret.get_secret_value(),
+                    algorithms=Settings().jwt.algorithm,
                 )
                 is_admin: bool = user_jwt.get("sudo", False)
                 creation_date: float = user_jwt.get("issued", -1)
-            except Exception:
-                tr = Errors.generate(
-                    request,
-                    403,
-                    "Invalid token provided. Please log in again (refresh the page) and try again.",
-                )
-                tr.delete_cookie(key="token")
-                return tr
+            except Exception as e:
+                if isinstance(e, jwt.JWTError) or isinstance(e, jwt.JWTClaimsError):
+                    tr = Errors.generate(
+                        request,
+                        403,
+                        "Invalid token provided. Please log in again (refresh the page) and try again.",
+                    )
+                    tr.delete_cookie(key="token")
+                    return tr
+                else:
+                    raise  # Re-raise exceptions that are not related to token validation
 
             if not is_admin:
                 return Errors.generate(
@@ -52,9 +53,7 @@ class Authentication:
                     essay="If you think this is an error, please try logging in again.",
                 )
 
-            if time.time() > creation_date + options.get("jwt").get("lifetime").get(
-                "sudo"
-            ):
+            if time.time() > creation_date + Settings().jwt.lifetime_sudo:
                 return Errors.generate(
                     request,
                     403,
@@ -86,29 +85,29 @@ class Authentication:
             try:
                 user_jwt = jwt.decode(
                     token,
-                    options.get("jwt").get("secret"),
-                    algorithms=options.get("jwt").get("algorithm"),
+                    Settings().jwt.secret.get_secret_value(),
+                    algorithms=Settings().jwt.algorithm,
                 )
                 creation_date: float = user_jwt.get("issued", -1)
-            except Exception:
-                tr = Errors.generate(
-                    request,
-                    403,
-                    "Invalid token provided. Please log in again (refresh the page) and try again.",
-                )
-                tr.delete_cookie(key="token")
-                return tr
+            except Exception as e:
+                if isinstance(e, jwt.JWTError) or isinstance(e, jwt.JWTClaimsError):
+                    tr = Errors.generate(
+                        request,
+                        403,
+                        "Invalid token provided. Please log in again (refresh the page) and try again.",
+                    )
+                    tr.delete_cookie(key="token")
+                    return tr
+                else:
+                    raise  # Re-raise exceptions that are not related to token validation
 
-            if time.time() > creation_date + options.get("jwt").get("lifetime").get(
-                "user"
-            ):
+            if time.time() > creation_date + Settings().jwt.lifetime_user:
                 return Errors.generate(
                     request,
                     403,
                     "Session expired.",
                     essay="Sessions last for about fifteen weeks. You need to re-log-in between semesters.",
                 )
-
             return await func(request, token, user_jwt, *args, **kwargs)
 
         return wrapper_member

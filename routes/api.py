@@ -3,7 +3,7 @@ from typing import Optional
 
 import boto3
 from botocore.exceptions import ClientError
-from fastapi import APIRouter, Cookie, Request
+from fastapi import APIRouter, Cookie, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from pydantic import error_wrappers
 
@@ -11,10 +11,9 @@ from models.info import InfoModel
 from models.user import PublicContact
 from util.authentication import Authentication
 from util.errors import Errors
+from util.forms import Forms
 from util.kennelish import Kennelish, Transformer
-from util.options import Options
-
-options = Options.fetch()
+from util.settings import Settings
 
 router = APIRouter(prefix="/api", tags=["API"], responses=Errors.basic_http())
 
@@ -47,7 +46,10 @@ Note that Kennelish form files are NOT considered sensitive.
 
 @router.get("/form/{num}")
 async def get_form(num: str):
-    return Options.get_form_body(num)
+    try:
+        return Forms.get_form_body(num)
+    except FileNotFoundError:
+        return HTTPException(status_code=404, detail="Form not found")
 
 
 """
@@ -65,11 +67,13 @@ async def get_form_html(
 ):
     # AWS dependencies
     dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
+    table = dynamodb.Table(Settings().aws.table)
 
     # Get form object
-    data = Options.get_form_body(num)
-
+    try:
+        data = Forms.get_form_body(num)
+    except FileNotFoundError:
+        return HTTPException(status_code=404, detail="Form not found")
     # Get data from DynamoDB
     user_data = table.get_item(Key={"id": user_jwt.get("id")}).get("Item", None)
 
@@ -93,7 +97,11 @@ async def post_form(
     num: str = 1,
 ):
     # Get Kennelish data
-    kennelish_data = Options.get_form_body(num)
+    try:
+        kennelish_data = Forms.get_form_body(num)
+    except FileNotFoundError:
+        return HTTPException(status_code=404, detail="Form not found")
+
     model = Transformer.kennelish_to_pydantic(kennelish_data)
 
     # Parse and Validate inputs
@@ -142,7 +150,7 @@ async def post_form(
 
     # AWS dependencies
     dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(options.get("aws").get("dynamodb").get("table"))
+    table = dynamodb.Table(Settings().aws.table)
 
     # Push data back to DynamoDB
     try:
