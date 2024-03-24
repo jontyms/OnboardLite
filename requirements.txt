@@ -9,5 +9,5 @@ requests-oauthlib==1.4.0
 semgrep==1.65.0
 stripe==8.6.0
 typing_extensions==4.10.0
-uvicorn==0.28.0
+uvicorn==0.29.0
 virtualenv==20.25.1
