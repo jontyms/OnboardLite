@@ -5,7 +5,7 @@ python-terraform==0.10.1
 PyYAML==6.0.1
 redis==5.0.3
 requests==2.31.0
-requests-oauthlib==1.4.0
+requests-oauthlib==2.0.0
 semgrep==1.66.0
 stripe==8.8.0
 typing_extensions==4.10.0
