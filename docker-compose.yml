@@ -5,7 +5,32 @@ services:
     ports:
       - 8000:8000
     volumes:
-      - ./config.yml:/app/config/options.yml
-
+      - ./config/options.yml:/app/config/options.yml
+    develop:
+      watch:
+        # sync static content
+        - path: ./static
+          action: sync
+          target: /app/static
+        # sync templates
+        - path: ./templates
+          action: sync
+          target: /app/templates
+        # sync app
+        - path: ./models/
+          action: sync+restart
+          target: /app/models/
+        - path: ./routers/
+          action: sync+restart
+          target: /app/routers/
+        - path: ./util/
+          action: sync+restart
+          target: /app/util/
+        - path: ./index.py
+          action: sync+restart
+          target: /app/index.py
+        - path: ./requirements.txt
+          action: rebuild
+          target: /app/requirements.txt
   redis:
     image: redis:7.2
