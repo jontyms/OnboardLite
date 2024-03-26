@@ -90,7 +90,8 @@ async def create_checkout_session(
             cancel_url=Settings().stripe.url_failure,
         )
     except Exception as e:
-        return str(e)
+        return HTTPException(status_code=500, detail="Error creating checkout session.")
+        logger.exeption("Error creating checkout session in stripe.py", e)
 
     return RedirectResponse(checkout_session.url, status_code=303)
 
