@@ -2,6 +2,8 @@ version: '3'
 services:
   fastapi:
     build: .
+    environment:
+      - BWS_ACCESS_TOKEN={$BWS_ACCESS_TOKEN}
     ports:
       - 8000:8000
     volumes:
