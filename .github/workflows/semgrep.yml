@@ -31,4 +31,12 @@ jobs:
       # Fetch project source with GitHub Actions Checkout.
       - uses: actions/checkout@v3
       # Run the "semgrep scan" command on the command line of the docker image.
-      - run: semgrep scan --config auto
+      - run: semgrep scan --config auto --sarif > findings.sarif
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          # Path to SARIF file relative to the root of the repository
+          sarif_file: findings.sarif
+          # Optional category for the results
+          # Used to differentiate multiple results for one commit
+          category: semgrep-oss
