@@ -21,8 +21,9 @@ def BitwardenConfig(settings: dict):
         project_id = settings['bws']['project_id']
         if bool(re.search('[^a-z0-9-]', project_id)):
             raise ValueError("Invalid project id")
-        command = f"bws secret list {project_id}"
-        bitwarden_raw = subprocess.check_output(command, shell=True, text=True)
+        command = ["bws", "secret", "list", project_id, "--output", "json"]
+        env_vars = os.environ.copy()
+        bitwarden_raw = subprocess.run(command, text=True, env=env_vars, capture_output=True).stdout
     except Exception as e:
         logger.exception(e)
     bitwarden_settings = parse_json_to_dict(bitwarden_raw)
