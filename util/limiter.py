@@ -35,9 +35,9 @@ class RateLimiter:
     def rate_limit(self, max_requests: int, window: int, request_path: str):
         def decorator(func):
             @wraps(func)
-            async def wrapper(request: Request, payload, *args, **kwargs):
-                payload = args[0]
-                user_id = payload.get("id")
+            async def wrapper(request: Request, user_jwt, *args, **kwargs):
+                user_jwt = args[0]
+                user_id = user_jwt.get("id")
                 if user_id is None:
                     raise HTTPException(
                         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -49,7 +49,7 @@ class RateLimiter:
                         status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                         detail="Too many requests",
                     )
-                return await func(request=request, payload=payload, **kwargs)
+                return await func(request=request, user_jwt=user_jwt, **kwargs)
 
             return wrapper
 
