@@ -97,48 +97,48 @@ class UserModel(BaseModel):
 
 
 # What admins can edit.
-class UserModelMutable(BaseModel):
+class UserModelMutable(BaseModel, extra="allow"):
     # Identifiers
     id: str
-    discord_id: Optional[str]
-    ucf_id: Optional[int]
-    nid: Optional[str]
-    ops_email: Optional[str]
-    infra_email: Optional[str]
+    discord_id: Optional[str] = None
+    ucf_id: Optional[int] = None
+    nid: Optional[str] = None
+    ops_email: Optional[str] = None
+    infra_email: Optional[str] = None
 
-    minecraft: Optional[str]
-    github: Optional[str]
+    minecraft: Optional[str] = None
+    github: Optional[str] = None
 
     # PII
-    first_name: Optional[str]
-    surname: Optional[str]
-    email: Optional[str]
-    is_returning: Optional[bool]
-    gender: Optional[str]
-    major: Optional[str]
-    class_standing: Optional[str]
-    shirt_size: Optional[str]
-    did_get_shirt: Optional[bool]
-    phone_number: Optional[int]
+    first_name: Optional[str] = None
+    surname: Optional[str] = None
+    email: Optional[str] = None
+    is_returning: Optional[bool] = None
+    gender: Optional[str] = None
+    major: Optional[str] = None
+    class_standing: Optional[str] = None
+    shirt_size: Optional[str] = None
+    did_get_shirt: Optional[bool] = None
+    phone_number: Optional[int] = None
 
     # Permissions and Member Status
-    sudo: Optional[bool]
-    did_pay_dues: Optional[bool]
+    sudo: Optional[bool] = None
+    did_pay_dues: Optional[bool] = None
 
     # Mentorship Program
     mentor_name: Optional[str] = None
 
-    is_full_member: Optional[bool]
+    is_full_member: Optional[bool] = None
     can_vote: Optional[bool] = False
 
     # Other models
-    experience: Optional[int]
-    curiosity: Optional[str]
-    c3_interest: Optional[bool]
+    experience: Optional[int] = None
+    curiosity: Optional[str] = None
+    c3_interest: Optional[bool] = None
 
     # Other things
-    attending: Optional[str]
-    comments: Optional[str]
+    attending: Optional[str] = None
+    comments: Optional[str] = None
 
 
 class PublicContact(BaseModel):
