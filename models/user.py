@@ -97,7 +97,7 @@ class UserModel(BaseModel):
 
 
 # What admins can edit.
-class UserModelMutable(BaseModel, extra="allow"):
+class UserModelMutable(BaseModel):
     # Identifiers
     id: str
     discord_id: Optional[str] = None
