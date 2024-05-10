@@ -9,7 +9,7 @@ Jinja2==3.1.4
 openstacksdk==3.0.0
 passwordgenerator==1.5.1
 pyOpenSSL==23.2.0
-pydantic==2.6.4
+pydantic==2.7.1
 pydantic_settings==2.2.1
 python-dateutil==2.9.0.post0
 pre-commit==3.7.0
