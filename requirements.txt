@@ -17,7 +17,7 @@ python-dotenv==1.0.1
 python-jose==3.3.0
 python-terraform==0.10.1
 PyYAML==6.0.1
-redis==5.0.3
+redis==5.0.4
 requests==2.31.0
 requests-oauthlib==2.0.0
 semgrep==1.67.0
