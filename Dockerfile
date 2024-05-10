@@ -13,6 +13,14 @@ RUN apt-get update && apt-get install -y build-essential
 # Clean up
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
+ADD https://github.com/bitwarden/sdk/releases/download/bws-v0.4.0/bws-x86_64-unknown-linux-gnu-0.4.0.zip /tmp
+
+RUN unzip /tmp/bws-x86_64-unknown-linux-gnu-0.4.0.zip
+
+RUN mv bws /usr/local/bin
+
+RUN rm -r /tmp/
+
 # Install the dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
