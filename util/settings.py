@@ -62,6 +62,7 @@ settings = dict()
 here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, "../config/options.yml")) as f:
     settings.update(yaml.load(f, Loader=yaml.FullLoader))
+
 def parse_json_to_dict(json_string):
     data = json.loads(json_string)
     return {item['key']: item['value'] for item in data}
@@ -70,6 +71,7 @@ def parse_json_to_dict(json_string):
 if settings.get('bws').get('enable'):
     settings = BitwardenConfig(settings)
 
+logger.debug("Final settings: %s", settings)
 
 class DiscordConfig(BaseModel):
     """
@@ -109,6 +111,7 @@ class StripeConfig(BaseModel):
     price_id: str
     url_success: str
     url_failure: str
+    pause_payments: bool
 stripe_config = StripeConfig(**settings['stripe'])
 
 class EmailConfig(BaseModel):

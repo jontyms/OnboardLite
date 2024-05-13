@@ -32,6 +32,12 @@
             </div>
         </div>
         <div class="form">
+            {% if paused_payments %}
+            <div class="alert">
+                <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                Dues payment is temporarily paused please check back later!
+            </div>
+            {% endif %}
             <h1>Pay Dues</h1>
             <p>Hack@UCF members get access to some very nice perks, some of which are pretty unique. With the help of membership dues and our sponsors, we are able to provide exclusive access to some cool resources and other benefits:</p>
             <ul>
@@ -51,7 +57,9 @@
                     <button type="button" class="btn wide grey" onclick="submit_and_nav('/final')">Skip</button>
                 </div>
                 <div>
-                    {% if not did_pay_dues %}
+                    {% if paused_payments and not did_pay_dues %}
+                    <h1>Dues Payment Paused</h1>
+                    {% elif not paused_payments and not did_pay_dues %}
                     <form action="/pay/checkout/" method="POST">
                         <button type="submit" id="checkout-button" class="btn wide">Pay Dues</button>
                     </form>

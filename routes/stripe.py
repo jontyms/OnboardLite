@@ -46,6 +46,7 @@ async def get_root(
     did_pay_dues = user_data.get("did_pay_dues", False)
 
     is_nid = True if user_data.get("nid", False) else False
+    paused_payments = Settings().stripe.pause_payments
 
     return templates.TemplateResponse(
         "pay.html",
@@ -56,6 +57,7 @@ async def get_root(
             "id": user_jwt["id"],
             "did_pay_dues": did_pay_dues,
             "is_nid": is_nid,
+            "paused_payments": paused_payments
         },
     )
 
@@ -67,6 +69,8 @@ async def create_checkout_session(
     token: Optional[str] = Cookie(None),
     user_jwt: Optional[object] = {},
 ):
+    if Settings().stripe.pause_payments:
+      return Errors.generate(request, 503, "Payments Paused")
     # AWS dependencies
     dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(Settings().aws.table)
