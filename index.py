@@ -84,19 +84,20 @@ async def index(request: Request, token: Optional[str] = Cookie(None)):
     user_id = None
     infra_email = None
 
-    try:
-        user_jwt = jwt.decode(
-            token,
-            Settings().jwt.secret.get_secret_value(),
-            algorithms=Settings().jwt.algorithm,
-        )
-        is_full_member: bool = user_jwt.get("is_full_member", False)
-        is_admin: bool = user_jwt.get("sudo", False)
-        user_id: bool = user_jwt.get("id", None)
-        infra_email: bool = user_jwt.get("infra_email", None)
-    except Exception as e:
-        logger.exception(e)
-        pass
+    if token is not None:
+      try:
+          user_jwt = jwt.decode(
+              token,
+              Settings().jwt.secret.get_secret_value(),
+              algorithms=Settings().jwt.algorithm,
+          )
+          is_full_member: bool = user_jwt.get("is_full_member", False)
+          is_admin: bool = user_jwt.get("sudo", False)
+          user_id: bool = user_jwt.get("id", None)
+          infra_email: bool = user_jwt.get("infra_email", None)
+      except Exception as e:
+          logger.exception(e)
+          pass
 
     return templates.TemplateResponse(
         "index.html",
