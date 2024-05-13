@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 
 import boto3
 import requests
+import sentry_sdk
 from boto3.dynamodb.conditions import Attr
 # FastAPI
 from fastapi import Cookie, FastAPI, Request, Response, status
@@ -43,10 +44,25 @@ logging.basicConfig(level=logging.INFO,
 logger = logging.getLogger(__name__)
 
 
+sentry_sdk.init(
+    dsn="https://bfd4a45f40b8f3f44d099c307007d086@o4507250398593024.ingest.us.sentry.io/4507250399641600",
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    traces_sample_rate=1.0,
+    # Set profiles_sample_rate to 1.0 to profile 100%
+    # of sampled transactions.
+    # We recommend adjusting this value in production.
+    profiles_sample_rate=1.0,
+)
+
+
 # Initiate FastAPI.
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+
 
 # Import endpoints from ./routes
 app.include_router(api.router)
