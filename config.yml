@@ -34,7 +34,7 @@ stripe:
     price_id: ""
     url_success: "https://join.hackucf.org/final/"
     url_failure: "https://join.hackucf.org/pay/"
-
+    pause_payments: true
 aws:
     dynamodb:
         table: "hackucf_members"
