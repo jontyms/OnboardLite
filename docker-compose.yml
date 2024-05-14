@@ -20,6 +20,9 @@ services:
         - path: ./templates
           action: sync
           target: /app/templates
+        - path: ./forms
+          action: sync
+          target: /app/templates
         # sync app
         - path: ./models/
           action: sync+restart

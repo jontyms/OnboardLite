@@ -8,7 +8,8 @@ from pydantic import error_wrappers
 from sqlmodel import Session, select
 
 from models.info import InfoModel
-from models.user import PublicContact, UserModel
+from models.user import (EthicsFormModel, EthicsFormUpdate, PublicContact,
+                         UserModel)
 from util.authentication import Authentication
 from util.database import get_session
 from util.errors import Errors
@@ -58,37 +59,71 @@ async def get_form(num: str):
 """
 Renders a Kennelish form file as HTML (with user data). Intended for AJAX applications.
 """
-
-
-@router.get("/form/{num}/html", response_class=HTMLResponse)
-@Authentication.member
-async def get_form_html(
-    request: Request,
-    token: Optional[str] = Cookie(None),
-    user_jwt: Optional[object] = {},
-    num: str = 1,
-):
-    # AWS dependencies
-    # dynamodb = boto3.resource("dynamodb")
-    # table = dynamodb.Table(Settings().aws.table)
-
-    # Get form object
-    try:
-        data = Forms.get_form_body(num)
-    except FileNotFoundError:
-        return HTTPException(status_code=404, detail="Form not found")
-    # Get data from DynamoDB
-    user_data = table.get_item(Key={"id": user_jwt.get("id")}).get("Item", None)
-
-    # Have Kennelish parse the data.
-    body = Kennelish.parse(data, user_data)
-
-    return body
+#TODO Fix or remove this route, Do we even need it?
+#
+#@router.get("/form/{num}/html", response_class=HTMLResponse)
+#@Authentication.member
+#async def get_form_html(
+#    request: Request,
+#    token: Optional[str] = Cookie(None),
+#    user_jwt: Optional[object] = {},
+#    num: str = 1,
+#):
+#    # AWS dependencies
+#    # dynamodb = boto3.resource("dynamodb")
+#    # table = dynamodb.Table(Settings().aws.table)
+#
+#    # Get form object
+#    try:
+#        data = Forms.get_form_body(num)
+#    except FileNotFoundError:
+#        return HTTPException(status_code=404, detail="Form not found")
+#    # Get data from DynamoDB
+#    user_data = table.get_item(Key={"id": user_jwt.get("id")}).get("Item", None)
+#
+#    # Have Kennelish parse the data.
+#    body = Kennelish.parse(data, user_data)
+#
+#    return body
 
 
 """
 Allows updating the user's database using a schema assumed by the Kennelish file.
 """
+@router.post("/form/ethics_form_midway")
+@Authentication.member
+async def post_ethics_form(
+    request: Request,
+    token: Optional[str] = Cookie(None),
+    user_jwt: Optional[object] = {},
+    session: Session = Depends(get_session),
+):
+    try:
+        ethics_form_data = EthicsFormUpdate.model_validate(await request.json())
+    except json.JSONDecodeError:
+        return {"description": "Malformed JSON input."}
+    user_id = user_jwt.get("id")
+    # Retrieve existing user model from the database
+    statement = select(UserModel).where(UserModel.id == user_id)
+    result = session.exec(statement)
+    user = result.one_or_none()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Update the ethics form with new values
+    validated_data = apply_fuzzy_parsing(ethics_form_data.model_dump(), EthicsFormModel)
+    print(validated_data.dict())
+    for key, value in validated_data:
+        if value is not None:
+            setattr(user.ethics_form, key, value)
+
+    # Save the updated model back to the database
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+
+    return user.ethics_form.dict()
 
 
 @router.post("/form/{num}")

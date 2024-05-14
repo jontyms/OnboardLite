@@ -23,6 +23,8 @@ def fuzzy_parse_value(value):
             return True
         if value in {"no", "false", "0", "No"}:
             return False
+        if "i promise not" in value:
+            return True
 
     # Convert other types as needed
 
@@ -34,7 +36,7 @@ def apply_fuzzy_parsing(data: dict, model_class):
     try:
         validated_data = model_class(**parsed_data)
     except ValidationError as e:
-        raise HTTPException(
+        raise Exception(
             status_code=422,
             detail={"description": "Malformed input.", "errors": e.errors()},
         )

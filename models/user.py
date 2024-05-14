@@ -5,6 +5,8 @@ from typing import Optional
 from pydantic import BaseModel, EmailStr, constr, validator
 from sqlmodel import Field, Relationship, SQLModel
 
+from util.forms import fuzzy_parse_value
+
 
 class DiscordModel(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -32,36 +34,9 @@ class EthicsFormModel(SQLModel, table=True):
     host_at_ucf: Optional[bool] = False
     signtime: Optional[int] = 0
 
-    user_id: Optional[int] = Field(default=None, foreign_key="usermodel.id")
+    user_id: Optional[uuid.UUID] = Field(default=None, foreign_key="usermodel.id")
     user: "UserModel" = Relationship(back_populates="ethics_form")
 
-
-# Removed unneeded functionality
-
-# class CyberLabModel(SQLModel, table=True):
-#    id: Optional[int] = Field(default=None, primary_key=True)
-#    resource: Optional[bool] = False
-#    clean: Optional[bool] = False
-#    no_profane: Optional[bool] = False
-#    access_control: Optional[bool] = False
-#    report_damage: Optional[bool] = False
-#    be_nice: Optional[bool] = False
-#    can_revoke: Optional[bool] = False
-#    signtime: Optional[int] = 0
-#
-#    user_id: Optional[int] = Field(default=None, foreign_key="usermodel.id")
-#    user: "UserModel" = Relationship(back_populates="cyberlab_monitor")
-#
-# class MenteeModel(SQLModel, table=True):
-#    id: Optional[int] = Field(default=None, primary_key=True)
-#    schedule: Optional[str] = None
-#    time_in_cyber: Optional[str] = None
-#    personal_proj: Optional[str] = None
-#    hope_to_gain: Optional[str] = None
-#    domain_interest: Optional[str] = None
-#
-#    user_id: Optional[int] = Field(default=None, foreign_key="usermodel.id")
-#    user: "UserModel" = Relationship(back_populates="mentee")
 
 
 class UserModel(SQLModel, table=True):
@@ -178,6 +153,20 @@ class PublicContact(BaseModel):
     ops_email: str
 
 
+class EthicsFormUpdate(BaseModel):
+    hack_others: Optional[str] = None
+    hack_ucf: Optional[str] = None
+    interrupt_ucf: Optional[str] = None
+    manip_traffic: Optional[str] = None
+    bypass_dhcp: Optional[str] = None
+    pirate: Optional[str] = None
+    host_at_ucf: Optional[str] = None
+    signtime: Optional[int] = None
+
+
+
+
+
 def to_dict(model):
     if model is None:
         return None
@@ -192,3 +181,36 @@ def to_dict(model):
                 data[key] = to_dict(value)
         return data
     return model
+
+
+
+
+
+
+
+# Removed unneeded functionality
+
+# class CyberLabModel(SQLModel, table=True):
+#    id: Optional[int] = Field(default=None, primary_key=True)
+#    resource: Optional[bool] = False
+#    clean: Optional[bool] = False
+#    no_profane: Optional[bool] = False
+#    access_control: Optional[bool] = False
+#    report_damage: Optional[bool] = False
+#    be_nice: Optional[bool] = False
+#    can_revoke: Optional[bool] = False
+#    signtime: Optional[int] = 0
+#
+#    user_id: Optional[int] = Field(default=None, foreign_key="usermodel.id")
+#    user: "UserModel" = Relationship(back_populates="cyberlab_monitor")
+#
+# class MenteeModel(SQLModel, table=True):
+#    id: Optional[int] = Field(default=None, primary_key=True)
+#    schedule: Optional[str] = None
+#    time_in_cyber: Optional[str] = None
+#    personal_proj: Optional[str] = None
+#    hope_to_gain: Optional[str] = None
+#    domain_interest: Optional[str] = None
+#
+#    user_id: Optional[int] = Field(default=None, foreign_key="usermodel.id")
+#    user: "UserModel" = Relationship(back_populates="mentee")
