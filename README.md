@@ -39,7 +39,7 @@ User=ubuntu
 Group=www-data
 WorkingDirectory=/home/onboard-user/OnboardLite/
 Environment="PATH=/home/onboard-user/OnboardLite/"
-ExecStart=/home/onboard-user/.local/bin/uvicorn index:app --host 127.0.0.1 --port 8000 --workers 2
+ExecStart=python3.11 -m uvicorn index:app --host 127.0.0.1 --port 8000 --workers 2
 
 [Install]
 WantedBy=multi-user.target
