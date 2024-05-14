@@ -7,9 +7,9 @@ from contextlib import asynccontextmanager
 from typing import Optional
 from urllib.parse import urlparse
 
-#import boto3
+# import boto3
 import requests
-#from boto3.dynamodb.conditions import Attr
+# from boto3.dynamodb.conditions import Attr
 # FastAPI
 from fastapi import Cookie, Depends, FastAPI, Request, Response, status
 from fastapi.responses import FileResponse, RedirectResponse
@@ -17,10 +17,11 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from jose import jwt
 from requests_oauthlib import OAuth2Session
+from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
 # Import data types
-from models.user import DiscordModel, EthicsFormModel, UserModel
+from models.user import DiscordModel, EthicsFormModel, UserModel, to_dict
 # Import routes
 from routes import admin, api, infra, stripe, wallet
 from util.approve import Approve
@@ -36,13 +37,15 @@ from util.kennelish import Kennelish
 from util.settings import Settings
 
 ### TODO: TEMP
-os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "0"
+# os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "0"
 ###
 
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S')
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 logger = logging.getLogger(__name__)
 
 
@@ -93,19 +96,19 @@ async def index(request: Request, token: Optional[str] = Cookie(None)):
     infra_email = None
 
     if token is not None:
-      try:
-          user_jwt = jwt.decode(
-              token,
-              Settings().jwt.secret.get_secret_value(),
-              algorithms=Settings().jwt.algorithm,
-          )
-          is_full_member: bool = user_jwt.get("is_full_member", False)
-          is_admin: bool = user_jwt.get("sudo", False)
-          user_id: bool = user_jwt.get("id", None)
-          infra_email: bool = user_jwt.get("infra_email", None)
-      except Exception as e:
-          logger.exception(e)
-          pass
+        try:
+            user_jwt = jwt.decode(
+                token,
+                Settings().jwt.secret.get_secret_value(),
+                algorithms=Settings().jwt.algorithm,
+            )
+            is_full_member: bool = user_jwt.get("is_full_member", False)
+            is_admin: bool = user_jwt.get("sudo", False)
+            user_id: bool = user_jwt.get("id", None)
+            infra_email: bool = user_jwt.get("infra_email", None)
+        except Exception as e:
+            logger.exception(e)
+            pass
 
     return templates.TemplateResponse(
         "index.html",
@@ -161,10 +164,8 @@ async def oauth_transformer_new(
     code: str = None,
     redir: str = "/join/2",
     redir_endpoint: Optional[str] = Cookie(None),
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
 ):
-
-
     # Open redirect check
     if redir == "_redir":
         redir = redir_endpoint
@@ -206,7 +207,7 @@ async def oauth_transformer_new(
     print(user)
     # BACKPORT: I didn't realize that Snowflakes were strings because of an integer overflow bug.
     # So this will do a query for the "mistaken" value and then fix its data.
-    #if not query_for_id:
+    # if not query_for_id:
     #    logger.info("Beginning Discord ID attribute migration...")
     #    query_for_id = table.scan(
     #        FilterExpression=Attr("discord_id").eq(int(discordData["id"]))
@@ -242,25 +243,23 @@ async def oauth_transformer_new(
             headers=headers,
             data=json.dumps(put_join_guild),
         )
-        user = UserModel(discord_id=discord_id,  id=member_id, infra_email=infra_email)
+        user = UserModel(discord_id=discord_id, id=member_id, infra_email=infra_email)
         discord_data = {
-                "email": discordData.get("email"),
-                "mfa": discordData.get("mfa_enabled"),
-                "avatar": f"https://cdn.discordapp.com/avatars/{discordData['id']}/{discordData['avatar']}.png?size=512",
-                "banner": f"https://cdn.discordapp.com/banners/{discordData['id']}/{discordData['banner']}.png?size=1536",
-                "color": discordData.get("accent_color"),
-                "nitro": discordData.get("premium_type"),
-                "locale": discordData.get("locale"),
-                "username": discordData.get("username"),
-                "user_id": user.id
-            }
+            "email": discordData.get("email"),
+            "mfa": discordData.get("mfa_enabled"),
+            "avatar": f"https://cdn.discordapp.com/avatars/{discordData['id']}/{discordData['avatar']}.png?size=512",
+            "banner": f"https://cdn.discordapp.com/banners/{discordData['id']}/{discordData['banner']}.png?size=1536",
+            "color": discordData.get("accent_color"),
+            "nitro": discordData.get("premium_type"),
+            "locale": discordData.get("locale"),
+            "username": discordData.get("username"),
+            "user_id": user.id,
+        }
         discord_model = DiscordModel(**discord_data)
         user.discord = discord_model
         session.add(user)
         session.commit()
         session.refresh(user)
-
-
 
     # Create JWT. This should be the only way to issue JWTs.
     jwtData = {
@@ -338,9 +337,8 @@ async def forms(
     token: Optional[str] = Cookie(None),
     user_jwt: Optional[object] = {},
     num: str = 1,
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
 ):
-
     if num == "1":
         return RedirectResponse("/join/", status_code=status.HTTP_302_FOUND)
     try:
@@ -353,12 +351,17 @@ async def forms(
             essay="This form does not exist.",
         )
 
-
     # Get data from SqlModel
-    statement = select(UserModel).where(UserModel.id == user_jwt["id"])
+    statement = (
+        select(UserModel)
+        .where(UserModel.id == user_jwt["id"])
+        .options(selectinload(UserModel.discord))
+    )
     user_data = session.exec(statement).one_or_none()
     # Have Kennelish parse the data.
-    body = Kennelish.parse(data, dict(user_data))
+    user_data = to_dict(user_data)
+    logger.info("Parsing form data" + str(user_data))
+    body = Kennelish.parse(data, user_data)
 
     # return num
     return templates.TemplateResponse(
@@ -384,7 +387,8 @@ async def logout(request: Request):
     rr.delete_cookie(key="token")
     return rr
 
-@app.get('/favicon.ico', include_in_schema=False)
+
+@app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
     return FileResponse("./static/favicon.ico")
 

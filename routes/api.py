@@ -1,17 +1,22 @@
 import json
+import logging
 from typing import Optional
 
-from fastapi import APIRouter, Cookie, HTTPException, Request
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from pydantic import error_wrappers
+from sqlmodel import Session, select
 
 from models.info import InfoModel
-from models.user import PublicContact
+from models.user import PublicContact, UserModel
 from util.authentication import Authentication
+from util.database import get_session
 from util.errors import Errors
-from util.forms import Forms
+from util.forms import Forms, apply_fuzzy_parsing
 from util.kennelish import Kennelish, Transformer
 from util.settings import Settings
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api", tags=["API"], responses=Errors.basic_http())
 
@@ -64,8 +69,8 @@ async def get_form_html(
     num: str = 1,
 ):
     # AWS dependencies
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(Settings().aws.table)
+    # dynamodb = boto3.resource("dynamodb")
+    # table = dynamodb.Table(Settings().aws.table)
 
     # Get form object
     try:
@@ -93,6 +98,7 @@ async def post_form(
     token: Optional[str] = Cookie(None),
     user_jwt: Optional[object] = {},
     num: str = 1,
+    session: Session = Depends(get_session),
 ):
     # Get Kennelish data
     try:
@@ -109,76 +115,28 @@ async def post_form(
         return {"description": "Malformed JSON input."}
 
     try:
-        # this only parses the data into an arbitrary pydantic model,
-        # it doesn't actually validate form field completion as far as I can tell
-        validated = model(**inp)
+        validated_data = apply_fuzzy_parsing(inp, UserModel)
     except error_wrappers.ValidationError:
         return {"description": "Malformed input."}
 
-    # Remove items we did not update
-    items_to_update = list(validated.dict().items())
-    items_to_keep = []
-    for item in items_to_update:
-        # What is Item[0] and Item[1]???
-        if item[1] is not None:
-            # English -> Boolean
-            if item[1] == "Yes" or item[1] == "I promise not to do this.":
-                item = (item[0], True)
-            elif (
-                item[1] == "No"
-                or item[1]
-                == "I disagree with this and do not wish to be part of Hack@UCF"
-            ):
-                item = (item[0], False)
+    user_id = user_jwt.get("id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="User not authenticated")
 
-            items_to_keep.append(item)
+    statement = select(UserModel).where(UserModel.id == user_id)
+    result = session.exec(statement)
+    user = result.one_or_none()
 
-    update_expression = "SET "
-    expression_attribute_values = {}
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
 
-    # Here, the variable 'items_to_keep' is validated input. We can update the user's profile from here.
+    updated_data = validated_data.dict(exclude_unset=True)
+    for key, value in updated_data.items():
+        setattr(user, key, value)
 
-    # Prepare to update to DynamoDB
-    for item in items_to_keep:
-        update_expression += f"{item[0]} = :{item[0].replace('.', '_')}, "
-        expression_attribute_values[f":{item[0].replace('.', '_')}"] = item[1]
+    # Save the updated model back to the database
+    session.add(user)
+    session.commit()
+    session.refresh(user)
 
-    # Strip last comma for update_expression
-    update_expression = update_expression[:-2]
-
-    # AWS dependencies
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(Settings().aws.table)
-
-    # Push data back to DynamoDB
-    try:
-        table.update_item(
-            Key={"id": user_jwt.get("id")},
-            UpdateExpression=update_expression,
-            ExpressionAttributeValues=expression_attribute_values,
-        )
-    except ClientError:
-        # We need to do a migration on *something*. We know it's a subtype.
-        # So we will find it and migrate it.
-        for item in items_to_keep:
-            if "." in item[0]:
-                dot_loc = item[0].find(".")
-                key_to_make = item[0][:dot_loc]
-
-                # Create dictionary
-                table.update_item(
-                    Key={"id": user_jwt.get("id")},
-                    # key_to_make is not user-supplied, rather, it's from the form JSON.
-                    # if this noSQLi's, then it's because of an insider threat.
-                    UpdateExpression=f"SET {key_to_make} = :dicty",
-                    ExpressionAttributeValues={":dicty": {}},
-                )
-
-        # After all dicts are a thing, re-run query.
-        table.update_item(
-            Key={"id": user_jwt.get("id")},
-            UpdateExpression=update_expression,
-            ExpressionAttributeValues=expression_attribute_values,
-        )
-
-    return validated
+    return user.model_dump()

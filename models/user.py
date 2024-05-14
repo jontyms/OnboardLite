@@ -1,7 +1,8 @@
+import re
 import uuid
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, constr, validator
 from sqlmodel import Field, Relationship, SQLModel
 
 
@@ -19,6 +20,7 @@ class DiscordModel(SQLModel, table=True):
     user_id: Optional[uuid.UUID] = Field(default=None, foreign_key="usermodel.id")
     user: "UserModel" = Relationship(back_populates="discord")
 
+
 class EthicsFormModel(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     hack_others: Optional[bool] = False
@@ -33,9 +35,10 @@ class EthicsFormModel(SQLModel, table=True):
     user_id: Optional[int] = Field(default=None, foreign_key="usermodel.id")
     user: "UserModel" = Relationship(back_populates="ethics_form")
 
+
 # Removed unneeded functionality
 
-#class CyberLabModel(SQLModel, table=True):
+# class CyberLabModel(SQLModel, table=True):
 #    id: Optional[int] = Field(default=None, primary_key=True)
 #    resource: Optional[bool] = False
 #    clean: Optional[bool] = False
@@ -49,7 +52,7 @@ class EthicsFormModel(SQLModel, table=True):
 #    user_id: Optional[int] = Field(default=None, foreign_key="usermodel.id")
 #    user: "UserModel" = Relationship(back_populates="cyberlab_monitor")
 #
-#class MenteeModel(SQLModel, table=True):
+# class MenteeModel(SQLModel, table=True):
 #    id: Optional[int] = Field(default=None, primary_key=True)
 #    schedule: Optional[str] = None
 #    time_in_cyber: Optional[str] = None
@@ -60,11 +63,12 @@ class EthicsFormModel(SQLModel, table=True):
 #    user_id: Optional[int] = Field(default=None, foreign_key="usermodel.id")
 #    user: "UserModel" = Relationship(back_populates="mentee")
 
+
 class UserModel(SQLModel, table=True):
     id: Optional[uuid.UUID] = Field(default_factory=uuid.uuid4, primary_key=True)
     discord_id: str = Field(unique=True)
-    ucf_id: Optional[int] = Field(unique=True,default=None)
-    nid: Optional[str] = Field(unique=True,default=None)
+    ucf_id: Optional[int] = Field(unique=True, default=None)
+    nid: Optional[str] = Field(unique=True, default=None)
     ops_email: Optional[str] = None
     infra_email: Optional[str] = None
     minecraft: Optional[str] = ""
@@ -94,8 +98,34 @@ class UserModel(SQLModel, table=True):
 
     discord: DiscordModel = Relationship(back_populates="user")
     ethics_form: EthicsFormModel = Relationship(back_populates="user")
-    #cyberlab_monitor: CyberLabModel = Relationship(back_populates="user")
-    #mentee: MenteeModel = Relationship(back_populates="user")
+    # cyberlab_monitor: CyberLabModel = Relationship(back_populates="user")
+    # mentee: MenteeModel = Relationship(back_populates="user")
+
+    @validator("nid")
+    def nid_length(cls, nid):
+        # regex for NID
+        pattern = re.compile(r"^([a-z]{2}[0-9]{6})$")
+        if pattern.match(nid) is None:
+            raise ValueError("NID must be 2 letters followed by 6 numbers")
+        if len(nid) != 8:
+            raise ValueError("NID must be 8 characters long")
+        return nid
+
+    @validator("shirt_size")
+    def shirt_size_length(cls, shirt_size):
+        # enum for shirt sizes
+        sizes = ["S", "M", "L", "XL", "2XL", "3XL"]
+        if shirt_size not in sizes:
+            raise ValueError("Shirt size must be one of S, M, L, XL, 2XL, 3XL")
+        return shirt_size
+
+    @validator("email")
+    def nid_length(cls, email):
+        # regex for email
+        pattern = re.compile(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$")
+        if pattern.match(email) is None:
+            raise ValueError("Email failed regex validation")
+
 
 # What admins can edit.
 class UserModelMutable(BaseModel):
@@ -146,3 +176,19 @@ class PublicContact(BaseModel):
     first_name: str
     surname: str
     ops_email: str
+
+
+def to_dict(model):
+    if model is None:
+        return None
+    if isinstance(model, list):
+        return [to_dict(item) for item in model]
+    if isinstance(model, SQLModel):
+        data = model.dict()
+        for key, value in model.__dict__.items():
+            if isinstance(value, SQLModel):
+                data[key] = to_dict(value)
+            elif isinstance(value, list) and value and isinstance(value[0], SQLModel):
+                data[key] = to_dict(value)
+        return data
+    return model
