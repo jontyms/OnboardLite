@@ -8,6 +8,7 @@ services:
       - 8000:8000
     volumes:
       - ./config/options.yml:/app/config/options.yml
+      - ./database/:/app/database
       - $HOME/.aws:/root/.aws
     develop:
       watch:

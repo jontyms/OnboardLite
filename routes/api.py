@@ -1,8 +1,6 @@
 import json
 from typing import Optional
 
-import boto3
-from botocore.exceptions import ClientError
 from fastapi import APIRouter, Cookie, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from pydantic import error_wrappers

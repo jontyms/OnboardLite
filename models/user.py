@@ -1,9 +1,12 @@
+import uuid
 from typing import Optional
 
 from pydantic import BaseModel
+from sqlmodel import Field, Relationship, SQLModel
 
 
-class DiscordModel(BaseModel):
+class DiscordModel(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
     email: Optional[str] = None
     mfa: Optional[bool] = None
     avatar: Optional[str] = None
@@ -13,8 +16,11 @@ class DiscordModel(BaseModel):
     locale: Optional[str] = None
     username: str
 
+    user_id: Optional[uuid.UUID] = Field(default=None, foreign_key="usermodel.id")
+    user: "UserModel" = Relationship(back_populates="discord")
 
-class EthicsFormModel(BaseModel):
+class EthicsFormModel(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
     hack_others: Optional[bool] = False
     hack_ucf: Optional[bool] = False
     interrupt_ucf: Optional[bool] = False
@@ -24,39 +30,45 @@ class EthicsFormModel(BaseModel):
     host_at_ucf: Optional[bool] = False
     signtime: Optional[int] = 0
 
+    user_id: Optional[int] = Field(default=None, foreign_key="usermodel.id")
+    user: "UserModel" = Relationship(back_populates="ethics_form")
 
-class CyberLabModel(BaseModel):
-    resource: Optional[bool] = False
-    clean: Optional[bool] = False
-    no_profane: Optional[bool] = False
-    access_control: Optional[bool] = False
-    report_damage: Optional[bool] = False
-    be_nice: Optional[bool] = False
-    can_revoke: Optional[bool] = False
-    signtime: Optional[int] = 0
+# Removed unneeded functionality
 
+#class CyberLabModel(SQLModel, table=True):
+#    id: Optional[int] = Field(default=None, primary_key=True)
+#    resource: Optional[bool] = False
+#    clean: Optional[bool] = False
+#    no_profane: Optional[bool] = False
+#    access_control: Optional[bool] = False
+#    report_damage: Optional[bool] = False
+#    be_nice: Optional[bool] = False
+#    can_revoke: Optional[bool] = False
+#    signtime: Optional[int] = 0
+#
+#    user_id: Optional[int] = Field(default=None, foreign_key="usermodel.id")
+#    user: "UserModel" = Relationship(back_populates="cyberlab_monitor")
+#
+#class MenteeModel(SQLModel, table=True):
+#    id: Optional[int] = Field(default=None, primary_key=True)
+#    schedule: Optional[str] = None
+#    time_in_cyber: Optional[str] = None
+#    personal_proj: Optional[str] = None
+#    hope_to_gain: Optional[str] = None
+#    domain_interest: Optional[str] = None
+#
+#    user_id: Optional[int] = Field(default=None, foreign_key="usermodel.id")
+#    user: "UserModel" = Relationship(back_populates="mentee")
 
-class MenteeModel(BaseModel):
-    schedule: Optional[str] = None
-    time_in_cyber: Optional[str] = None
-    personal_proj: Optional[str] = None
-    hope_to_gain: Optional[str] = None
-    domain_interest: Optional[str] = None
-
-
-class UserModel(BaseModel):
-    # Identifiers
-    id: str
-    discord_id: str
-    ucf_id: Optional[int] = None
-    nid: Optional[str] = None
+class UserModel(SQLModel, table=True):
+    id: Optional[uuid.UUID] = Field(default_factory=uuid.uuid4, primary_key=True)
+    discord_id: str = Field(unique=True)
+    ucf_id: Optional[int] = Field(unique=True,default=None)
+    nid: Optional[str] = Field(unique=True,default=None)
     ops_email: Optional[str] = None
     infra_email: Optional[str] = None
-
     minecraft: Optional[str] = ""
     github: Optional[str] = ""
-
-    # PII
     first_name: Optional[str] = ""
     surname: Optional[str] = ""
     email: Optional[str] = ""
@@ -68,33 +80,22 @@ class UserModel(BaseModel):
     did_get_shirt: Optional[bool] = False
     time_availability: Optional[str] = ""
     phone_number: Optional[int] = 0
-
-    # Permissions and Member Status
     sudo: Optional[bool] = False
     did_pay_dues: Optional[bool] = False
     join_date: Optional[int] = None
-
-    # Paperwork Signed
-    ethics_form: Optional[EthicsFormModel] = EthicsFormModel()
-    cyberlab_monitor: Optional[CyberLabModel] = CyberLabModel()
-
-    # Mentorship Program
-    mentee: Optional[MenteeModel] = MenteeModel()
     mentor_name: Optional[str] = None
-
     is_full_member: Optional[bool] = False
     can_vote: Optional[bool] = False
-
-    # Other models
-    discord: DiscordModel
     experience: Optional[int] = None
     curiosity: Optional[str] = None
     c3_interest: Optional[bool] = False
-
-    # Other things
     attending: Optional[str] = ""
     comments: Optional[str] = ""
 
+    discord: DiscordModel = Relationship(back_populates="user")
+    ethics_form: EthicsFormModel = Relationship(back_populates="user")
+    #cyberlab_monitor: CyberLabModel = Relationship(back_populates="user")
+    #mentee: MenteeModel = Relationship(back_populates="user")
 
 # What admins can edit.
 class UserModelMutable(BaseModel):

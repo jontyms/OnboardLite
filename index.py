@@ -3,27 +3,30 @@ import logging
 import os
 import time
 import uuid
+from contextlib import asynccontextmanager
 from typing import Optional
 from urllib.parse import urlparse
 
-import boto3
+#import boto3
 import requests
-from boto3.dynamodb.conditions import Attr
+#from boto3.dynamodb.conditions import Attr
 # FastAPI
-from fastapi import Cookie, FastAPI, Request, Response, status
+from fastapi import Cookie, Depends, FastAPI, Request, Response, status
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from jose import jwt
 from requests_oauthlib import OAuth2Session
+from sqlmodel import Session, select
 
 # Import data types
-from models.user import UserModel
+from models.user import DiscordModel, EthicsFormModel, UserModel
 # Import routes
 from routes import admin, api, infra, stripe, wallet
 from util.approve import Approve
 # Import middleware
 from util.authentication import Authentication
+from util.database import get_session, init_db
 # Import error handling
 from util.errors import Errors
 from util.forms import Forms
@@ -75,6 +78,11 @@ with open("clouds.yaml", "w", encoding="utf-8") as f:
 """
 Render the Onboard home page.
 """
+
+
+@app.on_event("startup")
+def on_startup():
+    init_db()
 
 
 @app.get("/")
@@ -153,10 +161,9 @@ async def oauth_transformer_new(
     code: str = None,
     redir: str = "/join/2",
     redir_endpoint: Optional[str] = Cookie(None),
+    session: Session = Depends(get_session)
 ):
-    # AWS dependencies
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(Settings().aws.table)
+
 
     # Open redirect check
     if redir == "_redir":
@@ -194,36 +201,28 @@ async def oauth_transformer_new(
     discordData = r.json()
 
     # Generate a new user ID or reuse an existing one.
-    query_for_id = table.scan(
-        FilterExpression=Attr("discord_id").eq(str(discordData["id"]))
-    )
-    query_for_id = query_for_id.get("Items")
-
+    statement = select(UserModel).where(UserModel.discord_id == discordData["id"])
+    user = session.exec(statement).one_or_none()
+    print(user)
     # BACKPORT: I didn't realize that Snowflakes were strings because of an integer overflow bug.
     # So this will do a query for the "mistaken" value and then fix its data.
-    if not query_for_id:
-        logger.info("Beginning Discord ID attribute migration...")
-        query_for_id = table.scan(
-            FilterExpression=Attr("discord_id").eq(int(discordData["id"]))
-        )
-        query_for_id = query_for_id.get("Items")
-
-        if query_for_id:
-            table.update_item(
-                Key={"id": query_for_id[0].get("id")},
-                UpdateExpression="SET discord_id = :discord_id",
-                ExpressionAttributeValues={":discord_id": str(discordData["id"])},
-            )
+    #if not query_for_id:
+    #    logger.info("Beginning Discord ID attribute migration...")
+    #    query_for_id = table.scan(
+    #        FilterExpression=Attr("discord_id").eq(int(discordData["id"]))
+    #    )
+    #    query_for_id = query_for_id.get("Items")
+    #
+    #    if query_for_id:
+    #        table.update_item(
+    #            Key={"id": query_for_id[0].get("id")},
+    #            UpdateExpression="SET discord_id = :discord_id",
+    #            ExpressionAttributeValues={":discord_id": str(discordData["id"])},
+    #        )
 
     is_new = False
 
-    if query_for_id:
-        query_for_id = query_for_id[0]
-        member_id = query_for_id.get("id")
-        do_sudo = query_for_id.get("sudo")
-        is_full_member = query_for_id.get("is_full_member")
-        infra_email = query_for_id.get("infra_email", "")
-    else:
+    if not user:
         is_full_member = False
         member_id = str(uuid.uuid4())
         do_sudo = False
@@ -243,48 +242,36 @@ async def oauth_transformer_new(
             headers=headers,
             data=json.dumps(put_join_guild),
         )
+        user = UserModel(discord_id=discord_id,  id=member_id, infra_email=infra_email)
+        discord_data = {
+                "email": discordData.get("email"),
+                "mfa": discordData.get("mfa_enabled"),
+                "avatar": f"https://cdn.discordapp.com/avatars/{discordData['id']}/{discordData['avatar']}.png?size=512",
+                "banner": f"https://cdn.discordapp.com/banners/{discordData['id']}/{discordData['banner']}.png?size=1536",
+                "color": discordData.get("accent_color"),
+                "nitro": discordData.get("premium_type"),
+                "locale": discordData.get("locale"),
+                "username": discordData.get("username"),
+                "user_id": user.id
+            }
+        discord_model = DiscordModel(**discord_data)
+        user.discord = discord_model
+        session.add(user)
+        session.commit()
+        session.refresh(user)
 
-    data = {
-        "id": member_id,
-        "discord_id": discordData["id"],
-        "discord": {
-            "email": discordData["email"],
-            "mfa": discordData["mfa_enabled"],
-            "avatar": f"https://cdn.discordapp.com/avatars/{discordData['id']}/{discordData['avatar']}.png?size=512",
-            "banner": f"https://cdn.discordapp.com/banners/{discordData['id']}/{discordData['banner']}.png?size=1536",
-            "color": discordData["accent_color"],
-            "nitro": discordData["public_flags"],
-            "locale": discordData["locale"],
-            "username": discordData["username"],
-        },
-        "email": discordData["email"]
-        ## Consider making this a separate table.
-        # "attendance": None # t/f based on dict/object keyed on iso-8601 date.
-    }
 
-    # Populate the full table.
-    full_data = UserModel(**data).dict()
-
-    # Push data back to DynamoDB
-    if is_new:
-        table.put_item(Item=full_data)
-    else:
-        table.update_item(
-            Key={"id": member_id},
-            UpdateExpression="SET discord = :discord",
-            ExpressionAttributeValues={":discord": full_data["discord"]},
-        )
 
     # Create JWT. This should be the only way to issue JWTs.
     jwtData = {
         "discord": token,
         "name": discordData["username"],
-        "pfp": full_data["discord"]["avatar"],
-        "id": member_id,
-        "sudo": do_sudo,
-        "is_full_member": is_full_member,
+        "pfp": user.discord.avatar,
+        "id": str(user.id),
+        "sudo": user.sudo,
+        "is_full_member": user.is_full_member,
         "issued": time.time(),
-        "infra_email": infra_email,
+        "infra_email": user.infra_email,
     }
     bearer = jwt.encode(
         jwtData,
@@ -351,10 +338,8 @@ async def forms(
     token: Optional[str] = Cookie(None),
     user_jwt: Optional[object] = {},
     num: str = 1,
+    session: Session = Depends(get_session)
 ):
-    # AWS dependencies
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(Settings().aws.table)
 
     if num == "1":
         return RedirectResponse("/join/", status_code=status.HTTP_302_FOUND)
@@ -369,11 +354,11 @@ async def forms(
         )
 
 
-    # Get data from DynamoDB
-    user_data = table.get_item(Key={"id": user_jwt.get("id")}).get("Item", None)
-
+    # Get data from SqlModel
+    statement = select(UserModel).where(UserModel.id == user_jwt["id"])
+    user_data = session.exec(statement).one_or_none()
     # Have Kennelish parse the data.
-    body = Kennelish.parse(data, user_data)
+    body = Kennelish.parse(data, dict(user_data))
 
     # return num
     return templates.TemplateResponse(

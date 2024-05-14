@@ -26,3 +26,4 @@ uvicorn==0.29.0
 virtualenv==20.26.1
 httpx
 pytest
+sqlmodel
