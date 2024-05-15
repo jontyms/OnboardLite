@@ -3,7 +3,6 @@ import logging
 from typing import Optional
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Request
-from fastapi.responses import HTMLResponse
 from pydantic import error_wrappers
 from sqlmodel import Session, select
 
@@ -14,8 +13,7 @@ from util.authentication import Authentication
 from util.database import get_session
 from util.errors import Errors
 from util.forms import Forms, apply_fuzzy_parsing
-from util.kennelish import Kennelish, Transformer
-from util.settings import Settings
+from util.kennelish import Transformer
 
 logger = logging.getLogger(__name__)
 
@@ -112,7 +110,7 @@ async def post_ethics_form(
         raise HTTPException(status_code=404, detail="User not found")
 
     # Update the ethics form with new values
-    validated_data = apply_fuzzy_parsing(ethics_form_data.model_dump(), EthicsFormModel)
+    validated_data = apply_fuzzy_parsing(ethics_form_data.model_dump(exclude_unset=True), EthicsFormModel)
     print(validated_data.dict())
     for key, value in validated_data:
         if value is not None:

@@ -5,6 +5,7 @@ from typing import Optional
 from fastapi import Request, status
 from fastapi.responses import RedirectResponse
 from jose import jwt
+from models.user import UserModel
 
 # Import options and errors
 from util.errors import Errors
@@ -111,3 +112,19 @@ class Authentication:
             return await func(request, token, user_jwt, *args, **kwargs)
 
         return wrapper_member
+
+    def create_jwt(user: UserModel):
+       jwtData = {
+          "discord": user.discord_id,
+          "id": str(user.id),
+          "sudo": user.sudo,
+          "is_full_member": user.is_full_member,
+          "issued": time.time(),
+          "infra_email": user.infra_email,
+       }
+       bearer = jwt.encode(
+           jwtData,
+           Settings().jwt.secret.get_secret_value(),
+           algorithm=Settings().jwt.algorithm,
+       )
+       return bearer

@@ -18,12 +18,12 @@ class Forms:
 def fuzzy_parse_value(value):
     # Convert common boolean-like values
     if isinstance(value, str):
-        value = value.lower()
-        if value in {"yes", "true", "1", "Yes"}:
+        value_test = value.lower()
+        if value_test in {"yes", "true", "1", "Yes"}:
             return True
-        if value in {"no", "false", "0", "No"}:
+        if value_test in {"no", "false", "0", "No"}:
             return False
-        if "i promise not" in value:
+        if "i promise not" in value_test:
             return True
 
     # Convert other types as needed

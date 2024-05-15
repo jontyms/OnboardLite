@@ -4,9 +4,11 @@ import logging
 import os
 from typing import Optional
 
-import boto3
+from util.database import get_session
+from sqlmodel import select, Session
+from models.user import UserModel
 import openstack
-from fastapi import APIRouter, Cookie, Request
+from fastapi import APIRouter, Cookie, Request, Depends
 from fastapi.responses import FileResponse
 from fastapi.templating import Jinja2Templates
 from python_terraform import Terraform
@@ -270,6 +272,7 @@ async def get_infra(
     request: Request,
     token: Optional[str] = Cookie(None),
     user_jwt: Optional[object] = {},
+    session: Session = Depends(get_session)
 ):
     member_id = user_jwt.get("id")
 
@@ -286,10 +289,7 @@ async def get_infra(
         creds = {}
 
     # Get user data
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(Settings().aws.table)
-
-    user_data = table.get_item(Key={"id": member_id}).get("Item", None)
+    user_data = session.exec(select(UserModel).where(UserModel.id == user_jwt.get("id"))).one_or_none()
 
     # Send DM...
     new_creds_msg = f"""Hello {user_data.get('first_name')},

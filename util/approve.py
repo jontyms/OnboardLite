@@ -1,19 +1,25 @@
 import logging
 import os
+from unittest import result
 
 import boto3
 import openstack
 from python_terraform import Terraform
+from requests import session
 
 from util.discord import Discord
 from util.email import Email
 from util.horsepass import HorsePass
 from util.settings import Settings
+from util.database import engine
+from sqlmodel import select, Session
+from sqlalchemy.orm import selectinload
+from models.user import UserModel
 
 logger = logging.getLogger()
 
 
-tf = Terraform(working_dir=Settings().infra.tf_directory)
+#tf = Terraform(working_dir=Settings().infra.tf_directory)
 
 """
 This function will ensure a member meets all requirements to be a member, and if so, creates an
@@ -26,6 +32,7 @@ If approval fails, dispatch a Discord message saying that something went wrong a
 class Approve:
     def __init__(self):
         pass
+        
 
     def provision_infra(member_id, user_data=None):
         # Log into OpenStack
@@ -42,13 +49,11 @@ class Approve:
             pass
 
         try:
-            dynamodb = boto3.resource("dynamodb")
-            table = dynamodb.Table(Settings().aws.table)
+            
             if not user_data:
-                user_data = table.get_item(Key={"id": member_id}).get("Item", None)
-
+                user_data = UserModel(session.exec(select(UserModel).where(UserModel.id == member_id)).one_or_none())
             # See if existing email.
-            username = user_data.get("infra_email", False)
+            username = user_data.infra_email
             if username:
                 user = conn.identity.find_user(username)
                 if user:
@@ -65,15 +70,14 @@ class Approve:
 
             else:
                 username = (
-                    user_data.get("discord", {}).get("username").replace(" ", "_")
+                    user_data.discord.username.replace(" ", "_")
                     + "@infra.hackucf.org"
                 )
                 # Add username to Onboard database
-                table.update_item(
-                    Key={"id": member_id},
-                    UpdateExpression="SET infra_email = :val",
-                    ExpressionAttributeValues={":val": username},
-                )
+                user_data.infra_email = username
+                session.add(user_data)
+                session.commit()
+                session.refresh(user_data)
 
             password = HorsePass.gen()
 
@@ -124,51 +128,56 @@ class Approve:
 
     # !TODO finish the post-sign-up stuff + testing
     def approve_member(member_id):
-        logger.info(f"Re-running approval for {member_id}")
-        dynamodb = boto3.resource("dynamodb")
-        table = dynamodb.Table(Settings().aws.table)
-
-        user_data = table.get_item(Key={"id": member_id}).get("Item", None)
-
-        # If a member was already approved, kill process.
-        if user_data.get("is_full_member", False):
-            logger.info("\tAlready full member.")
-            return True
-
-        # Sorry for the long if statement. But we consider someone a "member" iff:
-        # - They have a name
-        # - We have their Discord snowflake
-        # - They paid dues
-        # - They signed their ethics form
-        if (
-            user_data.get("first_name")
-            and user_data.get("discord_id")
-            and user_data.get("did_pay_dues")
-            and user_data.get("ethics_form", {}).get("signtime", 0) != 0
-        ):
-            logger.info("\tNewly-promoted full member!")
-
-            discord_id = user_data.get("discord_id")
-
-            # Create an Infra account.
-            creds = Approve.provision_infra(
-                member_id, user_data=user_data
-            )  # TODO(err): sometimes this is None
-            if creds is None:
-                creds = {}
-
-            # Minecraft server
-            if user_data.get("minecraft", False):
-                pass
-                # <whitelist logic>
-
-            # Assign the Dues-Paying Member role
-            Discord.assign_role(
-                discord_id, Settings().discord.member_role
+        with Session(engine) as session:
+            
+            logger.info(f"Re-running approval for {member_id}")
+            statement = (
+            select(UserModel)
+            .where(UserModel.id == member_id)
+            .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
             )
+        
+            result = session.exec(statement)
+            user_data = result.one_or_none()
+            # If a member was already approved, kill process.
+            if user_data.is_full_member:
+                logger.info("\tAlready full member.")
+                return True
 
-            # Send Discord message saying they are a member
-            welcome_msg = f"""Hello {user_data.get('first_name')}, and welcome to Hack@UCF!
+            # Sorry for the long if statement. But we consider someone a "member" iff:
+            # - They have a name
+            # - We have their Discord snowflake
+            # - They paid dues
+            # - They signed their ethics form
+            if (
+                user_data.first_name
+                and user_data.discord_id
+                and user_data.did_pay_dues
+                and user_data.ethics_form.signtime != 0
+            ):
+                logger.info("\tNewly-promoted full member!")
+
+                discord_id = user_data.discord_id
+
+                # Create an Infra account.
+                creds = Approve.provision_infra(
+                    member_id, user_data=user_data
+                )  # TODO(err): sometimes this is None
+                if creds is None:
+                    creds = {}
+
+                # Minecraft server
+                if user_data.minecraft:
+                    pass
+                    # <whitelist logic>
+
+                # Assign the Dues-Paying Member role
+                Discord.assign_role(
+                    discord_id, Settings().discord.member_role
+                )
+
+                # Send Discord message saying they are a member
+                welcome_msg = f"""Hello {user_data.first_name}, and welcome to Hack@UCF!
 
 This message is to confirm that your membership has processed successfully. You can access and edit your membership ID at https://{Settings().http.domain}/profile.
 
@@ -187,24 +196,23 @@ Happy Hacking,
   - Hack@UCF Bot
             """
 
-            Discord.send_message(discord_id, welcome_msg)
-            Email.send_email("Welcome to Hack@UCF", welcome_msg, user_data.get("email"))
-            # Set member as a "full" member.
-            table.update_item(
-                Key={"id": member_id},
-                UpdateExpression="SET is_full_member = :val",
-                ExpressionAttributeValues={":val": True},
-            )
+                Discord.send_message(discord_id, welcome_msg)
+                Email.send_email("Welcome to Hack@UCF", welcome_msg, user_data.email)
+                # Set member as a "full" member.
+                user_data.is_full_member = True
+                session.add(user_data)
+                session.commit()
+                session.refresh(user_data)
 
-        elif user_data.get("did_pay_dues"):
-            logger.info("\tPaid dues but did not do other step!")
-            # Send a message on why this check failed.
-            fail_msg = f"""Hello {user_data.get('first_name')},
+            elif user_data.did_pay_dues:
+               logger.info("\tPaid dues but did not do other step!")
+               # Send a message on why this check failed.
+               fail_msg = f"""Hello {user_data.first_name},
 
 We wanted to let you know that you **did not** complete all of the steps for being able to become an Hack@UCF member.
 
-- Provided a name: {'✅' if user_data.get('first_name') else '❌'}
-- Signed Ethics Form: {'✅' if user_data.get('ethics_form', {}).get('signtime', 0) != 0 else '❌'}
+- Provided a name: {'✅' if user_data.first_name else '❌'}
+- Signed Ethics Form: {'✅' if user_data.ethics_form.signtime != 0 else '❌'}
 - Paid $10 dues: ✅
 
 Please complete all of these to become a full member. Once you do, visit https://{Settings().http.domain}/profile to re-run this check.
@@ -214,9 +222,9 @@ If you think you have completed all of these, please reach out to an Exec on the
 We hope to see you soon,
   - Hack@UCF Bot
 """
-            Discord.send_message(discord_id, fail_msg)
+               Discord.send_message(discord_id, fail_msg)
 
-        else:
-            logger.info("\tDid not pay dues yet.")
+            else:
+                logger.info("\tDid not pay dues yet.")
 
         return False

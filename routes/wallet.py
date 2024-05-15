@@ -3,16 +3,18 @@ import os
 import uuid
 from typing import Optional
 
-import boto3
+from util.database import get_session
+from sqlmodel import select
+from sqlalchemy.orm import selectinload
+from models.user import UserModel, to_dict
 import requests
 from airpress import PKPass
-from fastapi import APIRouter, Cookie, Request, Response
+from fastapi import APIRouter, Cookie, Request, Response, Depends
 
 from models.info import InfoModel
 from models.user import PublicContact
 from util.authentication import Authentication
 from util.errors import Errors
-from util.settings import Settings
 
 router = APIRouter(
     prefix="/wallet", tags=["API", "MobileWallet"], responses=Errors.basic_http()
@@ -236,12 +238,17 @@ async def aapl_gen(
     request: Request,
     token: Optional[str] = Cookie(None),
     user_jwt: Optional[object] = {},
+    session=Depends(get_session),
 ):
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(Settings().aws.table)
+    
 
-    # Get data from DynamoDB
-    user_data = table.get_item(Key={"id": user_jwt.get("id")}).get("Item", None)
+    statement = (
+        select(UserModel)
+        .where(UserModel.id == user_jwt["id"])
+        .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
+        )
+    user_data = to_dict(session.exec(statement).one_or_none())
+    
 
     p = apple_wallet(user_data)
 

@@ -1,10 +1,11 @@
 import logging
 from typing import Optional
 
-import boto3
+from util.database import get_session
+from sqlmodel import select, Session
+from models.user import UserModel
 import stripe
-from boto3.dynamodb.conditions import Attr
-from fastapi import APIRouter, Cookie, HTTPException, Request
+from fastapi import APIRouter, Cookie, HTTPException, Request, Depends
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
@@ -35,17 +36,12 @@ async def get_root(
     request: Request,
     token: Optional[str] = Cookie(None),
     user_jwt: Optional[object] = {},
+    session: Session = Depends(get_session) 
 ):
-    # AWS dependencies
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(Settings().aws.table)
+    user_data = session.exec(select(UserModel).where(UserModel.id == user_jwt.get("id"))).one_or_none()
+    did_pay_dues = user_data.did_pay_dues
 
-    # Get data from DynamoDB
-    user_data = table.get_item(Key={"id": user_jwt.get("id")}).get("Item", None)
-
-    did_pay_dues = user_data.get("did_pay_dues", False)
-
-    is_nid = True if user_data.get("nid", False) else False
+    is_nid = True if user_data.nid else False
     paused_payments = Settings().stripe.pause_payments
 
     return templates.TemplateResponse(
@@ -68,18 +64,15 @@ async def create_checkout_session(
     request: Request,
     token: Optional[str] = Cookie(None),
     user_jwt: Optional[object] = {},
+    session: Session = Depends(get_session) 
 ):
     if Settings().stripe.pause_payments:
       return Errors.generate(request, 503, "Payments Paused")
-    # AWS dependencies
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(Settings().aws.table)
-
-    # Get data from DynamoDB
-    user_data = table.get_item(Key={"id": user_jwt.get("id")}).get("Item", None)
+    
+    user_data = session.exec(select(UserModel).where(UserModel.id == user_jwt.get("id"))).one_or_none()
 
     try:
-        stripe_email = user_data.get("email")
+        stripe_email = user_data.email
         checkout_session = stripe.checkout.Session.create(
             line_items=[
                 {
@@ -136,25 +129,18 @@ async def webhook(request: Request):
 
 
 def pay_dues(session):
+    session = get_session()
     customer_email = session.get("customer_email")
 
-    # AWS dependencies
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(Settings().aws.table)
 
-    # Get data from DynamoDB
-    response = table.scan(FilterExpression=Attr("email").eq(customer_email)).get(
-        "Items", None
-    )[0]
+    user_data = session.exec(select(UserModel).where(UserModel.email == customer_email)).one_or_none()
 
-    member_id = response.get("id")
+    member_id = user_data.id
 
     # Set PAID.
-    table.update_item(
-        Key={"id": member_id},
-        UpdateExpression="SET did_pay_dues = :val",
-        ExpressionAttributeValues={":val": True},
-    )
-
+    user_data.did_pay_dues = True
+    session.add(user_data)
+    session.commit()
+    
     # Do checks to approve membership status.
     Approve.approve_member(member_id)

@@ -1,15 +1,13 @@
 import json
 import logging
-import os
 import time
 import uuid
-from contextlib import asynccontextmanager
 from typing import Optional
 from urllib.parse import urlparse
-
-# import boto3
 import requests
-# from boto3.dynamodb.conditions import Attr
+
+
+
 # FastAPI
 from fastapi import Cookie, Depends, FastAPI, Request, Response, status
 from fastapi.responses import FileResponse, RedirectResponse
@@ -21,12 +19,12 @@ from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
 # Import data types
-from models.user import DiscordModel, EthicsFormModel, UserModel, to_dict
+from models.user import DiscordModel, UserModel, to_dict
 # Import routes
 from routes import admin, api, infra, stripe, wallet
 from util.approve import Approve
 # Import middleware
-from util.authentication import Authentication
+from util.authentication import Authentication 
 from util.database import get_session, init_db
 # Import error handling
 from util.errors import Errors
@@ -205,6 +203,7 @@ async def oauth_transformer_new(
     statement = select(UserModel).where(UserModel.discord_id == discordData["id"])
     user = session.exec(statement).one_or_none()
     print(user)
+    # TODO: Discuss removing
     # BACKPORT: I didn't realize that Snowflakes were strings because of an integer overflow bug.
     # So this will do a query for the "mistaken" value and then fix its data.
     # if not query_for_id:
@@ -262,21 +261,7 @@ async def oauth_transformer_new(
         session.refresh(user)
 
     # Create JWT. This should be the only way to issue JWTs.
-    jwtData = {
-        "discord": token,
-        "name": discordData["username"],
-        "pfp": user.discord.avatar,
-        "id": str(user.id),
-        "sudo": user.sudo,
-        "is_full_member": user.is_full_member,
-        "issued": time.time(),
-        "infra_email": user.infra_email,
-    }
-    bearer = jwt.encode(
-        jwtData,
-        Settings().jwt.secret.get_secret_value(),
-        algorithm=Settings().jwt.algorithm,
-    )
+    bearer = Authentication.create_jwt(user)
     rr = RedirectResponse(redir, status_code=status.HTTP_302_FOUND)
     rr.set_cookie(key="token", value=bearer)
 
@@ -310,12 +295,15 @@ async def profile(
     request: Request,
     token: Optional[str] = Cookie(None),
     user_jwt: Optional[object] = {},
+    session: Session = Depends(get_session),
 ):
-    # Get data from DynamoDB
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(Settings().aws.table)
 
-    user_data = table.get_item(Key={"id": user_jwt.get("id")}).get("Item", None)
+    statement = (
+        select(UserModel)
+        .where(UserModel.id == user_jwt["id"])
+        .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
+        )
+    user_data = to_dict(session.exec(statement).one_or_none())
 
     # Re-run approval workflow.
     Approve.approve_member(user_jwt.get("id"))

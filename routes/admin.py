@@ -1,9 +1,11 @@
 from typing import Optional
 
-import boto3
-from boto3.dynamodb.conditions import Attr
-from fastapi import APIRouter, Body, Cookie, Request, Response
-from fastapi.encoders import jsonable_encoder
+from util.database import get_session
+from sqlmodel import select, Session
+from sqlalchemy.orm import selectinload
+from models.user import UserModel, to_dict
+
+from fastapi import APIRouter, Body, Cookie, Request, Response, Depends
 from fastapi.templating import Jinja2Templates
 from jose import jwt
 
@@ -46,8 +48,9 @@ async def admin(request: Request, token: Optional[str] = Cookie(None)):
 @Authentication.admin
 async def get_infra(
     request: Request,
-    token: Optional[str] = Cookie(None),
+    user_jwt: Optional[str] = Cookie(None),
     member_id: Optional[str] = "FAIL",
+    session: Session = Depends(get_session)
 ):
     """
     API endpoint to FORCE-provision Infra credentials (even without membership!!!)
@@ -63,13 +66,10 @@ async def get_infra(
         return Errors.generate(request, 404, "User Not Found")
 
     # Get user data
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(Settings().aws.table)
-
-    user_data = table.get_item(Key={"id": member_id}).get("Item", None)
+    user_data = session.exec(select(UserModel).where(UserModel.id == member_id)).one_or_none()
 
     # Send DM...
-    new_creds_msg = f"""Hello {user_data.get('first_name')},
+    new_creds_msg = f"""Hello {user_data.first_name},
 
 We are happy to grant you Hack@UCF Private Cloud access!
 
@@ -90,7 +90,7 @@ Happy Hacking,
 
     # Send Discord message
     #Discord.send_message(user_data.get("discord_id"), new_creds_msg)
-    Email.send_email("Hack@UCF Private Cloud Credentials", new_creds_msg, user_data.get("email"))
+    Email.send_email("Hack@UCF Private Cloud Credentials", new_creds_msg, user_data.email)
     return {"username": creds.get("username"), "password": creds.get("password")}
 
 
@@ -98,8 +98,9 @@ Happy Hacking,
 @Authentication.admin
 async def get_refresh(
     request: Request,
-    token: Optional[str] = Cookie(None),
+    user_jwt: Optional[str] = Cookie(None),
     member_id: Optional[str] = "FAIL",
+    session: Session = Depends(get_session)
 ):
     """
     API endpoint that re-runs the member verification workflow
@@ -109,22 +110,22 @@ async def get_refresh(
 
     Approve.approve_member(member_id)
 
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(Settings().aws.table)
-    data = table.get_item(Key={"id": member_id}).get("Item", None)
+    user_data = session.exec(select(UserModel).where(UserModel.id == member_id)).one_or_none()
 
-    if not data:
+
+    if not user_data:
         return Errors.generate(request, 404, "User Not Found")
 
-    return {"data": data}
+    return {"data": user_data}
 
 
 @router.get("/get/")
 @Authentication.admin
 async def admin_get_single(
     request: Request,
-    token: Optional[str] = Cookie(None),
+    user_jwt: Optional[str] = Cookie(None),
     member_id: Optional[str] = "FAIL",
+    session: Session = Depends(get_session)
 ):
     """
     API endpoint that gets a specific user's data as JSON
@@ -132,14 +133,17 @@ async def admin_get_single(
     if member_id == "FAIL":
         return {"data": {}, "error": "Missing ?member_id"}
 
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(Settings().aws.table)
-    data = table.get_item(Key={"id": member_id}).get("Item", None)
+    statement = (
+        select(UserModel)
+        .where(UserModel.id == user_jwt["id"])
+        .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
+        )
+    user_data = to_dict(session.exec(statement).one_or_none())
 
-    if not data:
+    if not user_data:
         return Errors.generate(request, 404, "User Not Found")
 
-    return {"data": data}
+    return {"data": user_data}
 
 
 @router.get("/get_by_snowflake/")
@@ -148,6 +152,7 @@ async def admin_get_snowflake(
     request: Request,
     token: Optional[str] = Cookie(None),
     discord_id: Optional[str] = "FAIL",
+    session: Session = Depends(get_session)
 ):
     """
     API endpoint that gets a specific user's data as JSON, given a Discord snowflake.
@@ -156,22 +161,22 @@ async def admin_get_snowflake(
     if discord_id == "FAIL":
         return {"data": {}, "error": "Missing ?discord_id"}
 
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(Settings().aws.table)
-    data = table.scan(FilterExpression=Attr("discord_id").eq(str(discord_id))).get(
-        "Items"
-    )
-
-    if not data:
-        # Try a legacy-user-ID search (deprecated, but still neccesary)
-        data = table.scan(FilterExpression=Attr("discord_id").eq(int(discord_id))).get(
-            "Items"
+    statement = (
+        select(UserModel)
+        .where(UserModel.discord_id == discord_id)
+        .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
         )
+    data = to_dict(session.exec(statement).one_or_none())
+    #if not data:
+    #    # Try a legacy-user-ID search (deprecated, but still neccesary)
+    #    data = table.scan(FilterExpression=Attr("discord_id").eq(int(discord_id))).get(
+    #        "Items"
+    #    )
+    #
+    #    if not data:
+    #        return Errors.generate(request, 404, "User Not Found")
 
-        if not data:
-            return Errors.generate(request, 404, "User Not Found")
-
-    data = data[0]
+    #data = data[0]
 
     return {"data": data}
 
@@ -183,6 +188,7 @@ async def admin_post_discord_message(
     token: Optional[str] = Cookie(None),
     member_id: Optional[str] = "FAIL",
     user_jwt: dict = Body(None),
+    session: Session = Depends(get_session)
 ):
     """
     API endpoint that gets a specific user's data as JSON
@@ -190,16 +196,14 @@ async def admin_post_discord_message(
     if member_id == "FAIL":
         return {"data": {}, "error": "Missing ?member_id"}
 
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(Settings().aws.table)
-    data = table.get_item(Key={"id": member_id}).get("Item", None)
+    data = session.exec(select(UserModel).where(UserModel.id == member_id)).one_or_none()
 
     if not data:
         return Errors.generate(request, 404, "User Not Found")
 
     message_text = user_jwt.get("msg")
 
-    res = Discord.send_message(data.get("discord_id"), message_text)
+    res = Discord.send_message(data.discord_id, message_text)
 
     if res:
         return {"msg": "Message sent."}
@@ -213,57 +217,59 @@ async def admin_edit(
     request: Request,
     token: Optional[str] = Cookie(None),
     input_data: Optional[UserModelMutable] = {},
+    session: Session = Depends(get_session),
 ):
     """
     API endpoint that modifies a given user's data
     """
     member_id = input_data.id
 
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(Settings().aws.table)
-    old_data = table.get_item(Key={"id": member_id}).get("Item", None)
+    statement = (
+        select(UserModel)
+        .where(UserModel.id == member_id)
+        .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
+        )
+    old_data = to_dict(session.exec(statement).one_or_none())
 
     if not old_data:
         return Errors.generate(request, 404, "User Not Found")
+    input_data = input_data.model_dump(exclude_unset=True)
+    for key, value in input_data:
+        if value is not None:
+            setattr(old_data, key, value)
 
-    # Take Pydantic data -> dict -> strip null values
-    new_data = {k: v for k, v in jsonable_encoder(input_data).items() if v is not None}
-
-    # Existing  U  Provided
-    union = {**old_data, **new_data}
-
-    # This is how this works:
-    # 1. Get old data
-    # 2. Get new data (pydantic-validated)
-    # 3. Union the two
-    # 4. Put back as one giant entry
-
-    table.put_item(Item=union)
-
-    return {"data": union, "msg": "Updated successfully!"}
+    new_data=UserModel(**old_data)
+    session.add(new_data)
+    session.commit()
+    return {"data": new_data, "msg": "Updated successfully!"}
+    
 
 
 @router.get("/list")
 @Authentication.admin
-async def admin_list(request: Request, token: Optional[str] = Cookie(None)):
+async def admin_list(request: Request, token: Optional[str] = Cookie(None), session: Session = Depends(get_session)):
     """
     API endpoint that dumps all users as JSON.
     """
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(Settings().aws.table)
-    data = table.scan().get("Items", None)
+    statement = (
+        select(UserModel)
+        .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
+        )
+    data = to_dict(session.exec(statement))
     return {"data": data}
 
 
 @router.get("/csv")
 @Authentication.admin
-async def admin_list_csv(request: Request, token: Optional[str] = Cookie(None)):
+async def admin_list_csv(request: Request, token: Optional[str] = Cookie(None), session: Session = Depends(get_session)):
     """
     API endpoint that dumps all users as CSV.
     """
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(Settings().aws.table)
-    data = table.scan().get("Items", None)
+    statement = (
+        select(UserModel)
+        .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
+        )
+    data = to_dict(session.exec(statement))
 
     output = "Membership ID, First Name, Last Name, NID, Is Returning, Gender, Major, Class Standing, Shirt Size, Discord Username, Experience, Cyber Interests, Event Interest, Is C3 Interest, Comments, Ethics Form Timestamp, Minecraft, Infra Email\n"
     for user in data:

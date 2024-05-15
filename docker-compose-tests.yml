@@ -1,0 +1,47 @@
+version: '3'
+services:
+  fastapi:
+    build: 
+      context: .
+      dockerfile: Dockerfile-testing
+    environment:
+      - BWS_ACCESS_TOKEN={$BWS_ACCESS_TOKEN}
+    ports:
+      - 8000:8000
+    volumes:
+      - ./config/options.yml:/app/config/options.yml
+      - $HOME/.aws:/root/.aws
+    develop:
+      watch:
+        # sync static content
+        - path: ./static
+          action: sync
+          target: /app/static
+        # sync templates
+        - path: ./templates
+          action: sync
+          target: /app/templates
+        - path: ./forms
+          action: sync
+          target: /app/templates
+        # sync app
+        - path: ./models/
+          action: sync+restart
+          target: /app/models/
+        - path: ./routes/
+          action: sync+restart
+          target: /app/routes/
+        - path: ./tests/
+          action: rebuild
+          target: /app/tests/
+        - path: ./util/
+          action: sync+restart
+          target: /app/util/
+        - path: ./index.py
+          action: sync+restart
+          target: /app/index.py
+        - path: ./requirements.txt
+          action: rebuild
+          target: /app/requirements.txt
+  redis:
+    image: redis:7.2

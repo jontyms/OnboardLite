@@ -2,10 +2,9 @@ import re
 import uuid
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr, constr, validator
+from pydantic import BaseModel, validator
 from sqlmodel import Field, Relationship, SQLModel
 
-from util.forms import fuzzy_parse_value
 
 
 class DiscordModel(SQLModel, table=True):
@@ -95,7 +94,7 @@ class UserModel(SQLModel, table=True):
         return shirt_size
 
     @validator("email")
-    def nid_length(cls, email):
+    def nid_regex(cls, email):
         # regex for email
         pattern = re.compile(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$")
         if pattern.match(email) is None:
