@@ -6,15 +6,15 @@ import boto3
 import openstack
 from python_terraform import Terraform
 from requests import session
+from sqlalchemy.orm import selectinload
+from sqlmodel import Session, select
 
+from app.models.user import UserModel
+from app.util.database import engine
 from app.util.discord import Discord
 from app.util.email import Email
 from app.util.horsepass import HorsePass
 from app.util.settings import Settings
-from app.util.database import engine
-from sqlmodel import select, Session
-from sqlalchemy.orm import selectinload
-from app.models.user import UserModel
 
 logger = logging.getLogger()
 
@@ -32,7 +32,7 @@ If approval fails, dispatch a Discord message saying that something went wrong a
 class Approve:
     def __init__(self):
         pass
-        
+
 
     def provision_infra(member_id, user_data=None):
         # Log into OpenStack
@@ -49,7 +49,7 @@ class Approve:
             pass
 
         try:
-            
+
             if not user_data:
                 user_data = UserModel(session.exec(select(UserModel).where(UserModel.id == member_id)).one_or_none())
             # See if existing email.
@@ -129,14 +129,14 @@ class Approve:
     # !TODO finish the post-sign-up stuff + testing
     def approve_member(member_id):
         with Session(engine) as session:
-            
+
             logger.info(f"Re-running approval for {member_id}")
             statement = (
             select(UserModel)
             .where(UserModel.id == member_id)
             .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
             )
-        
+
             result = session.exec(statement)
             user_data = result.one_or_none()
             # If a member was already approved, kill process.

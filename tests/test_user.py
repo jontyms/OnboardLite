@@ -1,15 +1,15 @@
 import os
 import sys
-import pytest
 import uuid
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine
 
 # Add the project root to the PYTHONPATH
 from app.main import app
-from app.util.authentication import Authentication
 from app.models.user import UserModel
+from app.util.authentication import Authentication
 from app.util.database import get_session
 
 DATABASE_URL = "sqlite:///:memory:"

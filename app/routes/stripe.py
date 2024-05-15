@@ -1,16 +1,16 @@
 import logging
 from typing import Optional
 
-from app.util.database import get_session
-from sqlmodel import select, Session
-from app.models.user import UserModel
 import stripe
-from fastapi import APIRouter, Cookie, HTTPException, Request, Depends
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
+from sqlmodel import Session, select
 
+from app.models.user import UserModel
 from app.util.approve import Approve
 from app.util.authentication import Authentication
+from app.util.database import get_session
 from app.util.errors import Errors
 from app.util.settings import Settings
 
@@ -36,7 +36,7 @@ async def get_root(
     request: Request,
     token: Optional[str] = Cookie(None),
     user_jwt: Optional[object] = {},
-    session: Session = Depends(get_session) 
+    session: Session = Depends(get_session)
 ):
     user_data = session.exec(select(UserModel).where(UserModel.id == user_jwt.get("id"))).one_or_none()
     did_pay_dues = user_data.did_pay_dues
@@ -64,11 +64,11 @@ async def create_checkout_session(
     request: Request,
     token: Optional[str] = Cookie(None),
     user_jwt: Optional[object] = {},
-    session: Session = Depends(get_session) 
+    session: Session = Depends(get_session)
 ):
     if Settings().stripe.pause_payments:
       return Errors.generate(request, 503, "Payments Paused")
-    
+
     user_data = session.exec(select(UserModel).where(UserModel.id == user_jwt.get("id"))).one_or_none()
 
     try:
@@ -141,6 +141,6 @@ def pay_dues(session):
     user_data.did_pay_dues = True
     session.add(user_data)
     session.commit()
-    
+
     # Do checks to approve membership status.
     Approve.approve_member(member_id)

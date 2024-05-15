@@ -1,17 +1,15 @@
 from typing import Optional
 
-from app.util.database import get_session
-from sqlmodel import select, Session
-from sqlalchemy.orm import selectinload
-from app.models.user import UserModel, to_dict
-
-from fastapi import APIRouter, Body, Cookie, Request, Response, Depends
+from fastapi import APIRouter, Body, Cookie, Depends, Request, Response
 from fastapi.templating import Jinja2Templates
 from jose import jwt
+from sqlalchemy.orm import selectinload
+from sqlmodel import Session, select
 
-from app.models.user import UserModelMutable
+from app.models.user import UserModel, UserModelMutable, to_dict
 from app.util.approve import Approve
 from app.util.authentication import Authentication
+from app.util.database import get_session
 from app.util.discord import Discord
 from app.util.email import Email
 from app.util.errors import Errors
@@ -242,7 +240,7 @@ async def admin_edit(
     session.add(new_data)
     session.commit()
     return {"data": new_data, "msg": "Updated successfully!"}
-    
+
 
 
 @router.get("/list")

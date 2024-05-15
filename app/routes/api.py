@@ -8,7 +8,7 @@ from sqlmodel import Session, select
 
 from app.models.info import InfoModel
 from app.models.user import (EthicsFormModel, EthicsFormUpdate, PublicContact,
-                         UserModel)
+                             UserModel)
 from app.util.authentication import Authentication
 from app.util.database import get_session
 from app.util.errors import Errors

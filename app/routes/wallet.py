@@ -3,17 +3,16 @@ import os
 import uuid
 from typing import Optional
 
-from app.util.database import get_session
-from sqlmodel import select
-from sqlalchemy.orm import selectinload
-from app.models.user import UserModel, to_dict
 import requests
 from airpress import PKPass
-from fastapi import APIRouter, Cookie, Request, Response, Depends
+from fastapi import APIRouter, Cookie, Depends, Request, Response
+from sqlalchemy.orm import selectinload
+from sqlmodel import select
 
 from app.models.info import InfoModel
-from app.models.user import PublicContact
+from app.models.user import PublicContact, UserModel, to_dict
 from app.util.authentication import Authentication
+from app.util.database import get_session
 from app.util.errors import Errors
 
 router = APIRouter(
@@ -240,7 +239,7 @@ async def aapl_gen(
     user_jwt: Optional[object] = {},
     session=Depends(get_session),
 ):
-    
+
 
     statement = (
         select(UserModel)
@@ -248,7 +247,7 @@ async def aapl_gen(
         .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
         )
     user_data = to_dict(session.exec(statement).one_or_none())
-    
+
 
     p = apple_wallet(user_data)
 

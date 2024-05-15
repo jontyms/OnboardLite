@@ -4,10 +4,8 @@ import time
 import uuid
 from typing import Optional
 from urllib.parse import urlparse
+
 import requests
-
-
-
 # FastAPI
 from fastapi import Cookie, Depends, FastAPI, Request, Response, status
 from fastapi.responses import FileResponse, RedirectResponse
@@ -24,7 +22,7 @@ from app.models.user import DiscordModel, UserModel, to_dict
 from app.routes import admin, api, infra, stripe, wallet
 from app.util.approve import Approve
 # Import middleware
-from app.util.authentication import Authentication 
+from app.util.authentication import Authentication
 from app.util.database import get_session, init_db
 # Import error handling
 from app.util.errors import Errors
