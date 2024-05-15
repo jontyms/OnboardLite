@@ -1,23 +1,23 @@
 from typing import Optional
 
-from util.database import get_session
+from app.util.database import get_session
 from sqlmodel import select, Session
 from sqlalchemy.orm import selectinload
-from models.user import UserModel, to_dict
+from app.models.user import UserModel, to_dict
 
 from fastapi import APIRouter, Body, Cookie, Request, Response, Depends
 from fastapi.templating import Jinja2Templates
 from jose import jwt
 
-from models.user import UserModelMutable
-from util.approve import Approve
-from util.authentication import Authentication
-from util.discord import Discord
-from util.email import Email
-from util.errors import Errors
-from util.settings import Settings
+from app.models.user import UserModelMutable
+from app.util.approve import Approve
+from app.util.authentication import Authentication
+from app.util.discord import Discord
+from app.util.email import Email
+from app.util.errors import Errors
+from app.util.settings import Settings
 
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter(prefix="/admin", tags=["Admin"], responses=Errors.basic_http())
 

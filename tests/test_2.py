@@ -6,15 +6,13 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
 
-from src.index import app, get_session
+
+from app.main import app, get_session
+
 
 
 @pytest.fixture(name="session")  
-
-
 def session_fixture():  
-
-
     engine = create_engine(
         "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
     )
@@ -37,5 +35,5 @@ def test_create_hero(session: Session):
 
     client = TestClient(app)
 
-    response = client.get("/api/get/")
+    response = client.get("/api/")
     assert response.status_code == 200

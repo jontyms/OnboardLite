@@ -5,11 +5,11 @@ from typing import Optional
 from fastapi import Request, status
 from fastapi.responses import RedirectResponse
 from jose import jwt
-from models.user import UserModel
+from app.models.user import UserModel
 
 # Import options and errors
-from util.errors import Errors
-from util.settings import Settings
+from app.util.errors import Errors
+from app.util.settings import Settings
 
 
 class Authentication:

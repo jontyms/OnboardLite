@@ -1,20 +1,20 @@
 import logging
 from typing import Optional
 
-from util.database import get_session
+from app.util.database import get_session
 from sqlmodel import select, Session
-from models.user import UserModel
+from app.models.user import UserModel
 import stripe
 from fastapi import APIRouter, Cookie, HTTPException, Request, Depends
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from util.approve import Approve
-from util.authentication import Authentication
-from util.errors import Errors
-from util.settings import Settings
+from app.util.approve import Approve
+from app.util.authentication import Authentication
+from app.util.errors import Errors
+from app.util.settings import Settings
 
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="app/templates")
 
 
 logger = logging.getLogger(__name__)

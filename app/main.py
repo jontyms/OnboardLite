@@ -19,20 +19,20 @@ from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
 # Import data types
-from models.user import DiscordModel, UserModel, to_dict
+from app.models.user import DiscordModel, UserModel, to_dict
 # Import routes
-from routes import admin, api, infra, stripe, wallet
-from util.approve import Approve
+from app.routes import admin, api, infra, stripe, wallet
+from app.util.approve import Approve
 # Import middleware
-from util.authentication import Authentication 
-from util.database import get_session, init_db
+from app.util.authentication import Authentication 
+from app.util.database import get_session, init_db
 # Import error handling
-from util.errors import Errors
-from util.forms import Forms
+from app.util.errors import Errors
+from app.util.forms import Forms
 # Import the page rendering library
-from util.kennelish import Kennelish
+from app.util.kennelish import Kennelish
 # Import options
-from util.settings import Settings
+from app.util.settings import Settings
 
 ### TODO: TEMP
 # os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "0"
@@ -49,8 +49,8 @@ logger = logging.getLogger(__name__)
 
 # Initiate FastAPI.
 app = FastAPI()
-templates = Jinja2Templates(directory="templates")
-app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="app/templates")
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # Import endpoints from ./routes
 app.include_router(api.router)

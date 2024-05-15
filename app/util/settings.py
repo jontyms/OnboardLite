@@ -60,7 +60,7 @@ settings = dict()
 
 # Reads config from ../config/options.yml
 here = os.path.abspath(os.path.dirname(__file__))
-with open(os.path.join(here, "../config/options.yml")) as f:
+with open(os.path.join(here, "../../config/options.yml")) as f:
     settings.update(yaml.load(f, Loader=yaml.FullLoader))
 
 def parse_json_to_dict(json_string):

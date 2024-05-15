@@ -1,6 +1,6 @@
 from fastapi.templating import Jinja2Templates
 
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="aap/templates")
 
 
 class Errors:

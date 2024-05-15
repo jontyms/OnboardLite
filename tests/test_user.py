@@ -7,10 +7,10 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine
 
 # Add the project root to the PYTHONPATH
-from index import app
-from util.authentication import Authentication
-from models.user import UserModel
-from util.database import get_session
+from app.main import app
+from app.util.authentication import Authentication
+from app.models.user import UserModel
+from app.util.database import get_session
 
 DATABASE_URL = "sqlite:///:memory:"
 engine = create_engine(DATABASE_URL, echo=True)

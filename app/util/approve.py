@@ -7,14 +7,14 @@ import openstack
 from python_terraform import Terraform
 from requests import session
 
-from util.discord import Discord
-from util.email import Email
-from util.horsepass import HorsePass
-from util.settings import Settings
-from util.database import engine
+from app.util.discord import Discord
+from app.util.email import Email
+from app.util.horsepass import HorsePass
+from app.util.settings import Settings
+from app.util.database import engine
 from sqlmodel import select, Session
 from sqlalchemy.orm import selectinload
-from models.user import UserModel
+from app.models.user import UserModel
 
 logger = logging.getLogger()
 

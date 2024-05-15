@@ -6,14 +6,14 @@ from fastapi import APIRouter, Cookie, Depends, HTTPException, Request
 from pydantic import error_wrappers
 from sqlmodel import Session, select
 
-from models.info import InfoModel
-from models.user import (EthicsFormModel, EthicsFormUpdate, PublicContact,
+from app.models.info import InfoModel
+from app.models.user import (EthicsFormModel, EthicsFormUpdate, PublicContact,
                          UserModel)
-from util.authentication import Authentication
-from util.database import get_session
-from util.errors import Errors
-from util.forms import Forms, apply_fuzzy_parsing
-from util.kennelish import Transformer
+from app.util.authentication import Authentication
+from app.util.database import get_session
+from app.util.errors import Errors
+from app.util.forms import Forms, apply_fuzzy_parsing
+from app.util.kennelish import Transformer
 
 logger = logging.getLogger(__name__)
 
