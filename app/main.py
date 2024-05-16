@@ -295,12 +295,11 @@ async def profile(
     user_jwt: Optional[object] = {},
     session: Session = Depends(get_session),
 ):
-
     statement = (
         select(UserModel)
         .where(UserModel.id == user_jwt["id"])
         .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
-        )
+    )
     user_data = to_dict(session.exec(statement).one_or_none())
 
     # Re-run approval workflow.
@@ -338,9 +337,10 @@ async def forms(
         )
 
     # Get data from SqlModel
+
     statement = (
         select(UserModel)
-        .where(UserModel.id == user_jwt["id"])
+        .where(UserModel.id == user_jwt.get("id"))
         .options(selectinload(UserModel.discord))
     )
     user_data = session.exec(statement).one_or_none()

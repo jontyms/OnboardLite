@@ -13,31 +13,31 @@ services:
     develop:
       watch:
         # sync static content
-        - path: ./static
+        - path: ./app/static
           action: sync
-          target: /app/static
+          target: /src/app/static
         # sync templates
-        - path: ./templates
+        - path: ./app/templates
           action: sync
-          target: /app/templates
-        - path: ./forms
+          target: /src/app/templates
+        - path: ./app/forms
           action: sync
-          target: /app/templates
+          target: /src/app/templates
         # sync app
-        - path: ./models/
+        - path: ./app/app/models/
           action: sync+restart
-          target: /app/models/
-        - path: ./routes/
+          target: /src/app/models/
+        - path: ./app/routes/
           action: sync+restart
-          target: /app/routes/
-        - path: ./util/
+          target: /src/app/routes/
+        - path: ./app/util/
           action: sync+restart
-          target: /app/util/
-        - path: ./index.py
+          target: /src/app/util/
+        - path: ./app/index.py
           action: sync+restart
-          target: /app/index.py
-        - path: ./requirements.txt
+          target: /src/app/index.py
+        - path: ./app/requirements.txt
           action: rebuild
-          target: /app/requirements.txt
+          target: /src/app/requirements.txt
   redis:
     image: redis:7.2

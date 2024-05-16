@@ -57,16 +57,16 @@ async def get_form(num: str):
 """
 Renders a Kennelish form file as HTML (with user data). Intended for AJAX applications.
 """
-#TODO Fix or remove this route, Do we even need it?
+# TODO Fix or remove this route, Do we even need it?
 #
-#@router.get("/form/{num}/html", response_class=HTMLResponse)
-#@Authentication.member
-#async def get_form_html(
+# @router.get("/form/{num}/html", response_class=HTMLResponse)
+# @Authentication.member
+# async def get_form_html(
 #    request: Request,
 #    token: Optional[str] = Cookie(None),
 #    user_jwt: Optional[object] = {},
 #    num: str = 1,
-#):
+# ):
 #    # AWS dependencies
 #    # dynamodb = boto3.resource("dynamodb")
 #    # table = dynamodb.Table(Settings().aws.table)
@@ -88,6 +88,8 @@ Renders a Kennelish form file as HTML (with user data). Intended for AJAX applic
 """
 Allows updating the user's database using a schema assumed by the Kennelish file.
 """
+
+
 @router.post("/form/ethics_form_midway")
 @Authentication.member
 async def post_ethics_form(
@@ -110,7 +112,9 @@ async def post_ethics_form(
         raise HTTPException(status_code=404, detail="User not found")
 
     # Update the ethics form with new values
-    validated_data = apply_fuzzy_parsing(ethics_form_data.model_dump(exclude_unset=True), EthicsFormModel)
+    validated_data = apply_fuzzy_parsing(
+        ethics_form_data.model_dump(exclude_unset=True), EthicsFormModel
+    )
     print(validated_data.dict())
     for key, value in validated_data:
         if value is not None:

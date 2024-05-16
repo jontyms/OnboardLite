@@ -36,9 +36,11 @@ async def get_root(
     request: Request,
     token: Optional[str] = Cookie(None),
     user_jwt: Optional[object] = {},
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
 ):
-    user_data = session.exec(select(UserModel).where(UserModel.id == user_jwt.get("id"))).one_or_none()
+    user_data = session.exec(
+        select(UserModel).where(UserModel.id == user_jwt.get("id"))
+    ).one_or_none()
     did_pay_dues = user_data.did_pay_dues
 
     is_nid = True if user_data.nid else False
@@ -53,7 +55,7 @@ async def get_root(
             "id": user_jwt["id"],
             "did_pay_dues": did_pay_dues,
             "is_nid": is_nid,
-            "paused_payments": paused_payments
+            "paused_payments": paused_payments,
         },
     )
 
@@ -64,12 +66,14 @@ async def create_checkout_session(
     request: Request,
     token: Optional[str] = Cookie(None),
     user_jwt: Optional[object] = {},
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
 ):
     if Settings().stripe.pause_payments:
-      return Errors.generate(request, 503, "Payments Paused")
+        return Errors.generate(request, 503, "Payments Paused")
 
-    user_data = session.exec(select(UserModel).where(UserModel.id == user_jwt.get("id"))).one_or_none()
+    user_data = session.exec(
+        select(UserModel).where(UserModel.id == user_jwt.get("id"))
+    ).one_or_none()
 
     try:
         stripe_email = user_data.email
@@ -132,8 +136,9 @@ def pay_dues(session):
     session = get_session()
     customer_email = session.get("customer_email")
 
-
-    user_data = session.exec(select(UserModel).where(UserModel.email == customer_email)).one_or_none()
+    user_data = session.exec(
+        select(UserModel).where(UserModel.email == customer_email)
+    ).one_or_none()
 
     member_id = user_data.id
 

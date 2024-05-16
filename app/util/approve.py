@@ -19,7 +19,7 @@ from app.util.settings import Settings
 logger = logging.getLogger()
 
 
-#tf = Terraform(working_dir=Settings().infra.tf_directory)
+# tf = Terraform(working_dir=Settings().infra.tf_directory)
 
 """
 This function will ensure a member meets all requirements to be a member, and if so, creates an
@@ -32,7 +32,6 @@ If approval fails, dispatch a Discord message saying that something went wrong a
 class Approve:
     def __init__(self):
         pass
-
 
     def provision_infra(member_id, user_data=None):
         # Log into OpenStack
@@ -49,9 +48,12 @@ class Approve:
             pass
 
         try:
-
             if not user_data:
-                user_data = UserModel(session.exec(select(UserModel).where(UserModel.id == member_id)).one_or_none())
+                user_data = UserModel(
+                    session.exec(
+                        select(UserModel).where(UserModel.id == member_id)
+                    ).one_or_none()
+                )
             # See if existing email.
             username = user_data.infra_email
             if username:
@@ -70,8 +72,7 @@ class Approve:
 
             else:
                 username = (
-                    user_data.discord.username.replace(" ", "_")
-                    + "@infra.hackucf.org"
+                    user_data.discord.username.replace(" ", "_") + "@infra.hackucf.org"
                 )
                 # Add username to Onboard database
                 user_data.infra_email = username
@@ -129,16 +130,19 @@ class Approve:
     # !TODO finish the post-sign-up stuff + testing
     def approve_member(member_id):
         with Session(engine) as session:
-
             logger.info(f"Re-running approval for {member_id}")
             statement = (
-            select(UserModel)
-            .where(UserModel.id == member_id)
-            .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
+                select(UserModel)
+                .where(UserModel.id == member_id)
+                .options(
+                    selectinload(UserModel.discord), selectinload(UserModel.ethics_form)
+                )
             )
 
             result = session.exec(statement)
             user_data = result.one_or_none()
+            if not user_data:
+                raise Exception("User not found.")
             # If a member was already approved, kill process.
             if user_data.is_full_member:
                 logger.info("\tAlready full member.")
@@ -172,9 +176,7 @@ class Approve:
                     # <whitelist logic>
 
                 # Assign the Dues-Paying Member role
-                Discord.assign_role(
-                    discord_id, Settings().discord.member_role
-                )
+                Discord.assign_role(discord_id, Settings().discord.member_role)
 
                 # Send Discord message saying they are a member
                 welcome_msg = f"""Hello {user_data.first_name}, and welcome to Hack@UCF!
@@ -205,9 +207,9 @@ Happy Hacking,
                 session.refresh(user_data)
 
             elif user_data.did_pay_dues:
-               logger.info("\tPaid dues but did not do other step!")
-               # Send a message on why this check failed.
-               fail_msg = f"""Hello {user_data.first_name},
+                logger.info("\tPaid dues but did not do other step!")
+                # Send a message on why this check failed.
+                fail_msg = f"""Hello {user_data.first_name},
 
 We wanted to let you know that you **did not** complete all of the steps for being able to become an Hack@UCF member.
 
@@ -222,7 +224,7 @@ If you think you have completed all of these, please reach out to an Exec on the
 We hope to see you soon,
   - Hack@UCF Bot
 """
-               Discord.send_message(discord_id, fail_msg)
+                Discord.send_message(discord_id, fail_msg)
 
             else:
                 logger.info("\tDid not pay dues yet.")

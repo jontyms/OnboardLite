@@ -134,7 +134,7 @@ async def teardown():
                     conn.network.delete_port(port_id)
                 try:
                     conn.network.delete_router(resource)
-                except: # noqa
+                except:  # noqa
                     logger.debug("\t\t\t\tFailed and gave up.")
 
     logger.debug("\tNetworks...")
@@ -150,11 +150,11 @@ async def teardown():
                     logger.debug(f"\t\t\tdelete port: {port_id}")
                     try:
                         conn.network.delete_port(port_id)
-                    except: # noqa
+                    except:  # noqa
                         pass
                 try:
                     conn.network.delete_network(resource)
-                except: #noqa
+                except:  # noqa
                     logger.debug("\t\t\t\tFailed and gave up.")
     logger.debug("\tDone!")
 
@@ -271,7 +271,7 @@ async def get_infra(
     request: Request,
     token: Optional[str] = Cookie(None),
     user_jwt: Optional[object] = {},
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
 ):
     member_id = user_jwt.get("id")
 
@@ -288,7 +288,9 @@ async def get_infra(
         creds = {}
 
     # Get user data
-    user_data = session.exec(select(UserModel).where(UserModel.id == user_jwt.get("id"))).one_or_none()
+    user_data = session.exec(
+        select(UserModel).where(UserModel.id == user_jwt.get("id"))
+    ).one_or_none()
 
     # Send DM...
     new_creds_msg = f"""Hello {user_data.get('first_name')},
@@ -333,7 +335,7 @@ async def download_file(
     user_jwt: Optional[object] = {},
 ):
     # Replace 'path/to/your/file.txt' with the actual path to your file
-    file_path = "./HackUCF.ovpn"
+    file_path = "../HackUCF.ovpn"
     return FileResponse(
         file_path, filename="HackUCF.ovpn", media_type="application/octet-stream"
     )

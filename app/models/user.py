@@ -36,7 +36,6 @@ class EthicsFormModel(SQLModel, table=True):
     user: "UserModel" = Relationship(back_populates="ethics_form")
 
 
-
 class UserModel(SQLModel, table=True):
     id: Optional[uuid.UUID] = Field(default_factory=uuid.uuid4, primary_key=True)
     discord_id: str = Field(unique=True)
@@ -162,9 +161,6 @@ class EthicsFormUpdate(BaseModel):
     signtime: Optional[int] = None
 
 
-
-
-
 def to_dict(model):
     if model is None:
         return None
@@ -179,11 +175,6 @@ def to_dict(model):
                 data[key] = to_dict(value)
         return data
     return model
-
-
-
-
-
 
 
 # Removed unneeded functionality

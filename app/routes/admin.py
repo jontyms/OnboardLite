@@ -48,7 +48,7 @@ async def get_infra(
     request: Request,
     user_jwt: Optional[str] = Cookie(None),
     member_id: Optional[str] = "FAIL",
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
 ):
     """
     API endpoint to FORCE-provision Infra credentials (even without membership!!!)
@@ -64,7 +64,9 @@ async def get_infra(
         return Errors.generate(request, 404, "User Not Found")
 
     # Get user data
-    user_data = session.exec(select(UserModel).where(UserModel.id == member_id)).one_or_none()
+    user_data = session.exec(
+        select(UserModel).where(UserModel.id == member_id)
+    ).one_or_none()
 
     # Send DM...
     new_creds_msg = f"""Hello {user_data.first_name},
@@ -87,8 +89,10 @@ Happy Hacking,
             """
 
     # Send Discord message
-    #Discord.send_message(user_data.get("discord_id"), new_creds_msg)
-    Email.send_email("Hack@UCF Private Cloud Credentials", new_creds_msg, user_data.email)
+    # Discord.send_message(user_data.get("discord_id"), new_creds_msg)
+    Email.send_email(
+        "Hack@UCF Private Cloud Credentials", new_creds_msg, user_data.email
+    )
     return {"username": creds.get("username"), "password": creds.get("password")}
 
 
@@ -98,7 +102,7 @@ async def get_refresh(
     request: Request,
     user_jwt: Optional[str] = Cookie(None),
     member_id: Optional[str] = "FAIL",
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
 ):
     """
     API endpoint that re-runs the member verification workflow
@@ -108,8 +112,9 @@ async def get_refresh(
 
     Approve.approve_member(member_id)
 
-    user_data = session.exec(select(UserModel).where(UserModel.id == member_id)).one_or_none()
-
+    user_data = session.exec(
+        select(UserModel).where(UserModel.id == member_id)
+    ).one_or_none()
 
     if not user_data:
         return Errors.generate(request, 404, "User Not Found")
@@ -123,7 +128,7 @@ async def admin_get_single(
     request: Request,
     user_jwt: Optional[str] = Cookie(None),
     member_id: Optional[str] = "FAIL",
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
 ):
     """
     API endpoint that gets a specific user's data as JSON
@@ -135,7 +140,7 @@ async def admin_get_single(
         select(UserModel)
         .where(UserModel.id == user_jwt["id"])
         .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
-        )
+    )
     user_data = to_dict(session.exec(statement).one_or_none())
 
     if not user_data:
@@ -150,7 +155,7 @@ async def admin_get_snowflake(
     request: Request,
     token: Optional[str] = Cookie(None),
     discord_id: Optional[str] = "FAIL",
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
 ):
     """
     API endpoint that gets a specific user's data as JSON, given a Discord snowflake.
@@ -163,9 +168,9 @@ async def admin_get_snowflake(
         select(UserModel)
         .where(UserModel.discord_id == discord_id)
         .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
-        )
+    )
     data = to_dict(session.exec(statement).one_or_none())
-    #if not data:
+    # if not data:
     #    # Try a legacy-user-ID search (deprecated, but still neccesary)
     #    data = table.scan(FilterExpression=Attr("discord_id").eq(int(discord_id))).get(
     #        "Items"
@@ -174,7 +179,7 @@ async def admin_get_snowflake(
     #    if not data:
     #        return Errors.generate(request, 404, "User Not Found")
 
-    #data = data[0]
+    # data = data[0]
 
     return {"data": data}
 
@@ -186,7 +191,7 @@ async def admin_post_discord_message(
     token: Optional[str] = Cookie(None),
     member_id: Optional[str] = "FAIL",
     user_jwt: dict = Body(None),
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
 ):
     """
     API endpoint that gets a specific user's data as JSON
@@ -194,7 +199,9 @@ async def admin_post_discord_message(
     if member_id == "FAIL":
         return {"data": {}, "error": "Missing ?member_id"}
 
-    data = session.exec(select(UserModel).where(UserModel.id == member_id)).one_or_none()
+    data = session.exec(
+        select(UserModel).where(UserModel.id == member_id)
+    ).one_or_none()
 
     if not data:
         return Errors.generate(request, 404, "User Not Found")
@@ -226,7 +233,7 @@ async def admin_edit(
         select(UserModel)
         .where(UserModel.id == member_id)
         .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
-        )
+    )
     old_data = to_dict(session.exec(statement).one_or_none())
 
     if not old_data:
@@ -236,37 +243,42 @@ async def admin_edit(
         if value is not None:
             setattr(old_data, key, value)
 
-    new_data=UserModel(**old_data)
+    new_data = UserModel(**old_data)
     session.add(new_data)
     session.commit()
     return {"data": new_data, "msg": "Updated successfully!"}
 
 
-
 @router.get("/list")
 @Authentication.admin
-async def admin_list(request: Request, token: Optional[str] = Cookie(None), session: Session = Depends(get_session)):
+async def admin_list(
+    request: Request,
+    token: Optional[str] = Cookie(None),
+    session: Session = Depends(get_session),
+):
     """
     API endpoint that dumps all users as JSON.
     """
-    statement = (
-        select(UserModel)
-        .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
-        )
+    statement = select(UserModel).options(
+        selectinload(UserModel.discord), selectinload(UserModel.ethics_form)
+    )
     data = to_dict(session.exec(statement))
     return {"data": data}
 
 
 @router.get("/csv")
 @Authentication.admin
-async def admin_list_csv(request: Request, token: Optional[str] = Cookie(None), session: Session = Depends(get_session)):
+async def admin_list_csv(
+    request: Request,
+    token: Optional[str] = Cookie(None),
+    session: Session = Depends(get_session),
+):
     """
     API endpoint that dumps all users as CSV.
     """
-    statement = (
-        select(UserModel)
-        .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
-        )
+    statement = select(UserModel).options(
+        selectinload(UserModel.discord), selectinload(UserModel.ethics_form)
+    )
     data = to_dict(session.exec(statement))
 
     output = "Membership ID, First Name, Last Name, NID, Is Returning, Gender, Major, Class Standing, Shirt Size, Discord Username, Experience, Cyber Interests, Event Interest, Is C3 Interest, Comments, Ethics Form Timestamp, Minecraft, Infra Email\n"

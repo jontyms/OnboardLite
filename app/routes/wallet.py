@@ -239,15 +239,12 @@ async def aapl_gen(
     user_jwt: Optional[object] = {},
     session=Depends(get_session),
 ):
-
-
     statement = (
         select(UserModel)
         .where(UserModel.id == user_jwt["id"])
         .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
-        )
+    )
     user_data = to_dict(session.exec(statement).one_or_none())
-
 
     p = apple_wallet(user_data)
 
