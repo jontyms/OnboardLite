@@ -21,54 +21,54 @@
                 "input": "radio",
                 "required": true,
                 "options": ["I promise not to do this."],
-                "key": "hack_others"
+                "key": "ethics_form.hack_others"
             },
             {
                 "caption": "Deliberately perform an act which will seriously impact the operation of computers, peripherals, or networks that I do not own (including UCF's). This includes, but is not limited to, tampering with components of a network or otherwise blocking communication lines (Denial of Service attacks), or interfering with the operational readiness of a computer without permission.",
                 "input": "radio",
                 "required": true,
                 "options": ["I promise not to do this."],
-                "key": "hack_ucf"
+                "key": "ethics_form.hack_ucf"
             },
             {
                 "caption": "Generate excessive traffic on the UCF network in so much that it interferes with another user's ability to utilize the network.",
                 "input": "radio",
                 "required": true,
                 "options": ["I promise not to do this."],
-                "key": "interrupt_ucf"
+                "key": "ethics_form.interrupt_ucf"
             },
             {
                 "caption": "Attempt to masquerade as another UCF user, hide my identity, or attempt to monitor UCF network traffic.",
                 "input": "radio",
                 "required": true,
                 "options": ["I promise not to do this."],
-                "key": "manip_traffic"
+                "key": "ethics_form.manip_traffic"
             },
             {
                 "caption": "Use any IP address on the UCF network except that which has been automatically assigned to me via DHCP.",
                 "input": "radio",
                 "required": true,
                 "options": ["I promise not to do this."],
-                "key": "bypass_dhcp"
+                "key": "ethics_form.bypass_dhcp"
             },
             {
                 "caption": "Stream, download, upload, or transmit via other means, any materials that you are not legally licensed to or have specific permission to duplicate and/or share under protection of Copyright.",
                 "input": "radio",
                 "required": true,
                 "options": ["I promise not to do this."],
-                "key": "pirate"
+                "key": "ethics_form.pirate"
             },
             {
                 "caption": "Run a server (FTP, HTTP, IRC, etc) on the UCF open-use network.",
                 "input": "radio",
                 "required": true,
                 "options": ["I promise not to do this."],
-                "key": "host_at_ucf"
+                "key": "ethics_form.host_at_ucf"
             },
 
             {
-                "input": "signature",
-                "key": "signtime"
+                "input": "timestamp",
+                "key": "ethics_form.signtime"
             },
 
             {

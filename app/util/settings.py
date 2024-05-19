@@ -170,11 +170,7 @@ class JwtConfig(BaseModel):
 jwt_config = JwtConfig(**settings["jwt"])
 
 
-class DynamodbConfig(BaseModel):
-    table: str
 
-
-dynamodb_config = DynamodbConfig(**settings["aws"]["dynamodb"])
 
 
 class InfraConfig(BaseModel):
@@ -198,6 +194,11 @@ class InfraConfig(BaseModel):
 
 infra_config = InfraConfig(**settings["infra"])
 
+
+class DatabaseConfig(BaseModel):
+    url: str
+
+database_config = DatabaseConfig(**settings["database"])
 
 class RedisConfig(BaseModel):
     host: str
@@ -229,7 +230,7 @@ class Settings(BaseSettings, metaclass=SingletonBaseSettingsMeta):
     stripe: StripeConfig = stripe_config
     email: EmailConfig = email_config
     jwt: JwtConfig = jwt_config
-    aws: DynamodbConfig = dynamodb_config
+    database: DatabaseConfig = database_config
     infra: InfraConfig = infra_config
     redis: RedisConfig = redis_config
     http: HttpConfig = http_config

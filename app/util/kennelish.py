@@ -245,6 +245,10 @@ class Transformer:
             elif element_type == "slider":
                 obj[el.get("key")] = (int, None)
 
+            # Timestamps
+            elif element_type == "timestamp":
+                obj[el.get("key")] = (int, None)
+
             # For arbitrary strings.
             elif el.get("key") is not None:
                 obj[el.get("key")] = (str, None)

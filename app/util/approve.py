@@ -2,7 +2,6 @@ import logging
 import os
 from unittest import result
 
-import boto3
 import openstack
 from python_terraform import Terraform
 from requests import session

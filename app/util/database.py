@@ -2,11 +2,13 @@
 from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
 
-DATABASE_URL = "sqlite:///:memory:"
+from app.util.settings import Settings
+
+DATABASE_URL =  Settings().database.url
 # TODO remove echo=True
 engine = create_engine(
     DATABASE_URL,
-    echo=True,
+    # echo=True,
     connect_args={"check_same_thread": False},
     poolclass=StaticPool,
 )

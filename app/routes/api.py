@@ -4,16 +4,19 @@ from typing import Optional
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Request
 from pydantic import error_wrappers
+from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
 from app.models.info import InfoModel
-from app.models.user import (EthicsFormModel, EthicsFormUpdate, PublicContact,
-                             UserModel)
+from app.models.user import (EthicsFormModel, PublicContact, UserModel,
+                             UserModelMutable, to_dict)
+from app.util import kennelish
 from app.util.authentication import Authentication
 from app.util.database import get_session
 from app.util.errors import Errors
-from app.util.forms import Forms, apply_fuzzy_parsing
-from app.util.kennelish import Transformer
+from app.util.forms import (Forms, apply_fuzzy_parsing, parse_dict_to_model,
+                            update_model_instance)
+from app.util.kennelish import Kennelish, Transformer
 
 logger = logging.getLogger(__name__)
 
@@ -90,44 +93,44 @@ Allows updating the user's database using a schema assumed by the Kennelish file
 """
 
 
-@router.post("/form/ethics_form_midway")
-@Authentication.member
-async def post_ethics_form(
-    request: Request,
-    token: Optional[str] = Cookie(None),
-    user_jwt: Optional[object] = {},
-    session: Session = Depends(get_session),
-):
-    try:
-        ethics_form_data = EthicsFormUpdate.model_validate(await request.json())
-    except json.JSONDecodeError:
-        return {"description": "Malformed JSON input."}
-    user_id = user_jwt.get("id")
-    # Retrieve existing user model from the database
-    statement = select(UserModel).where(UserModel.id == user_id)
-    result = session.exec(statement)
-    user = result.one_or_none()
-
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    # Update the ethics form with new values
-    validated_data = apply_fuzzy_parsing(
-        ethics_form_data.model_dump(exclude_unset=True), EthicsFormModel
-    )
-    print(validated_data.dict())
-    for key, value in validated_data:
-        if value is not None:
-            setattr(user.ethics_form, key, value)
-
-    # Save the updated model back to the database
-    session.add(user)
-    session.commit()
-    session.refresh(user)
-
-    return user.ethics_form.dict()
-
-
+#@router.post("/form/ethics_form_midway")
+#@Authentication.member
+#async def post_ethics_form(
+#    request: Request,
+#    token: Optional[str] = Cookie(None),
+#    user_jwt: Optional[object] = {},
+#    session: Session = Depends(get_session),
+#):
+#    try:
+#        ethics_form_data = EthicsFormUpdate.model_validate(await request.json())
+#    except json.JSONDecodeError:
+#        return {"description": "Malformed JSON input."}
+#    user_id = user_jwt.get("id")
+#    # Retrieve existing user model from the database
+#    statement = select(UserModel).where(UserModel.id == user_id)
+#    result = session.exec(statement)
+#    user = result.one_or_none()
+#
+#    if not user:
+#        raise HTTPException(status_code=404, detail="User not found")
+#
+#    # Update the ethics form with new values
+#    validated_data = apply_fuzzy_parsing(
+#        ethics_form_data.model_dump(exclude_unset=True), EthicsFormModel
+#    )
+#    print(validated_data.dict())
+#    for key, value in validated_data:
+#        if value is not None:
+#            setattr(user.ethics_form, key, value)
+#
+#    # Save the updated model back to the database
+#    session.add(user)
+#    session.commit()
+#    session.refresh(user)
+#
+#    return user.ethics_form.dict()
+#
+#
 @router.post("/form/{num}")
 @Authentication.member
 async def post_form(
@@ -151,25 +154,32 @@ async def post_form(
     except json.JSONDecodeError:
         return {"description": "Malformed JSON input."}
 
-    try:
-        validated_data = apply_fuzzy_parsing(inp, UserModel)
-    except error_wrappers.ValidationError:
-        return {"description": "Malformed input."}
+    model_validated = model(**inp).model_dump()
 
-    user_id = user_jwt.get("id")
-    if not user_id:
-        raise HTTPException(status_code=401, detail="User not authenticated")
 
-    statement = select(UserModel).where(UserModel.id == user_id)
+    validated_data = apply_fuzzy_parsing(model_validated)
+
+    logger.warning(str(validated_data))
+
+    validated_data = parse_dict_to_model(UserModelMutable, validated_data)
+
+    statement = (
+        select(UserModel)
+        .where(UserModel.id == user_jwt["id"])
+        .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
+    )
     result = session.exec(statement)
     user = result.one_or_none()
 
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=422, detail="User not found")
 
-    updated_data = validated_data.dict(exclude_unset=True)
-    for key, value in updated_data.items():
-        setattr(user, key, value)
+    validated_data = to_dict(validated_data)
+    logger.warning(validated_data)
+
+    update_model_instance(user, validated_data)
+
+    logger.warning(to_dict(user))
 
     # Save the updated model back to the database
     session.add(user)

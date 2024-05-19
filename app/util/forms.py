@@ -1,8 +1,12 @@
 import json
+import logging
 import os
+from typing import Any, Dict, Optional
 
 from pydantic import ValidationError
+from sqlmodel import SQLModel
 
+logger = logging.getLogger(__name__)
 
 class Forms:
     def get_form_body(file="1"):
@@ -31,13 +35,47 @@ def fuzzy_parse_value(value):
     return value
 
 
-def apply_fuzzy_parsing(data: dict, model_class):
+def apply_fuzzy_parsing(data: dict):
     parsed_data = {k: fuzzy_parse_value(v) for k, v in data.items()}
-    try:
-        validated_data = model_class(**parsed_data)
-    except ValidationError as e:
-        raise Exception(
-            status_code=422,
-            detail={"description": "Malformed input.", "errors": e.errors()},
-        )
-    return validated_data
+    return parsed_data
+
+
+def parse_dict_to_model(model_class, data: Dict[str, Any]):
+    model_data = {}
+    nested_data = {}
+
+    # Separate nested and non-nested fields
+    for key, value in data.items():
+        if '.' in key:
+            nested_model, nested_field = key.split('.', 1)
+            if nested_model not in nested_data:
+                nested_data[nested_model] = {}
+            nested_data[nested_model][nested_field] = value
+        else:
+            model_data[key] = value
+
+    # Instantiate the main model
+    model_instance = model_class(**model_data)
+
+    # Recursively parse nested models
+    # Recursively parse nested models
+    for nested_model, nested_fields in nested_data.items():
+        nested_model_class = getattr(model_class, nested_model).property.mapper.class_
+        nested_instance = parse_dict_to_model(nested_model_class, nested_fields)
+        setattr(model_instance, nested_model, nested_instance)
+
+    return model_instance
+
+def update_model_instance(instance, data):
+    for key, value in data.items():
+        if value is not None:
+            attr = getattr(instance, key)
+
+            if isinstance(attr, SQLModel):
+                # If the attribute is a nested model, recursively update it
+                update_model_instance(attr, value)
+                logger.info("Nested   " + str(attr) + "   value  " +  str(value))
+            else:
+                # Otherwise, update the attribute directly
+                setattr(instance, key, value)
+                logger.info("regular   " + str(attr) + "  value  " + str(value))

@@ -1,7 +1,6 @@
-version: '3'
 services:
   fastapi:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile-testing
     environment:

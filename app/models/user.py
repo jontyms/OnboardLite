@@ -102,7 +102,7 @@ class UserModel(SQLModel, table=True):
 # What admins can edit.
 class UserModelMutable(BaseModel):
     # Identifiers
-    id: str
+    id: Optional[str] = None
     discord_id: Optional[str] = None
     ucf_id: Optional[int] = None
     nid: Optional[str] = None
@@ -142,7 +142,8 @@ class UserModelMutable(BaseModel):
     # Other things
     attending: Optional[str] = None
     comments: Optional[str] = None
-
+    discord: Optional[DiscordModel]
+    ethics_form: Optional[EthicsFormModel]
 
 class PublicContact(BaseModel):
     first_name: str
@@ -150,15 +151,7 @@ class PublicContact(BaseModel):
     ops_email: str
 
 
-class EthicsFormUpdate(BaseModel):
-    hack_others: Optional[str] = None
-    hack_ucf: Optional[str] = None
-    interrupt_ucf: Optional[str] = None
-    manip_traffic: Optional[str] = None
-    bypass_dhcp: Optional[str] = None
-    pirate: Optional[str] = None
-    host_at_ucf: Optional[str] = None
-    signtime: Optional[int] = None
+
 
 
 def to_dict(model):
