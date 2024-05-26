@@ -246,7 +246,7 @@ class Transformer:
                 obj[el.get("key")] = (int, None)
 
             # Timestamps
-            elif element_type == "timestamp":
+            elif element_type == "signature":
                 obj[el.get("key")] = (int, None)
 
             # For arbitrary strings.

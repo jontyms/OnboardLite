@@ -17,7 +17,7 @@ from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
 # Import data types
-from app.models.user import DiscordModel, UserModel, to_dict
+from app.models.user import DiscordModel, EthicsFormModel, UserModel, to_dict
 # Import routes
 from app.routes import admin, api, infra, stripe, wallet
 from app.util.approve import Approve
@@ -253,7 +253,9 @@ async def oauth_transformer_new(
             "user_id": user.id,
         }
         discord_model = DiscordModel(**discord_data)
+        ethics_form = EthicsFormModel()
         user.discord = discord_model
+        user.ethics_form = ethics_form
         session.add(user)
         session.commit()
         session.refresh(user)

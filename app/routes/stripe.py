@@ -98,7 +98,7 @@ async def create_checkout_session(
 
 
 @router.post("/webhook/validate")
-async def webhook(request: Request):
+async def webhook(request: Request, session: Session = Depends(get_session)):
     payload = await request.body()
     sig_header = request.headers.get("stripe-signature")
     event = None
@@ -118,25 +118,26 @@ async def webhook(request: Request):
     # Event Handling
     if event["type"] == "checkout.session.completed":
         # Retrieve the session. If you require line items in the response, you may include them by expanding line_items.
-        session = event["data"]["object"]
+        checkout_session = event["data"]["object"]
 
-        if session.payment_status == "paid":
+        if checkout_session.payment_status == "paid":
             # Mark as paid.
-            pay_dues(session)
+            pay_dues(checkout_session, session)
 
     elif event["type"] == "checkout.session.async_payment_succeeded":
-        session = event["data"]["object"]
-        pay_dues(session)
+        checkout_session = event["data"]["object"]
+        pay_dues(checkout_session, session)
 
     # Passed signature verification
     return HTTPException(status_code=200, detail="Success.")
 
 
-def pay_dues(session):
-    session = get_session()
-    customer_email = session.get("customer_email")
+def pay_dues(checkout_session, db_session):
 
-    user_data = session.exec(
+
+    customer_email = checkout_session.get("customer_email")
+
+    user_data = db_session.exec(
         select(UserModel).where(UserModel.email == customer_email)
     ).one_or_none()
 
@@ -144,8 +145,8 @@ def pay_dues(session):
 
     # Set PAID.
     user_data.did_pay_dues = True
-    session.add(user_data)
-    session.commit()
+    db_session.add(user_data)
+    db_session.commit()
 
     # Do checks to approve membership status.
     Approve.approve_member(member_id)

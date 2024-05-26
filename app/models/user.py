@@ -30,6 +30,7 @@ class EthicsFormModel(SQLModel, table=True):
     bypass_dhcp: Optional[bool] = False
     pirate: Optional[bool] = False
     host_at_ucf: Optional[bool] = False
+    cloud_aup: Optional[bool] = False
     signtime: Optional[int] = 0
 
     user_id: Optional[uuid.UUID] = Field(default=None, foreign_key="usermodel.id")

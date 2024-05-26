@@ -4,7 +4,6 @@ from unittest import result
 
 import openstack
 from python_terraform import Terraform
-from requests import session
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
@@ -47,37 +46,38 @@ class Approve:
             pass
 
         try:
-            if not user_data:
-                user_data = UserModel(
-                    session.exec(
-                        select(UserModel).where(UserModel.id == member_id)
-                    ).one_or_none()
-                )
-            # See if existing email.
-            username = user_data.infra_email
-            if username:
-                user = conn.identity.find_user(username)
-                if user:
-                    # Delete user's default project
-                    logger.debug(f"user // {user.default_project_id}")
-                    proj = conn.identity.get_project(user.default_project_id)
-                    proj = conn.identity.delete_project(proj)
+            with Session(engine) as session:
+                if not user_data:
+                    user_data = UserModel(
+                        session.exec(
+                            select(UserModel).where(UserModel.id == member_id)
+                        ).one_or_none()
+                    )
+                # See if existing email.
+                username = user_data.infra_email
+                if username:
+                    user = conn.identity.find_user(username)
+                    if user:
+                        # Delete user's default project
+                        logger.debug(f"user // {user.default_project_id}")
+                        proj = conn.identity.get_project(user.default_project_id)
+                        proj = conn.identity.delete_project(proj)
 
-                    # Delete user
-                    conn.identity.delete_user(user)
-                    logger.debug(f"{username}: User deleted.")
+                        # Delete user
+                        conn.identity.delete_user(user)
+                        logger.debug(f"{username}: User deleted.")
+                    else:
+                        logger.debug(f"{username}: No user.")
+
                 else:
-                    logger.debug(f"{username}: No user.")
-
-            else:
-                username = (
-                    user_data.discord.username.replace(" ", "_") + "@infra.hackucf.org"
-                )
-                # Add username to Onboard database
-                user_data.infra_email = username
-                session.add(user_data)
-                session.commit()
-                session.refresh(user_data)
+                    username = (
+                        user_data.discord.username.replace(" ", "_") + "@infra.hackucf.org"
+                    )
+                    # Add username to Onboard database
+                    user_data.infra_email = username
+                    session.add(user_data)
+                    session.commit()
+                    session.refresh(user_data)
 
             password = HorsePass.gen()
 
