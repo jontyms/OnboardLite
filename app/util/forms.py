@@ -29,11 +29,11 @@ class Forms:
         allowed_paths = "app/forms"
         if not is_path_allowed(form_file, allowed_paths):
             logger.error("attempted to access unauthorized paths")
-            raise
+            raise PermissionError("Access to the specified file is not allowed")
         try:
             return json.load(open(form_file, "r"))
         except FileNotFoundError:
-            raise
+            raise FileNotFoundError
 
 
 def fuzzy_parse_value(value):
