@@ -159,13 +159,14 @@ rate_limiter.get_redis()
 #    logger.debug("\tDone!")
 #
 #
-"""
-Get API information.
-"""
+
 
 
 @router.get("/")
 async def get_root():
+    """
+    Get API information.
+    """
     return InfoModel(
         name="Onboard Infra",
         description="Infrastructure Management via Onboard.",

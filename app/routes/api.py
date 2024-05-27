@@ -9,14 +9,9 @@ from sqlalchemy.orm import selectinload
 from sqlmodel import Session, SQLModel, select
 
 from app.models.info import InfoModel
-from app.models.user import (
-    EthicsFormModel,
-    PublicContact,
-    UserModel,
-    UserModelMutable,
-    user_to_dict,
-    user_update_instance,
-)
+from app.models.user import (EthicsFormModel, PublicContact, UserModel,
+                             UserModelMutable, user_to_dict,
+                             user_update_instance)
 from app.util import kennelish
 from app.util.authentication import Authentication
 from app.util.database import get_session
@@ -29,13 +24,14 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["API"], responses=Errors.basic_http())
 
 
-"""
-Get API information.
-"""
+
 
 
 @router.get("/")
 async def get_root():
+    """
+    Get API information.
+    """
     return InfoModel(
         name="OnboardLite",
         description="Hack@UCF's in-house membership management suite.",
@@ -49,14 +45,15 @@ async def get_root():
     )
 
 
-"""
-Gets the JSON markup for a Kennelish file. For client-side rendering (if that ever becomes a thing).
-Note that Kennelish form files are NOT considered sensitive.
-"""
+
 
 
 @router.get("/form/{num}")
 async def get_form(num: str):
+    """
+    Gets the JSON markup for a Kennelish file. For client-side rendering (if that ever becomes a thing).
+    Note that Kennelish form files are NOT considered sensitive.
+    """
     try:
         return Forms.get_form_body(num)
     except FileNotFoundError:

@@ -19,15 +19,16 @@ logger = logging.getLogger()
 
 # tf = Terraform(working_dir=Settings().infra.tf_directory)
 
-"""
-This function will ensure a member meets all requirements to be a member, and if so, creates an
-Infra account + whitelist them to the Hack@UCF Minecraft server.
-
-If approval fails, dispatch a Discord message saying that something went wrong and how to fix it.
-"""
 
 
 class Approve:
+    """
+    This function will ensure a member meets all requirements to be a member, and if so, creates an
+    Infra account + whitelist them to the Hack@UCF Minecraft server.
+
+    If approval fails, dispatch a Discord message saying that something went wrong and how to fix it.
+    """
+
     def __init__(self):
         pass
 

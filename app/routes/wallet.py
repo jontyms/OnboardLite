@@ -20,12 +20,13 @@ router = APIRouter(
 )
 
 
-"""
-Used to get Discord image.
-"""
+
 
 
 def get_img(url):
+    """
+    Used to get Discord image.
+    """
     resp = requests.get(url, stream=True)
     status = resp.status_code
     if status < 400:
@@ -34,12 +35,12 @@ def get_img(url):
         return get_img("https://cdn.hackucf.org/PFP.png")
 
 
-"""
-User data -> Apple Wallet blob
-"""
 
 
 def apple_wallet(user_data):
+    """
+    User data -> Apple Wallet blob
+    """
     # Create empty pass package
     p = PKPass()
 
@@ -211,13 +212,13 @@ def apple_wallet(user_data):
     return p
 
 
-"""
-Get API information.
-"""
 
 
 @router.get("/")
 async def get_root():
+    """
+    Get API information.
+    """
     return InfoModel(
         name="Onboard for Mobile Wallets",
         description="Apple Wallet support.",

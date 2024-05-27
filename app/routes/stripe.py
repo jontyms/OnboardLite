@@ -25,9 +25,7 @@ router = APIRouter(prefix="/pay", tags=["API"], responses=Errors.basic_http())
 stripe.api_key = Settings().stripe.api_key.get_secret_value()
 
 
-"""
-Get API information.
-"""
+
 
 
 @router.get("/")
@@ -38,6 +36,9 @@ async def get_root(
     user_jwt: Optional[object] = {},
     session: Session = Depends(get_session),
 ):
+    """
+    Get API information.
+    """
     user_data = session.exec(
         select(UserModel).where(UserModel.id == user_jwt.get("id"))
     ).one_or_none()
