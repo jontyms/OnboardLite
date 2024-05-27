@@ -7,8 +7,12 @@ from jose import jwt
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
-from app.models.user import (UserModel, UserModelMutable, user_to_dict,
-                             user_update_instance)
+from app.models.user import (
+    UserModel,
+    UserModelMutable,
+    user_to_dict,
+    user_update_instance,
+)
 from app.util.approve import Approve
 from app.util.authentication import Authentication
 from app.util.database import get_session
