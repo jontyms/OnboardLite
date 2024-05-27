@@ -220,7 +220,6 @@ async def oauth_transformer_new(
     # Generate a new user ID or reuse an existing one.
     statement = select(UserModel).where(UserModel.discord_id == discordData["id"])
     user = session.exec(statement).one_or_none()
-    print(user)
     # TODO: Discuss removing
     # BACKPORT: I didn't realize that Snowflakes were strings because of an integer overflow bug.
     # So this will do a query for the "mistaken" value and then fix its data.
