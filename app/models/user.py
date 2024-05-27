@@ -1,6 +1,6 @@
 import re
 import uuid
-from typing import Any, Dict, Optional, Type
+from typing import Any, Optional
 
 from pydantic import BaseModel, validator
 from sqlmodel import Field, Relationship, SQLModel

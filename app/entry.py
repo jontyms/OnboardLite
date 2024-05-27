@@ -1,6 +1,7 @@
 import os
-import sys
 import subprocess
+import sys
+
 
 # Define the default command to run uvicorn with environment variables
 def run_uvicorn():

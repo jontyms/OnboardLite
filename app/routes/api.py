@@ -1,23 +1,19 @@
 import json
 import logging
-from collections import defaultdict
-from typing import Any, Dict, Optional, Type
+from typing import Optional
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Request
-from pydantic import error_wrappers
 from sqlalchemy.orm import selectinload
-from sqlmodel import Session, SQLModel, select
+from sqlmodel import Session, select
 
 from app.models.info import InfoModel
-from app.models.user import (EthicsFormModel, PublicContact, UserModel,
-                             UserModelMutable, user_to_dict,
+from app.models.user import (PublicContact, UserModel, user_to_dict,
                              user_update_instance)
-from app.util import kennelish
 from app.util.authentication import Authentication
 from app.util.database import get_session
 from app.util.errors import Errors
 from app.util.forms import Forms, apply_fuzzy_parsing, transform_dict
-from app.util.kennelish import Kennelish, Transformer
+from app.util.kennelish import Transformer
 
 logger = logging.getLogger(__name__)
 

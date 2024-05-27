@@ -1,6 +1,5 @@
 import json
 import logging
-import time
 import uuid
 from typing import Optional
 from urllib.parse import urlparse
@@ -232,13 +231,9 @@ async def oauth_transformer_new(
     #            ExpressionAttributeValues={":discord_id": str(discordData["id"])},
     #        )
 
-    is_new = False
 
     if not user:
-        is_full_member = False
         member_id = str(uuid.uuid4())
-        do_sudo = False
-        is_new = True
         infra_email = ""
 
         # Make user join the Hack@UCF Discord, if it's their first rodeo.

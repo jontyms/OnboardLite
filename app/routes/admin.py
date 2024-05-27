@@ -7,19 +7,14 @@ from jose import jwt
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
-from app.models.user import (
-    UserModel,
-    UserModelMutable,
-    user_to_dict,
-    user_update_instance,
-)
+from app.models.user import (UserModel, UserModelMutable, user_to_dict,
+                             user_update_instance)
 from app.util.approve import Approve
 from app.util.authentication import Authentication
 from app.util.database import get_session
 from app.util.discord import Discord
 from app.util.email import Email
 from app.util.errors import Errors
-from app.util.forms import transform_dict
 from app.util.settings import Settings
 
 logger = logging.getLogger(__name__)

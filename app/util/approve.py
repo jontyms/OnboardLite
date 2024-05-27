@@ -1,6 +1,5 @@
 import logging
 import os
-from unittest import result
 
 import openstack
 from python_terraform import Terraform

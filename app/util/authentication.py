@@ -7,7 +7,6 @@ from fastapi.responses import RedirectResponse
 from jose import jwt
 
 from app.models.user import UserModel
-
 # Import options and errors
 from app.util.errors import Errors
 from app.util.settings import Settings
