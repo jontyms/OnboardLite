@@ -2,7 +2,7 @@
 FROM python:3.11-bookworm
 
 # Set the working directory in the container
-WORKDIR /src
+WORKDIR /app
 
 # Copy the requirements file to the container
 COPY requirements.txt .
@@ -31,5 +31,4 @@ COPY . .
 EXPOSE 8000
 
 # Start the FastAPI application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-#CMD ["sleep", "1h"]
+CMD ["sleep", "infinity"]

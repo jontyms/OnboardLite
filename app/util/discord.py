@@ -2,7 +2,7 @@ import json
 
 import requests
 
-from util.settings import Settings
+from app.util.settings import Settings
 
 headers = {
     "Authorization": f"Bot {Settings().discord.bot_token.get_secret_value()}",

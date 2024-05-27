@@ -5,6 +5,7 @@ from pydantic import constr, create_model
 
 logger = logging.getLogger(__name__)
 
+
 # Known bug: You cannot pre-fill data stored in second-level DynamoDB levels.
 # So "parent.child" won't retrieve a value.
 class Kennelish:
@@ -68,7 +69,7 @@ class Kennelish:
         return output
 
     def signature(entry, user_data=None):
-        output = f"<div name='{entry.get('key')}' class='signature'>By submitting this form, you, {user_data.get('first_name', 'HackUCF Member #' + user_data.get('id'))} {user_data.get('surname', '')}, agree to the above terms. This form will be time-stamped.</div>"
+        output = f"<div name='{entry.get('key')}' class='signature'>By submitting this form, you, {user_data.get('first_name', 'HackUCF Member #' + str(user_data.get('id')))} {user_data.get('surname', '')}, agree to the above terms. This form will be time-stamped.</div>"
         return output
 
     def text(entry, user_data=None, inp_type="text"):
@@ -224,25 +225,28 @@ class Transformer:
 
             # For emails (specified domain)
             elif element_type == "email" and el.get("domain", False):
-                regex_constr = constr(
-                    regex="([A-Za-z0-9.-_+]+)@" + el.get("domain").lower()
-                )
+                domain_regex = rf'^[A-Za-z0-9._%+-]+@{el.get("domain").lower()}$'
+                regex_constr = constr(pattern=domain_regex)
                 obj[el.get("key")] = (regex_constr, None)
 
             # For emails (any domain)
             elif element_type == "email":
                 regex_constr = constr(
-                    regex="([A-Za-z0-9.-_+]+)@[A-Za-z0-9-]+(.[A-Za-z-]{2,})"
+                    pattern=r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
                 )
                 obj[el.get("key")] = (regex_constr, None)
 
             # For NIDs
             elif element_type == "nid":
-                regex_constr = constr(regex="(^([a-z]{2}[0-9]{6})$)")
+                regex_constr = constr(pattern="(^([a-z]{2}[0-9]{6})$)")
                 obj[el.get("key")] = (regex_constr, None)
 
             # For numbers
             elif element_type == "slider":
+                obj[el.get("key")] = (int, None)
+
+            # Timestamps
+            elif element_type == "signature":
                 obj[el.get("key")] = (int, None)
 
             # For arbitrary strings.

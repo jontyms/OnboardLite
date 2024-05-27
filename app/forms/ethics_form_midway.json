@@ -65,6 +65,13 @@
                 "options": ["I promise not to do this."],
                 "key": "ethics_form.host_at_ucf"
             },
+            {
+                "caption": "I have read and agree to the Hack@UCF Cloud Acceptable Use Policy located at <a href='https://help.hackucf.org/misc/aup/'> here </a>",
+                "input": "radio",
+                "required": true,
+                "options": ["I promise not to do this."],
+                "key": "ethics_form.cloud_aup"
+            },
 
             {
                 "input": "signature",

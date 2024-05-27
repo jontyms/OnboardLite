@@ -1,0 +1,7 @@
+exclude = [
+    "tests"
+]
+
+
+[lint]
+ignore = ["F401"]

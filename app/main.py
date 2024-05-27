@@ -1,52 +1,73 @@
 import json
 import logging
-import os
-import time
 import uuid
 from typing import Optional
 from urllib.parse import urlparse
 
-import boto3
 import requests
-from boto3.dynamodb.conditions import Attr
+
 # FastAPI
-from fastapi import Cookie, FastAPI, Request, Response, status
+from fastapi import Cookie, Depends, FastAPI, Request, Response, status
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from jose import jwt
 from requests_oauthlib import OAuth2Session
+from sqlalchemy.orm import selectinload
+from sqlmodel import Session, select
 
 # Import data types
-from models.user import UserModel
-# Import routes
-from routes import admin, api, infra, stripe, wallet
-from util.approve import Approve
-# Import middleware
-from util.authentication import Authentication
-# Import error handling
-from util.errors import Errors
-from util.forms import Forms
-# Import the page rendering library
-from util.kennelish import Kennelish
-# Import options
-from util.settings import Settings
+from app.models.user import DiscordModel, EthicsFormModel, UserModel, user_to_dict
 
+# Import routes
+from app.routes import admin, api, infra, stripe, wallet
+from app.util.approve import Approve
+
+# Import middleware
+from app.util.authentication import Authentication
+from app.util.database import get_session, init_db
+
+# Import error handling
+from app.util.errors import Errors
+from app.util.forms import Forms
+
+# Import the page rendering library
+from app.util.kennelish import Kennelish
+
+# Import options
+from app.util.settings import Settings
+
+if Settings().telemetry.enable:
+    import sentry_sdk
 ### TODO: TEMP
-os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "0"
+# os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "0"
 ###
 
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S')
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 logger = logging.getLogger(__name__)
 
 
 # Initiate FastAPI.
 app = FastAPI()
-templates = Jinja2Templates(directory="templates")
-app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="app/templates")
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
+if Settings().telemetry.enable:
+    sentry_sdk.init(
+        dsn=Settings().telemetry.url,
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for performance monitoring.
+        traces_sample_rate=1.0,
+        # Set profiles_sample_rate to 1.0 to profile 100%
+        # of sampled transactions.
+        # We recommend adjusting this value in production.
+        profiles_sample_rate=1.0,
+    )
 
 # Import endpoints from ./routes
 app.include_router(api.router)
@@ -77,6 +98,11 @@ Render the Onboard home page.
 """
 
 
+@app.on_event("startup")
+def on_startup():
+    init_db()
+
+
 @app.get("/")
 async def index(request: Request, token: Optional[str] = Cookie(None)):
     is_full_member = False
@@ -85,19 +111,19 @@ async def index(request: Request, token: Optional[str] = Cookie(None)):
     infra_email = None
 
     if token is not None:
-      try:
-          user_jwt = jwt.decode(
-              token,
-              Settings().jwt.secret.get_secret_value(),
-              algorithms=Settings().jwt.algorithm,
-          )
-          is_full_member: bool = user_jwt.get("is_full_member", False)
-          is_admin: bool = user_jwt.get("sudo", False)
-          user_id: bool = user_jwt.get("id", None)
-          infra_email: bool = user_jwt.get("infra_email", None)
-      except Exception as e:
-          logger.exception(e)
-          pass
+        try:
+            user_jwt = jwt.decode(
+                token,
+                Settings().jwt.secret.get_secret_value(),
+                algorithms=Settings().jwt.algorithm,
+            )
+            is_full_member: bool = user_jwt.get("is_full_member", False)
+            is_admin: bool = user_jwt.get("sudo", False)
+            user_id: bool = user_jwt.get("id", None)
+            infra_email: bool = user_jwt.get("infra_email", None)
+        except Exception as e:
+            logger.exception(e)
+            pass
 
     return templates.TemplateResponse(
         "index.html",
@@ -153,11 +179,8 @@ async def oauth_transformer_new(
     code: str = None,
     redir: str = "/join/2",
     redir_endpoint: Optional[str] = Cookie(None),
+    session: Session = Depends(get_session),
 ):
-    # AWS dependencies
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(Settings().aws.table)
-
     # Open redirect check
     if redir == "_redir":
         redir = redir_endpoint
@@ -194,40 +217,27 @@ async def oauth_transformer_new(
     discordData = r.json()
 
     # Generate a new user ID or reuse an existing one.
-    query_for_id = table.scan(
-        FilterExpression=Attr("discord_id").eq(str(discordData["id"]))
-    )
-    query_for_id = query_for_id.get("Items")
-
+    statement = select(UserModel).where(UserModel.discord_id == discordData["id"])
+    user = session.exec(statement).one_or_none()
+    # TODO: Discuss removing
     # BACKPORT: I didn't realize that Snowflakes were strings because of an integer overflow bug.
     # So this will do a query for the "mistaken" value and then fix its data.
-    if not query_for_id:
-        logger.info("Beginning Discord ID attribute migration...")
-        query_for_id = table.scan(
-            FilterExpression=Attr("discord_id").eq(int(discordData["id"]))
-        )
-        query_for_id = query_for_id.get("Items")
+    # if not query_for_id:
+    #    logger.info("Beginning Discord ID attribute migration...")
+    #    query_for_id = table.scan(
+    #        FilterExpression=Attr("discord_id").eq(int(discordData["id"]))
+    #    )
+    #    query_for_id = query_for_id.get("Items")
+    #
+    #    if query_for_id:
+    #        table.update_item(
+    #            Key={"id": query_for_id[0].get("id")},
+    #            UpdateExpression="SET discord_id = :discord_id",
+    #            ExpressionAttributeValues={":discord_id": str(discordData["id"])},
+    #        )
 
-        if query_for_id:
-            table.update_item(
-                Key={"id": query_for_id[0].get("id")},
-                UpdateExpression="SET discord_id = :discord_id",
-                ExpressionAttributeValues={":discord_id": str(discordData["id"])},
-            )
-
-    is_new = False
-
-    if query_for_id:
-        query_for_id = query_for_id[0]
-        member_id = query_for_id.get("id")
-        do_sudo = query_for_id.get("sudo")
-        is_full_member = query_for_id.get("is_full_member")
-        infra_email = query_for_id.get("infra_email", "")
-    else:
-        is_full_member = False
+    if not user:
         member_id = str(uuid.uuid4())
-        do_sudo = False
-        is_new = True
         infra_email = ""
 
         # Make user join the Hack@UCF Discord, if it's their first rodeo.
@@ -243,54 +253,28 @@ async def oauth_transformer_new(
             headers=headers,
             data=json.dumps(put_join_guild),
         )
-
-    data = {
-        "id": member_id,
-        "discord_id": discordData["id"],
-        "discord": {
-            "email": discordData["email"],
-            "mfa": discordData["mfa_enabled"],
+        user = UserModel(discord_id=discord_id, id=member_id, infra_email=infra_email)
+        discord_data = {
+            "email": discordData.get("email"),
+            "mfa": discordData.get("mfa_enabled"),
             "avatar": f"https://cdn.discordapp.com/avatars/{discordData['id']}/{discordData['avatar']}.png?size=512",
             "banner": f"https://cdn.discordapp.com/banners/{discordData['id']}/{discordData['banner']}.png?size=1536",
-            "color": discordData["accent_color"],
-            "nitro": discordData["public_flags"],
-            "locale": discordData["locale"],
-            "username": discordData["username"],
-        },
-        "email": discordData["email"]
-        ## Consider making this a separate table.
-        # "attendance": None # t/f based on dict/object keyed on iso-8601 date.
-    }
-
-    # Populate the full table.
-    full_data = UserModel(**data).dict()
-
-    # Push data back to DynamoDB
-    if is_new:
-        table.put_item(Item=full_data)
-    else:
-        table.update_item(
-            Key={"id": member_id},
-            UpdateExpression="SET discord = :discord",
-            ExpressionAttributeValues={":discord": full_data["discord"]},
-        )
+            "color": discordData.get("accent_color"),
+            "nitro": discordData.get("premium_type"),
+            "locale": discordData.get("locale"),
+            "username": discordData.get("username"),
+            "user_id": user.id,
+        }
+        discord_model = DiscordModel(**discord_data)
+        ethics_form = EthicsFormModel()
+        user.discord = discord_model
+        user.ethics_form = ethics_form
+        session.add(user)
+        session.commit()
+        session.refresh(user)
 
     # Create JWT. This should be the only way to issue JWTs.
-    jwtData = {
-        "discord": token,
-        "name": discordData["username"],
-        "pfp": full_data["discord"]["avatar"],
-        "id": member_id,
-        "sudo": do_sudo,
-        "is_full_member": is_full_member,
-        "issued": time.time(),
-        "infra_email": infra_email,
-    }
-    bearer = jwt.encode(
-        jwtData,
-        Settings().jwt.secret.get_secret_value(),
-        algorithm=Settings().jwt.algorithm,
-    )
+    bearer = Authentication.create_jwt(user)
     rr = RedirectResponse(redir, status_code=status.HTTP_302_FOUND)
     rr.set_cookie(key="token", value=bearer)
 
@@ -324,12 +308,14 @@ async def profile(
     request: Request,
     token: Optional[str] = Cookie(None),
     user_jwt: Optional[object] = {},
+    session: Session = Depends(get_session),
 ):
-    # Get data from DynamoDB
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(Settings().aws.table)
-
-    user_data = table.get_item(Key={"id": user_jwt.get("id")}).get("Item", None)
+    statement = (
+        select(UserModel)
+        .where(UserModel.id == user_jwt["id"])
+        .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
+    )
+    user_data = user_to_dict(session.exec(statement).one_or_none())
 
     # Re-run approval workflow.
     Approve.approve_member(user_jwt.get("id"))
@@ -351,11 +337,8 @@ async def forms(
     token: Optional[str] = Cookie(None),
     user_jwt: Optional[object] = {},
     num: str = 1,
+    session: Session = Depends(get_session),
 ):
-    # AWS dependencies
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(Settings().aws.table)
-
     if num == "1":
         return RedirectResponse("/join/", status_code=status.HTTP_302_FOUND)
     try:
@@ -368,11 +351,17 @@ async def forms(
             essay="This form does not exist.",
         )
 
+    # Get data from SqlModel
 
-    # Get data from DynamoDB
-    user_data = table.get_item(Key={"id": user_jwt.get("id")}).get("Item", None)
-
+    statement = (
+        select(UserModel)
+        .where(UserModel.id == user_jwt.get("id"))
+        .options(selectinload(UserModel.discord))
+    )
+    user_data = session.exec(statement).one_or_none()
     # Have Kennelish parse the data.
+    user_data = user_to_dict(user_data)
+    logger.info("Parsing form data" + str(user_data))
     body = Kennelish.parse(data, user_data)
 
     # return num
@@ -399,9 +388,10 @@ async def logout(request: Request):
     rr.delete_cookie(key="token")
     return rr
 
-@app.get('/favicon.ico', include_in_schema=False)
+
+@app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
-    return FileResponse("./static/favicon.ico")
+    return FileResponse("./app/static/favicon.ico")
 
 
 if __name__ == "__main__":

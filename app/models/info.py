@@ -3,7 +3,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 # Import data types
-from models.user import PublicContact
+from app.models.user import PublicContact
 
 
 class InfoModel(BaseModel):
