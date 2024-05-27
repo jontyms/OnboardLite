@@ -10,12 +10,13 @@ from sqlmodel import Session, SQLModel, select
 
 from app.models.info import InfoModel
 from app.models.user import (EthicsFormModel, PublicContact, UserModel,
-                             UserModelMutable, to_dict)
+                             UserModelMutable, user_to_dict,
+                             user_update_instance)
 from app.util import kennelish
 from app.util.authentication import Authentication
 from app.util.database import get_session
 from app.util.errors import Errors
-from app.util.forms import Forms, apply_fuzzy_parsing
+from app.util.forms import Forms, apply_fuzzy_parsing, transform_dict
 from app.util.kennelish import Kennelish, Transformer
 
 logger = logging.getLogger(__name__)
@@ -158,20 +159,8 @@ async def post_form(
 
     validated_data = apply_fuzzy_parsing(model_validated)
 
-    def transform_dict(d):
-       if not any('.' in key for key in d):
-        return d
-       nested_dict = defaultdict(dict)
-       for key, value in d.items():
-           parent, child = key.split('.')
-           nested_dict[parent][child] = value
-       return nested_dict
-
     # Transform the dictionary
     validated_data = transform_dict(validated_data)
-
-
-    logger.warning(str(validated_data))
 
 
     statement = (
@@ -185,28 +174,8 @@ async def post_form(
     if not user:
         raise HTTPException(status_code=422, detail="User not found")
 
-    logger.warning(validated_data)
 
-
-    def update_instance(instance: SQLModel, data: Dict[str, Any]) -> None:
-        for key, value in data.items():
-            if isinstance(value, dict):
-                nested_instance = getattr(instance, key, None)
-                if nested_instance is not None:
-                    update_instance(nested_instance, value)
-                else:
-                    nested_model_class = instance.__class__.__annotations__.get(key)
-                    if nested_model_class:
-                        new_nested_instance = nested_model_class()
-                        update_instance(new_nested_instance, value)
-            else:
-                setattr(instance, key, value)
-
-
-
-
-    update_instance(user, validated_data)
-    logger.warning(to_dict(user))
+    user_update_instance(user, validated_data)
 
     # Save the updated model back to the database
     session.add(user)

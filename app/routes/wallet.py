@@ -10,7 +10,7 @@ from sqlalchemy.orm import selectinload
 from sqlmodel import select
 
 from app.models.info import InfoModel
-from app.models.user import PublicContact, UserModel, to_dict
+from app.models.user import PublicContact, UserModel, user_to_dict
 from app.util.authentication import Authentication
 from app.util.database import get_session
 from app.util.errors import Errors
@@ -244,7 +244,7 @@ async def aapl_gen(
         .where(UserModel.id == user_jwt["id"])
         .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
     )
-    user_data = to_dict(session.exec(statement).one_or_none())
+    user_data = user_to_dict(session.exec(statement).one_or_none())
 
     p = apple_wallet(user_data)
 

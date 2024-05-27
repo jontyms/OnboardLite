@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 from fastapi import APIRouter, Body, Cookie, Depends, Request, Response
@@ -6,14 +7,18 @@ from jose import jwt
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
-from app.models.user import UserModel, UserModelMutable, to_dict
+from app.models.user import (UserModel, UserModelMutable, user_to_dict,
+                             user_update_instance)
 from app.util.approve import Approve
 from app.util.authentication import Authentication
 from app.util.database import get_session
 from app.util.discord import Discord
 from app.util.email import Email
 from app.util.errors import Errors
+from app.util.forms import transform_dict
 from app.util.settings import Settings
+
+logger = logging.getLogger(__name__)
 
 templates = Jinja2Templates(directory="app/templates")
 
@@ -141,7 +146,7 @@ async def admin_get_single(
         .where(UserModel.id == user_jwt["id"])
         .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
     )
-    user_data = to_dict(session.exec(statement).one_or_none())
+    user_data = user_to_dict(session.exec(statement).one_or_none())
 
     if not user_data:
         return Errors.generate(request, 404, "User Not Found")
@@ -169,7 +174,7 @@ async def admin_get_snowflake(
         .where(UserModel.discord_id == discord_id)
         .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
     )
-    data = to_dict(session.exec(statement).one_or_none())
+    data = user_to_dict(session.exec(statement).one_or_none())
     # if not data:
     #    # Try a legacy-user-ID search (deprecated, but still neccesary)
     #    data = table.scan(FilterExpression=Attr("discord_id").eq(int(discord_id))).get(
@@ -234,19 +239,16 @@ async def admin_edit(
         .where(UserModel.id == member_id)
         .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
     )
-    old_data = to_dict(session.exec(statement).one_or_none())
+    member_data = session.exec(statement).one_or_none()
 
-    if not old_data:
+    if not member_data:
         return Errors.generate(request, 404, "User Not Found")
-    input_data = input_data.model_dump(exclude_unset=True)
-    for key, value in input_data:
-        if value is not None:
-            setattr(old_data, key, value)
+    input_data = user_to_dict(input_data)
+    user_update_instance(member_data, input_data)
 
-    new_data = UserModel(**old_data)
-    session.add(new_data)
+    session.add(member_data)
     session.commit()
-    return {"data": new_data, "msg": "Updated successfully!"}
+    return {"data": user_to_dict(member_data), "msg": "Updated successfully!"}
 
 
 @router.get("/list")
@@ -262,7 +264,13 @@ async def admin_list(
     statement = select(UserModel).options(
         selectinload(UserModel.discord), selectinload(UserModel.ethics_form)
     )
-    data = to_dict(session.exec(statement))
+    users = session.exec(statement)
+    data = []
+    for user in users:
+        user = user_to_dict(user)
+        data.append(user)
+
+
     return {"data": data}
 
 
@@ -279,7 +287,7 @@ async def admin_list_csv(
     statement = select(UserModel).options(
         selectinload(UserModel.discord), selectinload(UserModel.ethics_form)
     )
-    data = to_dict(session.exec(statement))
+    data = user_to_dict(session.exec(statement))
 
     output = "Membership ID, First Name, Last Name, NID, Is Returning, Gender, Major, Class Standing, Shirt Size, Discord Username, Experience, Cyber Interests, Event Interest, Is C3 Interest, Comments, Ethics Form Timestamp, Minecraft, Infra Email\n"
     for user in data:

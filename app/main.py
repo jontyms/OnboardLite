@@ -17,7 +17,8 @@ from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
 # Import data types
-from app.models.user import DiscordModel, EthicsFormModel, UserModel, to_dict
+from app.models.user import (DiscordModel, EthicsFormModel, UserModel,
+                             user_to_dict)
 # Import routes
 from app.routes import admin, api, infra, stripe, wallet
 from app.util.approve import Approve
@@ -32,6 +33,8 @@ from app.util.kennelish import Kennelish
 # Import options
 from app.util.settings import Settings
 
+if Settings().telemetry.enable:
+    import sentry_sdk
 ### TODO: TEMP
 # os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "0"
 ###
@@ -49,6 +52,18 @@ logger = logging.getLogger(__name__)
 app = FastAPI()
 templates = Jinja2Templates(directory="app/templates")
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
+if Settings().telemetry.enable:
+    sentry_sdk.init(
+        dsn=Settings().telemetry.url,
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for performance monitoring.
+        traces_sample_rate=1.0,
+        # Set profiles_sample_rate to 1.0 to profile 100%
+        # of sampled transactions.
+        # We recommend adjusting this value in production.
+        profiles_sample_rate=1.0,
+    )
 
 # Import endpoints from ./routes
 app.include_router(api.router)
@@ -302,7 +317,7 @@ async def profile(
         .where(UserModel.id == user_jwt["id"])
         .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
     )
-    user_data = to_dict(session.exec(statement).one_or_none())
+    user_data = user_to_dict(session.exec(statement).one_or_none())
 
     # Re-run approval workflow.
     Approve.approve_member(user_jwt.get("id"))
@@ -347,7 +362,7 @@ async def forms(
     )
     user_data = session.exec(statement).one_or_none()
     # Have Kennelish parse the data.
-    user_data = to_dict(user_data)
+    user_data = user_to_dict(user_data)
     logger.info("Parsing form data" + str(user_data))
     body = Kennelish.parse(data, user_data)
 

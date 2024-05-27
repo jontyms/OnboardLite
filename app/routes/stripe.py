@@ -147,6 +147,7 @@ def pay_dues(checkout_session, db_session):
     user_data.did_pay_dues = True
     db_session.add(user_data)
     db_session.commit()
+    db_session.refresh(user_data)
 
     # Do checks to approve membership status.
     Approve.approve_member(member_id)

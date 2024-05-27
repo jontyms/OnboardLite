@@ -3,6 +3,7 @@ import logging
 import os
 import re
 import subprocess
+from typing import Optional
 
 import yaml
 from pydantic import BaseModel, SecretStr, constr
@@ -194,6 +195,11 @@ class InfraConfig(BaseModel):
 
 infra_config = InfraConfig(**settings["infra"])
 
+class TelemetryConfig(BaseModel):
+    url: Optional[str] = None
+    enable: Optional[bool] = False
+
+telemetry_config = TelemetryConfig(**settings["telemetry"])
 
 class DatabaseConfig(BaseModel):
     url: str
@@ -234,3 +240,4 @@ class Settings(BaseSettings, metaclass=SingletonBaseSettingsMeta):
     infra: InfraConfig = infra_config
     redis: RedisConfig = redis_config
     http: HttpConfig = http_config
+    telemetry: TelemetryConfig = telemetry_config

@@ -1,6 +1,6 @@
 import re
 import uuid
-from typing import Optional
+from typing import Any, Dict, Optional, Type
 
 from pydantic import BaseModel, validator
 from sqlmodel import Field, Relationship, SQLModel
@@ -143,8 +143,8 @@ class UserModelMutable(BaseModel):
     # Other things
     attending: Optional[str] = None
     comments: Optional[str] = None
-    discord: Optional[DiscordModel]
-    ethics_form: Optional[EthicsFormModel]
+    discord: Optional[DiscordModel] = None
+    ethics_form: Optional[EthicsFormModel] = None
 
 class PublicContact(BaseModel):
     first_name: str
@@ -155,20 +155,36 @@ class PublicContact(BaseModel):
 
 
 
-def to_dict(model):
+def user_to_dict(model):
     if model is None:
         return None
     if isinstance(model, list):
-        return [to_dict(item) for item in model]
-    if isinstance(model, SQLModel):
-        data = model.dict()
+        return [user_to_dict(item) for item in model]
+    if isinstance(model, (SQLModel, BaseModel)):
+        data = model.model_dump()
         for key, value in model.__dict__.items():
-            if isinstance(value, SQLModel):
-                data[key] = to_dict(value)
-            elif isinstance(value, list) and value and isinstance(value[0], SQLModel):
-                data[key] = to_dict(value)
+            if isinstance(value, (SQLModel, BaseModel)):
+                data[key] = user_to_dict(value)
+            elif isinstance(value, list) and value and isinstance(value[0], (SQLModel, BaseModel)):
+                data[key] = user_to_dict(value)
         return data
-    return model
+
+
+def user_update_instance(instance: SQLModel, data: dict[str, Any]) -> None:
+    for key, value in data.items():
+        if isinstance(value, dict):
+            nested_instance = getattr(instance, key, None)
+            if nested_instance is not None:
+                user_update_instance(nested_instance, value)
+            else:
+                nested_model_class = instance.__class__.__annotations__.get(key)
+                if nested_model_class:
+                    new_nested_instance = nested_model_class()
+                    user_update_instance(new_nested_instance, value)
+        else:
+            if value is not None:
+                setattr(instance, key, value)
+
 
 
 # Removed unneeded functionality

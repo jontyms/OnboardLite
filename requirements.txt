@@ -26,3 +26,6 @@ virtualenv==20.26.1
 httpx
 pytest
 sqlmodel
+sentry_sdk
+alembic
+aiosqlite
