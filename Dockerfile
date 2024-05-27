@@ -1,11 +1,8 @@
 # Use the official Python base image
-FROM python:3.11-bookworm
+FROM python:3.11-bookworm AS base
 
 # Set the working directory in the container
 WORKDIR /src
-
-# Copy the requirements file to the container
-COPY requirements.txt .
 
 # Install build-essential
 RUN apt-get update && apt-get install -y build-essential
@@ -21,15 +18,41 @@ RUN mv bws /usr/local/bin
 
 RUN rm -r /tmp/
 
-# Install the dependencies
-RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
 
-# Copy the application code to the container
+
+FROM base AS dev
+
 COPY . .
 
-# Expose the port that the FastAPI application will run on
+RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
+
+RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements-dev.txt
+
+EXPOSE 8000
+
+ENTRYPOINT ["python3", "app/entry.py" ]
+
+CMD dev
+
+
+
+FROM dev AS test
+
+CMD ["pytest"]
+
+
+
+FROM base as prod
+
+COPY requirements.txt .
+
+RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
+
+COPY ./app ./app
+
 EXPOSE 8000
 
 # Start the FastAPI application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-#CMD ["sleep", "1h"]
+ENTRYPOINT ["/bin/python3", "app/entry.py"]
+
+CMD []

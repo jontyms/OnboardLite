@@ -1,6 +1,6 @@
 services:
   fastapi:
-    build: .
+    image: ghcr.io/hackucf/onboardlite:latest
     environment:
       - BWS_ACCESS_TOKEN={$BWS_ACCESS_TOKEN}
     ports:
@@ -8,34 +8,5 @@ services:
     volumes:
       - ./config/options.yml:/src/config/options.yml
       - ./database/:/data/
-    develop:
-      watch:
-        # sync static content
-        - path: ./app/static
-          action: sync
-          target: /src/app/static
-        # sync templates
-        - path: ./app/templates
-          action: sync
-          target: /src/app/templates
-        - path: ./app/forms
-          action: sync
-          target: /src/app/templates
-        # sync app
-        - path: ./app/app/models/
-          action: sync+restart
-          target: /src/app/models/
-        - path: ./app/routes/
-          action: sync+restart
-          target: /src/app/routes/
-        - path: ./app/util/
-          action: sync+restart
-          target: /src/app/util/
-        - path: ./app/index.py
-          action: sync+restart
-          target: /src/app/index.py
-        - path: ./requirements.txt
-          action: rebuild
-          target: /src/app/requirements.txt
   redis:
     image: redis:7.2
