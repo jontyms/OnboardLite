@@ -146,13 +146,11 @@ class UserModelMutable(BaseModel):
     discord: Optional[DiscordModel] = None
     ethics_form: Optional[EthicsFormModel] = None
 
+
 class PublicContact(BaseModel):
     first_name: str
     surname: str
     ops_email: str
-
-
-
 
 
 def user_to_dict(model):
@@ -165,7 +163,11 @@ def user_to_dict(model):
         for key, value in model.__dict__.items():
             if isinstance(value, (SQLModel, BaseModel)):
                 data[key] = user_to_dict(value)
-            elif isinstance(value, list) and value and isinstance(value[0], (SQLModel, BaseModel)):
+            elif (
+                isinstance(value, list)
+                and value
+                and isinstance(value[0], (SQLModel, BaseModel))
+            ):
                 data[key] = user_to_dict(value)
         return data
 
@@ -184,7 +186,6 @@ def user_update_instance(instance: SQLModel, data: dict[str, Any]) -> None:
         else:
             if value is not None:
                 setattr(instance, key, value)
-
 
 
 # Removed unneeded functionality

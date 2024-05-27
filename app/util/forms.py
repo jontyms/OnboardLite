@@ -9,6 +9,7 @@ from sqlmodel import SQLModel
 
 logger = logging.getLogger(__name__)
 
+
 def is_path_allowed(user_path: str, allowed_dir: str) -> bool:
     # Convert to absolute paths
     user_path = Path(user_path).resolve()
@@ -21,10 +22,11 @@ def is_path_allowed(user_path: str, allowed_dir: str) -> bool:
     except ValueError:
         return False
 
+
 class Forms:
     def get_form_body(file="1"):
         form_file = os.path.join(os.getcwd(), "app/forms", f"{file}.json")
-        allowed_paths= "app/forms"
+        allowed_paths = "app/forms"
         if not is_path_allowed(form_file, allowed_paths):
             logger.error("attempted to access unauthorized paths")
             raise
@@ -32,7 +34,6 @@ class Forms:
             return json.load(open(form_file, "r"))
         except FileNotFoundError:
             raise
-
 
 
 def fuzzy_parse_value(value):
@@ -63,10 +64,10 @@ def transform_dict(d):
     """
     Turns the nested Models in the format nested_model.key1: "1" into nested_model: {key1: "1", key2: "2" }
     """
-    if not any('.' in key for key in d):
-     return d
+    if not any("." in key for key in d):
+        return d
     nested_dict = DefaultDict(dict)
     for key, value in d.items():
-        parent, child = key.split('.')
+        parent, child = key.split(".")
         nested_dict[parent][child] = value
     return nested_dict

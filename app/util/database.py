@@ -7,7 +7,7 @@ from sqlmodel.pool import StaticPool
 
 from app.util.settings import Settings
 
-DATABASE_URL =  Settings().database.url
+DATABASE_URL = Settings().database.url
 # TODO remove echo=True
 engine = create_engine(
     DATABASE_URL,
@@ -24,7 +24,6 @@ def init_db():
 def get_session():
     with Session(engine) as session:
         yield session
-
 
 
 def check_current_head(alembic_cfg, connectable):

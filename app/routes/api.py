@@ -9,9 +9,14 @@ from sqlalchemy.orm import selectinload
 from sqlmodel import Session, SQLModel, select
 
 from app.models.info import InfoModel
-from app.models.user import (EthicsFormModel, PublicContact, UserModel,
-                             UserModelMutable, user_to_dict,
-                             user_update_instance)
+from app.models.user import (
+    EthicsFormModel,
+    PublicContact,
+    UserModel,
+    UserModelMutable,
+    user_to_dict,
+    user_update_instance,
+)
 from app.util import kennelish
 from app.util.authentication import Authentication
 from app.util.database import get_session
@@ -94,14 +99,14 @@ Allows updating the user's database using a schema assumed by the Kennelish file
 """
 
 
-#@router.post("/form/ethics_form_midway")
-#@Authentication.member
-#async def post_ethics_form(
+# @router.post("/form/ethics_form_midway")
+# @Authentication.member
+# async def post_ethics_form(
 #    request: Request,
 #    token: Optional[str] = Cookie(None),
 #    user_jwt: Optional[object] = {},
 #    session: Session = Depends(get_session),
-#):
+# ):
 #    try:
 #        ethics_form_data = EthicsFormUpdate.model_validate(await request.json())
 #    except json.JSONDecodeError:
@@ -162,7 +167,6 @@ async def post_form(
     # Transform the dictionary
     validated_data = transform_dict(validated_data)
 
-
     statement = (
         select(UserModel)
         .where(UserModel.id == user_jwt["id"])
@@ -173,7 +177,6 @@ async def post_form(
 
     if not user:
         raise HTTPException(status_code=422, detail="User not found")
-
 
     user_update_instance(user, validated_data)
 

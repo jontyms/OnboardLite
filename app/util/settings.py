@@ -171,9 +171,6 @@ class JwtConfig(BaseModel):
 jwt_config = JwtConfig(**settings["jwt"])
 
 
-
-
-
 class InfraConfig(BaseModel):
     """
     Represents the infrastructure configuration.
@@ -195,16 +192,21 @@ class InfraConfig(BaseModel):
 
 infra_config = InfraConfig(**settings["infra"])
 
+
 class TelemetryConfig(BaseModel):
     url: Optional[str] = None
     enable: Optional[bool] = False
 
+
 telemetry_config = TelemetryConfig(**settings["telemetry"])
+
 
 class DatabaseConfig(BaseModel):
     url: str
 
+
 database_config = DatabaseConfig(**settings["database"])
+
 
 class RedisConfig(BaseModel):
     host: str

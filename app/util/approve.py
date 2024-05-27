@@ -71,7 +71,8 @@ class Approve:
 
                 else:
                     username = (
-                        user_data.discord.username.replace(" ", "_") + "@infra.hackucf.org"
+                        user_data.discord.username.replace(" ", "_")
+                        + "@infra.hackucf.org"
                     )
                     # Add username to Onboard database
                     user_data.infra_email = username

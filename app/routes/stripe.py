@@ -133,8 +133,6 @@ async def webhook(request: Request, session: Session = Depends(get_session)):
 
 
 def pay_dues(checkout_session, db_session):
-
-
     customer_email = checkout_session.get("customer_email")
 
     user_data = db_session.exec(

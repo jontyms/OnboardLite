@@ -6,6 +6,7 @@ from typing import Optional
 from urllib.parse import urlparse
 
 import requests
+
 # FastAPI
 from fastapi import Cookie, Depends, FastAPI, Request, Response, status
 from fastapi.responses import FileResponse, RedirectResponse
@@ -17,19 +18,23 @@ from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
 # Import data types
-from app.models.user import (DiscordModel, EthicsFormModel, UserModel,
-                             user_to_dict)
+from app.models.user import DiscordModel, EthicsFormModel, UserModel, user_to_dict
+
 # Import routes
 from app.routes import admin, api, infra, stripe, wallet
 from app.util.approve import Approve
+
 # Import middleware
 from app.util.authentication import Authentication
 from app.util.database import get_session, init_db
+
 # Import error handling
 from app.util.errors import Errors
 from app.util.forms import Forms
+
 # Import the page rendering library
 from app.util.kennelish import Kennelish
+
 # Import options
 from app.util.settings import Settings
 

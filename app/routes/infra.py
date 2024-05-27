@@ -38,7 +38,7 @@ rate_limiter = RateLimiter(
 rate_limiter.get_redis()
 
 
-#def get_shitty_database():
+# def get_shitty_database():
 #    """
 #    Dump contents of the file that stores infra options.
 #    I lovingly call this the "shitty database."
@@ -55,7 +55,7 @@ rate_limiter.get_redis()
 #    return data
 
 
-#async def create_resource(project, callback_discord_id=None):
+# async def create_resource(project, callback_discord_id=None):
 #    shitty_database = get_shitty_database()
 #    proj_name = project.name
 #
@@ -89,17 +89,17 @@ rate_limiter.get_redis()
 #    if callback_discord_id:
 #        resource_create_msg = f"""Hello!
 #
-#Your requested virtual machine has been created! You can now view it at {Settings().infra.horizon}.
+# Your requested virtual machine has been created! You can now view it at {Settings().infra.horizon}.
 #
-#Enjoy,
+# Enjoy,
 #    - Hack@UCF Bot
-#"""
+# """
 #        Discord.send_message(callback_discord_id, resource_create_msg)
 #
 #    logger.info("\tDone!")
 #
 #
-#async def teardown():
+# async def teardown():
 #    logger.debug("Initializing post-GBM teardown...")
 #    death_word = "gbm"
 #
@@ -183,19 +183,20 @@ async def get_root():
         ],
     )
 
+
 #
-#"""
-#API endpoint to self-service create a GBM environment.
-#"""
+# """
+# API endpoint to self-service create a GBM environment.
+# """
 #
 #
-#@router.get("/provision/")
-#@Authentication.member
-#async def get_provision(
+# @router.get("/provision/")
+# @Authentication.member
+# async def get_provision(
 #    request: Request,
 #    token: Optional[str] = Cookie(None),
 #    user_jwt: Optional[object] = {},
-#):
+# ):
 #    conn = openstack.connect(cloud="hackucf_infra")
 #
 #    # Get single user
@@ -211,46 +212,46 @@ async def get_root():
 #    return {"msg": "Queued."}
 #
 #
-#"""
-#API endpoint to trigger tear-down of GBM-provisioned stuff.
-#"""
+# """
+# API endpoint to trigger tear-down of GBM-provisioned stuff.
+# """
 #
 #
-#@router.get("/teardown/")
-#@Authentication.admin
-#async def get_teardown(request: Request, token: Optional[str] = Cookie(None)):
+# @router.get("/teardown/")
+# @Authentication.admin
+# async def get_teardown(request: Request, token: Optional[str] = Cookie(None)):
 #    asyncio.create_task(teardown())  # runs teardown async
 #    return {"msg": "Queued."}
 #
 #
-#"""
-#API endpoint to SET the one-click deploy Settings().
-#"""
+# """
+# API endpoint to SET the one-click deploy Settings().
+# """
 #
 #
-#@router.get("/options/get")
-#@Authentication.member
-#async def get_options(
+# @router.get("/options/get")
+# @Authentication.member
+# async def get_options(
 #    request: Request,
 #    token: Optional[str] = Cookie(None),
 #    user_jwt: Optional[object] = {},
-#):
+# ):
 #    return get_shitty_database()
 #
 #
-#"""
-#API endpoint to SET the one-click deploy Settings().
-#"""
+# """
+# API endpoint to SET the one-click deploy Settings().
+# """
 #
 #
-#@router.get("/options/set")
-#@Authentication.admin
-#async def set_options(
+# @router.get("/options/set")
+# @Authentication.admin
+# async def set_options(
 #    request: Request,
 #    token: Optional[str] = Cookie(None),
 #    gbmName: Optional[str] = None,
 #    imageId: Optional[str] = None,
-#):
+# ):
 #    shitty_database = {"gbmName": gbmName, "imageId": imageId}
 #
 #    with open("infra_options.json", "w") as f:
@@ -258,8 +259,6 @@ async def get_root():
 #
 #    return shitty_database
 #
-
-
 
 
 @router.get("/reset/")
@@ -320,9 +319,6 @@ Happy Hacking,
     Email.send_email("Reset Infra Credentials", new_creds_msg, user_data.get("email"))
 
     return {"username": creds.get("username"), "password": creds.get("password")}
-
-
-
 
 
 @router.get("/openvpn")
