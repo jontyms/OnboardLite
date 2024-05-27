@@ -158,7 +158,6 @@ rate_limiter.get_redis()
 #
 
 
-
 @router.get("/")
 async def get_root():
     """

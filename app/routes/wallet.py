@@ -20,9 +20,6 @@ router = APIRouter(
 )
 
 
-
-
-
 def get_img(url):
     """
     Used to get Discord image.
@@ -33,8 +30,6 @@ def get_img(url):
         return resp.raw.read()
     else:
         return get_img("https://cdn.hackucf.org/PFP.png")
-
-
 
 
 def apple_wallet(user_data):
@@ -210,8 +205,6 @@ def apple_wallet(user_data):
     p.sign()
 
     return p
-
-
 
 
 @router.get("/")

@@ -231,7 +231,6 @@ async def oauth_transformer_new(
     #            ExpressionAttributeValues={":discord_id": str(discordData["id"])},
     #        )
 
-
     if not user:
         member_id = str(uuid.uuid4())
         infra_email = ""

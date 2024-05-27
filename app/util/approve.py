@@ -19,7 +19,6 @@ logger = logging.getLogger()
 # tf = Terraform(working_dir=Settings().infra.tf_directory)
 
 
-
 class Approve:
     """
     This function will ensure a member meets all requirements to be a member, and if so, creates an

@@ -20,9 +20,6 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["API"], responses=Errors.basic_http())
 
 
-
-
-
 @router.get("/")
 async def get_root():
     """
@@ -39,9 +36,6 @@ async def get_root():
             )
         ],
     )
-
-
-
 
 
 @router.get("/form/{num}")

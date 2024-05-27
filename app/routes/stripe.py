@@ -25,9 +25,6 @@ router = APIRouter(prefix="/pay", tags=["API"], responses=Errors.basic_http())
 stripe.api_key = Settings().stripe.api_key.get_secret_value()
 
 
-
-
-
 @router.get("/")
 @Authentication.member
 async def get_root(

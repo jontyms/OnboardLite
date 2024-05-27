@@ -27,7 +27,7 @@ def get_session():
 
 def check_current_head(alembic_cfg, connectable):
     # type: (config.Config, engine.Engine) -> bool
-    #cfg = config.Config("../alembic.ini")
+    # cfg = config.Config("../alembic.ini")
     directory = script.ScriptDirectory.from_config(alembic_cfg)
     with connectable.begin() as connection:
         context = migration.MigrationContext.configure(connection)
