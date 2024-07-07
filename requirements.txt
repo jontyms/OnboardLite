@@ -8,7 +8,7 @@ openstacksdk==3.1.0
 passwordgenerator==1.5.1
 pyOpenSSL==23.2.0
 pydantic==2.8.2
-pydantic_settings==2.2.1
+pydantic_settings==2.3.4
 python-dateutil==2.9.0.post0
 python-jose==3.3.0
 python-terraform==0.10.1
