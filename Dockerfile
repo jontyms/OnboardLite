@@ -1,8 +1,6 @@
 # Use the official Python base image
 FROM python:3.11-bookworm AS base
 
-USER onboard-user
-
 # Set the working directory in the container
 WORKDIR /src
 
@@ -47,6 +45,10 @@ CMD ["pytest"]
 FROM base as prod
 
 COPY requirements.txt .
+
+RUN useradd onboard-user
+
+USER onboard-user
 
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
 
