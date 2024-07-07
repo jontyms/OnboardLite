@@ -46,10 +46,6 @@ FROM base as prod
 
 COPY requirements.txt .
 
-RUN useradd onboard-user
-
-USER onboard-user
-
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
 
 COPY ./app ./app
