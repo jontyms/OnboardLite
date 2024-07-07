@@ -1,6 +1,8 @@
 # Use the official Python base image
 FROM python:3.11-bookworm AS base
 
+USER onboard-user
+
 # Set the working directory in the container
 WORKDIR /src
 
