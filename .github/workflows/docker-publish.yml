@@ -34,7 +34,7 @@ jobs:
         run: docker build --target prod -t onboardlite:${{ steps.extract_branch.outputs.branch }} .
 
       - name: Tag Docker image
-        run: docker tag myapp:${{ steps.extract_branch.outputs.branch }} ghcr.io/${{ github.repository }}/onboardlite:${{ steps.extract_branch.outputs.branch }}
+        run: docker tag onboardlite:${{ steps.extract_branch.outputs.branch }} ghcr.io/hackucf/onboardlite:${{ steps.extract_branch.outputs.branch }}
 
       - name: Push Docker image
-        run: docker push ghcr.io/${{ github.repository }}/onboardlite:${{ steps.extract_branch.outputs.branch }}
+        run: docker push ghcr.io/hackucf/onboardlite:${{ steps.extract_branch.outputs.branch }}
