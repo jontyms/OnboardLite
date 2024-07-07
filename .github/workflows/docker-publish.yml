@@ -1,0 +1,40 @@
+name: CI/CD Workflow
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  schedule:
+    - cron: '21 18 * * 3'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
+
+      - name: Extract branch name
+        id: extract_branch
+        run: echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/})"
+
+      - name: Build Docker image
+        run: docker build --target prod -t onboardlite:${{ steps.extract_branch.outputs.branch }} .
+
+      - name: Tag Docker image
+        run: docker tag myapp:${{ steps.extract_branch.outputs.branch }} ghcr.io/${{ github.repository }}/onboardlite:${{ steps.extract_branch.outputs.branch }}
+
+      - name: Push Docker image
+        run: docker push ghcr.io/${{ github.repository }}/onboardlite:${{ steps.extract_branch.outputs.branch }}

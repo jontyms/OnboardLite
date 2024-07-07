@@ -1,0 +1,41 @@
+services:
+  fastapi:
+    build: .
+    environment:
+      - BWS_ACCESS_TOKEN={$BWS_ACCESS_TOKEN}
+    ports:
+      - 8000:8000
+    volumes:
+      - ./config/options.yml:/src/config/options.yml
+      - ./database/:/data/
+    develop:
+      watch:
+        # sync static content
+        - path: ./app/static
+          action: sync
+          target: /src/app/static
+        # sync templates
+        - path: ./app/templates
+          action: sync
+          target: /src/app/templates
+        - path: ./app/forms
+          action: sync
+          target: /src/app/templates
+        # sync app
+        - path: ./app/app/models/
+          action: sync
+          target: /src/app/models/
+        - path: ./app/routes/
+          action: sync
+          target: /src/app/routes/
+        - path: ./app/util/
+          action: sync
+          target: /src/app/util/
+        - path: ./app/index.py
+          action: sync
+          target: /src/app/index.py
+        - path: ./requirements.txt
+          action: rebuild
+          target: /src/app/requirements.txt
+  redis:
+    image: redis:7.2

@@ -20,7 +20,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build Docker image
-        run: docker build . -t onboardlite
+        run: docker build . --target prod -t onboardlite
 
       - name: Verify Docker image
         run: docker run --rm onboardlite echo "Docker image built successfully!"
