@@ -19,7 +19,6 @@ repos:
     hooks:
       - id: trailing-whitespace
       - id: check-merge-conflict
-      - id: end-of-file-fixer
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.18.4
     hooks:
