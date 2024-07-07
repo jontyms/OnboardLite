@@ -31,7 +31,7 @@ jobs:
         run: echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/})"
 
       - name: Build Docker image
-        run: docker build -t onboardlite:${{ steps.extract_branch.outputs.branch }} .
+        run: docker build --target prod -t onboardlite:${{ steps.extract_branch.outputs.branch }} .
 
       - name: Tag Docker image
         run: docker tag myapp:${{ steps.extract_branch.outputs.branch }} ghcr.io/${{ github.repository }}/onboardlite:${{ steps.extract_branch.outputs.branch }}
