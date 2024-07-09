@@ -1,7 +1,6 @@
 import logging
 from typing import Optional
 
-import openstack
 from fastapi import APIRouter, Cookie, Depends, Request
 from fastapi.responses import FileResponse
 from fastapi.templating import Jinja2Templates
@@ -26,13 +25,7 @@ templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter(prefix="/infra", tags=["Infra"], responses=Errors.basic_http())
 
-tf = Terraform(working_dir="./")
-
-rate_limiter = RateLimiter(
-    Settings().redis.host, Settings().redis.port, Settings().redis.db
-)
-
-rate_limiter.get_redis()
+# tf = Terraform(working_dir="./")
 
 
 # def get_shitty_database():
@@ -258,69 +251,68 @@ async def get_root():
 #
 
 
-@router.get("/reset/")
-@Authentication.member
-@rate_limiter.rate_limit(1, 604800, "reset")
-async def get_infra(
-    request: Request,
-    token: Optional[str] = Cookie(None),
-    user_jwt: Optional[object] = {},
-    session: Session = Depends(get_session),
-):
-    """
-    API endpoint to self-service reset Infra credentials (membership-validating)
-    """
-    member_id = user_jwt.get("id")
-
-    if not (user_jwt.get("is_full_member") or user_jwt.get("infra_email")):
-        return Errors.generate(
-            request, 403, "This API endpoint is restricted to Dues-Paying Members."
-        )
-
-    # This also reprovisions Infra access if an account already exists.
-    # This is useful for cleaning up things + nuking in case of an error.
-    creds = Approve.provision_infra(member_id)
-
-    if not creds:
-        creds = {}
-
-    # Get user data
-    user_data = session.exec(
-        select(UserModel).where(UserModel.id == user_jwt.get("id"))
-    ).one_or_none()
-
-    # Send DM...
-    new_creds_msg = f"""Hello {user_data.get('first_name')},
-
-You have requested to reset your Hack@UCF Infrastructure credentials. This change comes with new credentials.
-
-A reminder that you can use these credentials at {Settings().infra.horizon} while on the CyberLab WiFi.
-
-```
-Username: {creds.get('username', 'Not Set')}
-Password: {creds.get('password', f"Please visit https://{Settings().http.domain}/profile and under Danger Zone, reset your Infra creds.")}
-```
-
-The password for the `Cyberlab` WiFi is currently `{Settings().infra.wifi}`, but this is subject to change (and we'll let you know when that happens).
-
-By using the Hack@UCF Infrastructure, you agree to the following EULA located at https://help.hackucf.org/misc/eula
-
-Happy Hacking,
-
- - Hack@UCF Bot
-            """
-
-    # Send Discord message
-    # Discord.send_message(user_data.get("discord_id"), new_creds_msg)
-    # Send Email
-    Email.send_email("Reset Infra Credentials", new_creds_msg, user_data.get("email"))
-
-    return {"username": creds.get("username"), "password": creds.get("password")}
-
-
+# TODO figure out reset flow
+# @router.get("/reset/")
+# @Authentication.member
+# async def get_infra(
+#    request: Request,
+#    token: Optional[str] = Cookie(None),
+#    user_jwt: Optional[object] = {},
+#    session: Session = Depends(get_session),
+# ):
+#    """
+#    API endpoint to self-service reset Infra credentials (membership-validating)
+#    """
+#    member_id = user_jwt.get("id")
+#
+#    if not (user_jwt.get("is_full_member") or user_jwt.get("infra_email")):
+#        return Errors.generate(
+#            request, 403, "This API endpoint is restricted to Dues-Paying Members."
+#        )
+#
+#    # This also reprovisions Infra access if an account already exists.
+#    # This is useful for cleaning up things + nuking in case of an error.
+#    creds = Approve.provision_infra(member_id)
+#
+#    if not creds:
+#        creds = {}
+#
+#    # Get user data
+#    user_data = session.exec(
+#        select(UserModel).where(UserModel.id == user_jwt.get("id"))
+#    ).one_or_none()
+#
+#    # Send DM...
+#    new_creds_msg = f"""Hello {user_data.get('first_name')},
+#
+# You have requested to reset your Hack@UCF Infrastructure credentials. This change comes with new credentials.
+#
+# A reminder that you can use these credentials at {Settings().infra.horizon} while on the CyberLab WiFi.
+#
+# ```
+# Username: {creds.get('username', 'Not Set')}
+# Password: {creds.get('password', f"Please visit https://{Settings().http.domain}/profile and under Danger Zone, reset your Infra creds.")}
+# ```
+#
+# The password for the `Cyberlab` WiFi is currently `{Settings().infra.wifi}`, but this is subject to change (and we'll let you know when that happens).
+#
+# By using the Hack@UCF Infrastructure, you agree to the following EULA located at https://help.hackucf.org/misc/eula
+#
+# Happy Hacking,
+#
+# - Hack@UCF Bot
+#            """
+#
+#    # Send Discord message
+#    # Discord.send_message(user_data.get("discord_id"), new_creds_msg)
+#    # Send Email
+#    Email.send_email("Reset Infra Credentials", new_creds_msg, user_data.get("email"))
+#
+#    return {"username": creds.get("username"), "password": creds.get("password")}
+#
+#
 @router.get("/openvpn")
 @Authentication.member
-@rate_limiter.rate_limit(5, 60, "ovpn")
 async def download_file(
     request: Request,
     token: Optional[str] = Cookie(None),

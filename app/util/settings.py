@@ -185,12 +185,19 @@ class InfraConfig(BaseModel):
 
     wifi: str
     horizon: str
-    application_credential_id: str
-    application_credential_secret: SecretStr
-    tf_directory: str
 
 
 infra_config = InfraConfig(**settings["infra"])
+
+
+class KeycloakConfig(BaseModel):
+    username: str
+    password: SecretStr
+    url: str
+    relam: str
+
+
+keycloak_config = KeycloakConfig(**settings["keycloak"])
 
 
 class TelemetryConfig(BaseModel):
@@ -242,4 +249,5 @@ class Settings(BaseSettings, metaclass=SingletonBaseSettingsMeta):
     infra: InfraConfig = infra_config
     redis: RedisConfig = redis_config
     http: HttpConfig = http_config
+    keycloak: KeycloakConfig = keycloak_config
     telemetry: TelemetryConfig = telemetry_config
