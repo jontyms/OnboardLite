@@ -18,7 +18,7 @@ requests==2.32.2
 requests-oauthlib==2.0.0
 stripe==9.12.0
 typing_extensions==4.12.2
-uvicorn==0.29.0
+uvicorn==0.30.1
 sqlmodel
 sentry_sdk
 alembic
