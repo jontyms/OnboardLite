@@ -67,6 +67,7 @@ if Settings().telemetry.enable:
         # of sampled transactions.
         # We recommend adjusting this value in production.
         profiles_sample_rate=1.0,
+        environment="dev",
     )
 
 # Import endpoints from ./routes
@@ -76,21 +77,22 @@ app.include_router(admin.router)
 app.include_router(wallet.router)
 app.include_router(infra.router)
 
+# TODO figure out wtf this is used for
 # Create the OpenStack SDK config.
-with open("clouds.yaml", "w", encoding="utf-8") as f:
-    f.write(
-        f"""clouds:
-  hackucf_infra:
-    auth:
-      auth_url: {Settings().infra.horizon}:5000
-      application_credential_id: {Settings().infra.application_credential_id}
-      application_credential_secret: {Settings().infra.application_credential_secret.get_secret_value()}
-    region_name: "hack-ucf-0"
-    interface: "public"
-    identity_api_version: 3
-    auth_type: "v3applicationcredential"
-"""
-    )
+# with open("clouds.yaml", "w", encoding="utf-8") as f:
+#    f.write(
+#        f"""clouds:
+#  hackucf_infra:
+#    auth:
+#      auth_url: {Settings().infra.horizon}:5000
+#      application_credential_id: {Settings().infra.application_credential_id}
+#      application_credential_secret: {Settings().infra.application_credential_secret.get_secret_value()}
+#    region_name: "hack-ucf-0"
+#    interface: "public"
+#    identity_api_version: 3
+#    auth_type: "v3applicationcredential"
+# """
+#    )
 
 
 """

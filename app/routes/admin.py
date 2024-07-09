@@ -108,7 +108,7 @@ Happy Hacking,
 @Authentication.admin
 async def get_refresh(
     request: Request,
-    user_jwt: Optional[str] = Cookie(None),
+    token: Optional[str] = Cookie(None),
     member_id: Optional[str] = "FAIL",
     session: Session = Depends(get_session),
 ):
