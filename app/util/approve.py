@@ -44,7 +44,7 @@ class Approve:
                     "enabled": True,
                     "firstName": user_data.first_name,
                     "lastName": user_data.surname,
-                    "attributes": {"onboard-membership-id": user_data.id},
+                    "attributes": {"onboard-membership-id": str(user_data.id)},
                     "credentials": [
                         {
                             "value": "secret",
@@ -54,8 +54,8 @@ class Approve:
                 },
                 exist_ok=False,
             )
-        except Exception as e:
-            logger.exception("Keycloak Error" + e)
+        except Exception:
+            logger.exception("Keycloak Error")
             raise
 
         return {"username": username, "password": password}
@@ -100,7 +100,8 @@ class Approve:
                 try:
                     creds = Approve.provision_infra(member_id, user_data)
                 except:
-                    logger.error("Failed to provision user account")
+                    logger.execption("Failed to provision user account")
+                    creds = {"username": None, "password": None}
 
                 # Assign the Dues-Paying Member role
                 Discord.assign_role(discord_id, Settings().discord.member_role)
