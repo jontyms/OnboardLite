@@ -88,7 +88,7 @@ Username: {creds.get('username', 'Not Set')}
 Password: {creds.get('password', f"Please visit https://{Settings().http.domain}/profile and under Danger Zone, reset your Infra creds.")}
 ```
 
-By using the Hack@UCF Infrastructure, you agree to the following EULA located at https://help.hackucf.org/misc/eula
+By using the Hack@UCF Infrastructure, you agree to the following Acceptable Use Policy located at https://help.hackucf.org/misc/aup
 
 The password for the `Cyberlab` WiFi is currently `{Settings().infra.wifi}`, but this is subject to change (and we'll let you know when that happens).
 

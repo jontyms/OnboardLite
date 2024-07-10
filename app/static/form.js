@@ -282,19 +282,6 @@ window.onload = (evt) => {
         }
     }
 
-    // Should we show the "spin up box" button?
-    if (document.getElementById("newInfraBox")) {
-        document.getElementById("newInfraBox").onclick = (evt) => {
-            provisionInfra();
-        }
-        fetch("/infra/options/get").then(data => {
-            return data.json();
-        }).then(resp => {
-            if (resp.imageId && resp.gbmName) {
-                document.getElementById("newInfraBox").style.display = "inline-block";
-            }
-        })
-    }
 
     if (typeof QRCodeStyling !== "undefined" && document.getElementById("membership_id")) {
         const qrCode = new QRCodeStyling({

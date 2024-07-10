@@ -217,9 +217,9 @@ async def get_root():
         description="Apple Wallet support.",
         credits=[
             PublicContact(
-                first_name="Jeffrey",
-                surname="DiVincent",
-                ops_email="jdivincent@hackucf.org",
+                first_name="Jonathan",
+                surname="Styles",
+                ops_email="jstyles@hackucf.org",
             )
         ],
     )

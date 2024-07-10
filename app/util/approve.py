@@ -120,7 +120,7 @@ Password: {creds.get('password', f"Please visit https://{Settings().http.domain}
 
 The password for the `Cyberlab` WiFi is currently `{Settings().infra.wifi}`, but this is subject to change (and we'll let you know when that happens).
 
-By using the Hack@UCF Infrastructure, you agree to the following EULA located at https://help.hackucf.org/misc/eula
+By using the Hack@UCF Infrastructure, you agree to the Acceptable Use Policy located at https://help.hackucf.org/misc/aup
 
 Happy Hacking,
   - Hack@UCF Bot
