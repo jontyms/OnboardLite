@@ -178,9 +178,6 @@ class InfraConfig(BaseModel):
     Attributes:
         wifi (str): The WiFi password used in welcome messages.
         horizon (str): The url of the openstack horizon interface (also used to derive the keystone endpoint).
-        application_credential_id (str): The application credential ID used to provision users and projects.
-        application_credential_secret (SecretStr): The application credential secret used to provision users and projects.
-        tf_directory (str): The Terraform directory.
     """
 
     wifi: str
