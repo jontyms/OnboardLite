@@ -498,3 +498,13 @@ td.nid:hover, td.email:hover {
   .closebtn:hover {
     color: black;
   }
+
+  #footer{
+    padding-top: 20px;
+    font-size: 12px;
+    color: var(--hackucf-light-grey);
+    display: table;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}

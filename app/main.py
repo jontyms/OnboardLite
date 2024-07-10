@@ -361,7 +361,7 @@ async def forms(
         {
             "request": request,
             "icon": user_jwt["pfp"],
-            "name": user_jwt["name"],
+            "user_data": user_data,
             "id": user_jwt["id"],
             "body": body,
         },

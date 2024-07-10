@@ -1,22 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, user-scalable=0">
-
-    <title>Sign-Up Completed - Hack@UCF</title>
-    <link rel="stylesheet" type="text/css" href="/static/hackucf.css">
-    <link rel="icon" href="/static/favicon.svg">
-
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@900&family=Roboto:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap" rel="stylesheet">
-
-    <!-- Font Awesome -->
-    <link href="https://use.fontawesome.com/releases/v6.1.1/css/all.css" rel="stylesheet">
-</head>
+{% extends 'base.html' %}
+{% block title %} Sign-Up Completed - Hack@UCF {% endblock %}
+{% block content %}
 <body>
     <div class="app" id="1">
         <h1>Sign-up Almost Complete!</h1>
@@ -30,4 +14,4 @@
     </div>
 </body>
 <script type="text/javascript" src="/static/form.js"></script>
-</html>
+{% endblock %}
