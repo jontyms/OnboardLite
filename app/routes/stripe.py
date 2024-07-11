@@ -5,9 +5,10 @@ import stripe
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
+from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
-from app.models.user import UserModel
+from app.models.user import UserModel, user_to_dict
 from app.util.approve import Approve
 from app.util.authentication import Authentication
 from app.util.database import get_session
@@ -36,23 +37,24 @@ async def get_root(
     """
     Get API information.
     """
-    user_data = session.exec(
-        select(UserModel).where(UserModel.id == user_jwt.get("id"))
-    ).one_or_none()
+    statement = (
+        select(UserModel)
+        .where(UserModel.id == user_jwt["id"])
+        .options(selectinload(UserModel.discord))
+    )
+    user_data = session.exec(statement).one_or_none()
     did_pay_dues = user_data.did_pay_dues
 
-    is_nid = True if user_data.nid else False
+    user_data = user_to_dict(user_data)
+
     paused_payments = Settings().stripe.pause_payments
 
     return templates.TemplateResponse(
         "pay.html",
         {
             "request": request,
-            "icon": user_jwt["pfp"],
-            "name": user_jwt["name"],
-            "id": user_jwt["id"],
+            "user_data": user_data,
             "did_pay_dues": did_pay_dues,
-            "is_nid": is_nid,
             "paused_payments": paused_payments,
         },
     )
