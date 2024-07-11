@@ -72,8 +72,8 @@ function userStatusString(member) {
     if (member.sudo)
         return "Administrator";
 
-    if (member.cyberlab_monitor.signtime !== 0)
-        return "CyberLab Monitor";
+    //if (member.cyberlab_monitor.signtime !== 0)
+    //    return "CyberLab Monitor";
 
     if (member.ops_email)
         return "Operations Member";
