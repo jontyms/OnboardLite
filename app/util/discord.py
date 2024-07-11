@@ -60,3 +60,19 @@ class Discord:
 
         # Use res.ok()?
         return res.status_code < 400
+
+    def join_hack_server(discord_id, token):
+        if not Settings().discord.enable:
+            return
+        # Make user join the Hack@UCF Discord, if it's their first rodeo.
+        headers = {
+            "Authorization": f"Bot {Settings().discord.bot_token.get_secret_value()}",
+            "Content-Type": "application/json",
+            "X-Audit-Log-Reason": "Hack@UCF OnboardLite Bot",
+        }
+        put_join_guild = {"access_token": token["access_token"]}
+        requests.put(
+            f"https://discordapp.com/api/guilds/{Settings().discord.guild_id}/members/{discord_id}",
+            headers=headers,
+            data=json.dumps(put_join_guild),
+        )

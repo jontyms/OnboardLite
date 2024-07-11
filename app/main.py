@@ -26,6 +26,7 @@ from app.util.approve import Approve
 # Import middleware
 from app.util.authentication import Authentication
 from app.util.database import get_session, init_db
+from app.util.discord import Discord
 
 # Import error handling
 from app.util.errors import Errors
@@ -241,20 +242,8 @@ async def oauth_transformer_new(
     if not user:
         member_id = str(uuid.uuid4())
         infra_email = ""
-
-        # Make user join the Hack@UCF Discord, if it's their first rodeo.
-        discord_id = str(discordData["id"])
-        headers = {
-            "Authorization": f"Bot {Settings().discord.bot_token.get_secret_value()}",
-            "Content-Type": "application/json",
-            "X-Audit-Log-Reason": "Hack@UCF OnboardLite Bot",
-        }
-        put_join_guild = {"access_token": token["access_token"]}
-        requests.put(
-            f"https://discordapp.com/api/guilds/{Settings().discord.guild_id}/members/{discord_id}",
-            headers=headers,
-            data=json.dumps(put_join_guild),
-        )
+        discord_id = discordData["id"]
+        Discord().join_hack_server(discord_id, token)
         user = UserModel(discord_id=discord_id, id=member_id, infra_email=infra_email)
         discord_data = {
             "email": discordData.get("email"),
