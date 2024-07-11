@@ -100,7 +100,7 @@ class Approve:
                 try:
                     creds = Approve.provision_infra(member_id, user_data)
                 except:
-                    logger.execption("Failed to provision user account")
+                    logger.exception("Failed to provision user account")
                     creds = {"username": None, "password": None}
 
                 # Assign the Dues-Paying Member role
