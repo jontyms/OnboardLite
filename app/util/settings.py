@@ -105,6 +105,7 @@ class DiscordConfig(BaseModel):
     redirect_base: str
     scope: str
     secret: SecretStr
+    enable: Optional[bool] = True
 
 
 discord_config = DiscordConfig(**settings["discord"])
@@ -146,6 +147,7 @@ class EmailConfig(BaseModel):
     smtp_server: str
     email: str
     password: SecretStr
+    enable: Optional[bool] = True
 
 
 email_config = EmailConfig(**settings["email"])

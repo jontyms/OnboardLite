@@ -20,6 +20,8 @@ class Discord:
         pass
 
     def assign_role(discord_id, role_id):
+        if not Settings().discord.enable:
+            return
         discord_id = str(discord_id)
 
         req = requests.put(
@@ -44,6 +46,8 @@ class Discord:
         return resp.get("id", None)
 
     def send_message(discord_id, message):
+        if not Settings().discord.enable:
+            return
         discord_id = str(discord_id)
         channel_id = Discord.get_dm_channel_id(discord_id)
 

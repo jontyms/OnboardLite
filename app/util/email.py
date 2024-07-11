@@ -17,6 +17,8 @@ class Email:
     """
 
     def send_email(subject, body, recipient):
+        if not Settings().email.enable:
+            return
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
         msg["From"] = email
