@@ -1,54 +1,44 @@
-# Options for Onboard.
 bws:
-    project_id: ""
-    enable: ""
+    project_id: "your_project_id"
+    enable: "true"
+
 jwt:
-    secret:
+    secret: "your_jwt_secret_key_here"  # Ensure this is at least 32 characters long
     algorithm: "HS256"
     lifetime_user: 9072000  # 15 weeks
     lifetime_sudo: 86400    # 1 day
 
 http:
-    domain: join.hackucf.org
+    domain: "join.hackucf.org"
 
 infra:
-    wifi: ""
+    wifi: "your_wifi_password_here"
     horizon: "https://horizon.hackucf.org"
-    application_credential_id:
-    application_credential_secret:
-    tf_directory: "./"
 
 discord:
-    client_id: ""
-    secret: ""
+    client_id: "your_discord_client_id_here"
+    secret: "your_discord_secret_here"
     redirect_base: "https://join.hackucf.org/api/oauth/?redir="
     scope: "email identify guilds.join"
-    bot_token: ""
-    guild_id: ""
-    member_role: ""
-
+    bot_token: "your_discord_bot_token_here"
+    guild_id: "your_guild_id_here"
+    member_role: "your_member_role_id_here"
+    enable: true
 
 stripe:
-    api_key: ""
-    webhook_secret: ""
-    price_id: ""
+    api_key: "your_stripe_api_key_here"
+    webhook_secret: "your_stripe_webhook_secret_here"
+    price_id: "your_stripe_price_id_here"
     url_success: "https://join.hackucf.org/final/"
     url_failure: "https://join.hackucf.org/pay/"
     pause_payments: true
-aws:
-    dynamodb:
-        table: "hackucf_members"
 
 email:
-    smtp_server: smtp.gmail.com
-    email: "*****@hackucf.org"
-    password: ""
+    smtp_server: "smtp.gmail.com"
+    email: "your_email@hackucf.org"
+    password: "your_email_password_here"
+    enable: true
 
-redis:
-    host: "localhost"
-    port: 6379
-    db: 0
-
-telementary:
-    url:
-    enable:
+telemetry:
+    url: "your_telemetry_url_here"
+    enable: true
