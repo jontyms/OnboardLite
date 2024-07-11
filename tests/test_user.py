@@ -22,10 +22,6 @@ def test_openvpn(client: TestClient, jwt: str):
 
 
 def test_db(client: TestClient, session: Session, jwt: str):
-    user_in_db = (
-        session.query(UserModel)
-        .filter(UserModel.discord_id == "669276074563666347")
-        .first()
-    )
+    user_in_db = session.query(UserModel).filter(UserModel.ucf_id == 123456).first()
     assert user_in_db is not None
     assert user_in_db.email == "test_user@example.com"
