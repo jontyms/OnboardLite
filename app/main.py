@@ -68,7 +68,7 @@ if Settings().telemetry.enable:
         # of sampled transactions.
         # We recommend adjusting this value in production.
         profiles_sample_rate=1.0,
-        environment="dev",
+        environment=Settings().telemetry.env,
     )
 
 # Import endpoints from ./routes

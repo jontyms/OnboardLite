@@ -202,6 +202,7 @@ keycloak_config = KeycloakConfig(**settings["keycloak"])
 class TelemetryConfig(BaseModel):
     url: Optional[str] = None
     enable: Optional[bool] = False
+    env: Optional[str] = "dev"
 
 
 telemetry_config = TelemetryConfig(**settings["telemetry"])
