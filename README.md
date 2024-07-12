@@ -2,13 +2,76 @@
 
 OnboardLite is the result of the Influx Initiative, our vision for an improved student organization lifecycle at the University of Central Florida
 
-This is to be replaced by Influx in the future, a more fleshed-out approach with increased scope.
 
-## Getting Started (local)
-```py
-# Requires >= Python3.8
+
+## Local Dev
+```
+git clone https://github.com/HackUCF/OnboardLite.git
+python3 -m venv .venv
+echo ".venv/" > ./.git/info/exclude
+source ./.venv/bin/activate
 python3 -m pip install -r requirements.txt
-python3 index.py
+python3 -m pip install -r requirements-dev.txt
+pre-commit install
+cp options-example.yml ./config/options.yml
+```
+Goto https://discord.com/developers/applications create an application. Then under oauth2 get client id and client sceret set redir url to ``http://localhost:8000/api/oauth/?redir=_redir``
+Set
+```
+discord
+   client_id:
+   secret:
+   redirect_base: http://localhost:8000/api/oauth/?redir=
+   enable: false
+```
+set
+```
+email:
+    enable false
+```
+Set
+```
+http:
+    domain:  localhost:8000
+```
+Set jwt secret to a <32 charcter random string
+
+Set database to
+```
+database:
+    url: "sqlite:////data/database.db"  # For docker create database/
+    url: "sqlite:///database/database.db" # For local dev create database/
+```
+To run you can do either
+
+``python3 -m uvicorn app.main:app --host 0.0.0.0 --reload --port 8000``
+
+or
+
+``docker compose -f docker-compose-dev.yml watch``
+
+Debug in  vscode create ``.vscode/launch.json``
+```
+{
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "Python: FastAPI",
+            "type": "debugpy",
+            "justMyCode": true,
+            "request": "launch",
+            "module": "uvicorn",
+            "args": [
+                "app.main:app",
+                "--reload",
+                "--port",
+                "8000"
+            ]
+        }
+
+    ]
+}
 ```
 
 ## Deploying
@@ -84,9 +147,4 @@ Administrators are classified as trusted Operations members and are *not* the sa
 Please report security vulnerabilities to `execs@hackucf.org`.
 
 
-## Discord
-add redirect for http://localhost:8000/api/oauth/?redir=_redir
 
-
-## Teraform
-Run teraform init
