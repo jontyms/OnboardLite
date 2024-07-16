@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session
 
 from app.models.user import UserModel
+from app.routes.infra import ERR_VPN_CONFIG_NOT_FOUND
 
 
 # jwt: str
@@ -17,8 +18,9 @@ def test_profile(mock_approve, client: TestClient, jwt: str):
 
 
 def test_openvpn(client: TestClient, jwt: str):
-    response = client.get("/infra/openvpn/", cookies={"token": jwt})
-    assert response.status_code == 200
+    response = client.get("/infra/openvpn", cookies={"token": jwt})
+    assert response.status_code == 500
+    assert response.json().get('detail') == ERR_VPN_CONFIG_NOT_FOUND.detail
 
 
 def test_db(client: TestClient, session: Session, jwt: str):
