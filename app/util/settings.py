@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field, SecretStr, constr, model_validator
 from pydantic_settings import BaseSettings
 
 logger = logging.getLogger(__name__)
+
 config_file = pathlib.Path(os.getenv("ONBOARD_CONFIG_FILE", "config.yml")).resolve()
 onboard_env = os.getenv("ONBOARD_ENV", "prod")
 
@@ -81,6 +82,7 @@ if os.path.exists(config_file):
         settings.update(yaml.load(f, Loader=yaml.FullLoader))
 else:
     logger.error("No config file found at: " + str(config_file))
+
 
 
 def parse_json_to_dict(json_string):
