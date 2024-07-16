@@ -1,6 +1,6 @@
 bws:
     project_id: "your_project_id"
-    enable: "false"
+    enable: False
 
 jwt:
     secret: "your_jwt_secret_key_here"  # Ensure this is at least 32 characters long
@@ -16,14 +16,14 @@ infra:
     horizon: "https://horizon.hackucf.org"
 
 discord:
-    client_id: "your_discord_client_id_here"
+    client_id: 0
     secret: "your_discord_secret_here"
     redirect_base: "https://join.hackucf.org/api/oauth/?redir="
     scope: "email identify guilds.join"
     bot_token: "your_discord_bot_token_here"
-    guild_id: "your_guild_id_here"
-    member_role: "your_member_role_id_here"
-    enable: false
+    guild_id: 0
+    member_role: 0
+    enable: true
 
 stripe:
     api_key: "your_stripe_api_key_here"
@@ -43,6 +43,4 @@ telemetry:
     url: "your_telemetry_url_here"
     enable: false
 
-database:
-    url: "sqlite:////data/database.db"  # For docker create database/
-    #url: "sqlite:///database/database.db" # For local dev create database/
+keycloak:

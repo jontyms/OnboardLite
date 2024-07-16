@@ -7,8 +7,7 @@ This is to be replaced by Influx in the future, a more fleshed-out approach with
 ## Getting Started (local)
 ```py
 # Requires >= Python3.8
-python3 -m pip install -r requirements.txt
-python3 index.py
+make dev
 ```
 
 ## Deploying

@@ -1,0 +1,5 @@
+httpx
+pre-commit
+pytest
+semgrep
+pip-tools
