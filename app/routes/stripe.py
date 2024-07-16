@@ -22,8 +22,9 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/pay", tags=["API"], responses=Errors.basic_http())
 
-# Set Stripe API key.
-stripe.api_key = Settings().stripe.api_key.get_secret_value()
+if not Settings().stripe.pause_payments:
+    # Set Stripe API key.
+    stripe.api_key = Settings().stripe.api_key.get_secret_value()
 
 
 @router.get("/")
