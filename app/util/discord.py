@@ -4,11 +4,12 @@ import requests
 
 from app.util.settings import Settings
 
-headers = {
-    "Authorization": f"Bot {Settings().discord.bot_token.get_secret_value()}",
-    "Content-Type": "application/json",
-    "X-Audit-Log-Reason": "Hack@UCF OnboardLite Bot",
-}
+if Settings().discord.enable:
+    headers = {
+        "Authorization": f"Bot {Settings().discord.bot_token.get_secret_value()}",
+        "Content-Type": "application/json",
+        "X-Audit-Log-Reason": "Hack@UCF OnboardLite Bot",
+    }
 
 
 class Discord:

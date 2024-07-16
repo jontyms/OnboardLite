@@ -6,9 +6,10 @@ import commonmark
 
 from app.util.settings import Settings
 
-email = Settings().email.email
-password = Settings().email.password.get_secret_value()
-smtp_host = Settings().email.smtp_server
+if Settings().email.enable:
+    email = Settings().email.email
+    password = Settings().email.password.get_secret_value()
+    smtp_host = Settings().email.smtp_server
 
 
 class Email:
