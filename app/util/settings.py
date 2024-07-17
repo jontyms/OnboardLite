@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import pathlib
 import re
 import subprocess
 from gc import enable
@@ -11,7 +12,7 @@ from pydantic import BaseModel, Field, SecretStr, constr, model_validator
 from pydantic_settings import BaseSettings
 
 logger = logging.getLogger(__name__)
-config_file = os.getenv("ONBOARD_CONFIG_FILE", "config.yml")
+config_file = pathlib.Path(os.getenv("ONBOARD_CONFIG_FILE", "config.yml")).resolve()
 onboard_env = os.getenv("ONBOARD_ENV", "prod")
 
 if onboard_env == "dev":
@@ -78,6 +79,8 @@ settings = dict()
 if os.path.exists(config_file):
     with open(config_file) as f:
         settings.update(yaml.load(f, Loader=yaml.FullLoader))
+else:
+    logger.error("No config file found at: " + str(config_file))
 
 
 def parse_json_to_dict(json_string):
