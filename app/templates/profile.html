@@ -12,7 +12,10 @@
         <div class="form">
             <h1>Your Hack@UCF Information</h1>
             <div id="qr" class="qr"></div>
+            <div class="wallet-container">
             <a id="apple_wallet" href="/wallet/apple"><img src="/static/apple_wallet.svg"></img></a>
+            <a id="goolge_wallet" href="/wallet/google"><img src="/static/google_wallet_button.svg"></img></a>
+            </div>
             <div class="entry">
                 <h3>Membership ID</h3>
                 <div id="membership_id">{{ user_data.get('id', 'Not Issued (report to Execs!)') }}</div>
