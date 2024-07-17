@@ -84,7 +84,6 @@ else:
     logger.error("No config file found at: " + str(config_file))
 
 
-
 def parse_json_to_dict(json_string):
     data = json.loads(json_string)
     return {item["key"]: item["value"] for item in data}
