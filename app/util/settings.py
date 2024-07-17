@@ -193,6 +193,41 @@ else:
     logger.warn("Missing Stripe config")
 
 
+class GoogleWalletConfig(BaseModel):
+    """
+    #TODO fix docs
+    """
+
+    auth_json: Optional[SecretStr] = Field(None)
+    class_suffix: Optional[str] = Field(None)
+    issuer_id: Optional[str] = Field(None)
+    enable: Optional[bool] = Field(True)
+
+    @model_validator(mode="after")
+    def check_required_fields(cls, values):
+        enable = values.enable
+        if enable:
+            required_fields = [
+                "auth_json",
+                "issuer_id",
+                "class_suffix",
+            ]
+            for field in required_fields:
+                if getattr(values, field) is None:
+                    raise ValueError(
+                        f"Google Wallet {field} is required when pause_payments is True"
+                    )
+        return values
+
+
+if settings.get("google_wallet"):
+    google_wallet_config = GoogleWalletConfig(**settings["google_wallet"])
+elif onboard_env == "dev":
+    google_wallet_config = GoogleWalletConfig(enable=False)
+else:
+    logger.warn("Missing GWallet config")
+
+
 class EmailConfig(BaseModel):
     """
     Represents the configuration for an email.
@@ -352,4 +387,5 @@ class Settings(BaseSettings, metaclass=SingletonBaseSettingsMeta):
     infra: InfraConfig = infra_config
     http: HttpConfig = http_config
     keycloak: KeycloakConfig = keycloak_config
+    google_wallet: GoogleWalletConfig = google_wallet_config
     telemetry: Optional[TelemetryConfig] = telemetry_config
