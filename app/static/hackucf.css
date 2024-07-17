@@ -508,3 +508,21 @@ td.nid:hover, td.email:hover {
     margin-left: auto;
     margin-right: auto;
 }
+
+.wallet-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* Adjust the gap between logos as needed */
+    margin: 20px 0; /* Adjust the margin to space out the logos */
+}
+.wallet-container a {
+    flex: 1 1 auto;
+}
+.qr, .wallet-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
