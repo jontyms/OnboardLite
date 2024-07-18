@@ -1,5 +1,4 @@
 import logging
-import os
 
 from keycloak import KeycloakAdmin
 from sqlalchemy.orm import selectinload
