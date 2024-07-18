@@ -7,7 +7,7 @@ from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
 from app.models.info import InfoModel
-from app.models.user import PublicContact, UserModel, user_to_dict, user_update_instance
+from app.models.user import PublicContact, UserModel, user_update_instance
 from app.util.authentication import Authentication
 from app.util.database import get_session
 from app.util.errors import Errors

@@ -1,10 +1,7 @@
-import json
 import logging
 import uuid
 from typing import Optional
 from urllib.parse import urlparse
-
-import requests
 
 # FastAPI
 from fastapi import Cookie, Depends, FastAPI, Request, Response, status
