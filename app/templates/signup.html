@@ -1,49 +1,58 @@
-{% extends 'base.html' %}
-{% block title %} Sign Up - HackUCF {% endblock %}
-{% block content %}
+{% extends 'base.html' %} {% block title %} Sign Up - HackUCF {% endblock %} {%
+block content %}
 <body>
-    <div class="app" id="1">
-        <h1>Welcome to Hack@UCF!</h1>
-        <h2>This wizard will help you join Hack@UCF as a dues-paying member.</h2>
+  <div class="app" id="1">
+    <h1>Welcome to Hack@UCF!</h1>
+    <h2>This wizard will help you join Hack@UCF as a dues-paying member.</h2>
 
-        <a class="btn" href="/discord/new/"><i class="fa-brands fa-discord"></i> Link Discord</a>
+    <a class="btn" href="/discord/new/"
+      ><i class="fa-brands fa-discord"></i> Link Discord</a
+    >
 
-        <div class="unfocus">
-            <h3>Use of Discord Account</h3>
-            <p>
-                We will ask you to link your Discord with Hack@UCF.
-                This allows us to help expedite the sign-up process and, in the future, let you manage your membership
-                from within Discord.
-            </p>
-            <p>
-                <b>Privacy is <i>very</i> important to us.</b> If you have any questions, email <code>ops@hackucf.org</code>.
-            </p>
-            <details>
-                <summary>Click to view nerdy details.</summary>
-                <p>
-                    Onboard is a custom Python3 application that handles membership for Hack@UCF. It was written by
-                    <a href="https://divi.sh" target="_blank">Jeffrey</a> and is currently maintained by <a href="jontyms.com">Jonathan.</a>
-                    It was designed make it easier to get started with joining the club, since historically we had ~5 different steps that
-                    had to be filled out.
-                </p>
-                <p>
-                    Onboard is powered by SQLite, Stripe, and the Discord API. When you link your Discord
-                    with Onboard, we collect some account metadata, such as your user ID, profile image, email, 2FA status, and
-                    username.
-                </p>
-                <p>
-                    Every person who links their Discord, regardless if they pay dues, will be given a Hack@UCF ID. This is a
-                    unique identifier that we can use in place of University identifiers (such as your UCF ID) to verify membership.
-                    You can access your Hack@UCF ID via the "My Membership" page.
-                </p>
-                <p>
-                    We also will, at the end of sign-up, ask for payment. We have a third-party vendor,
-                    <a href="https://stripe.com/" target="_blank">Stripe</a>,
-                    handle payments securely. We do not ever get your card information.
-                </p>
-            </details>
-        </div>
+    <div class="unfocus">
+      <h3>Use of Discord Account</h3>
+      <p>
+        We will ask you to link your Discord with Hack@UCF. This allows us to
+        help expedite the sign-up process and, in the future, let you manage
+        your membership from within Discord.
+      </p>
+      <p>
+        <b>Privacy is <i>very</i> important to us.</b> If you have any
+        questions, email <code>ops@hackucf.org</code>.
+      </p>
+      <details>
+        <summary>Click to view nerdy details.</summary>
+        <p>
+          Onboard is a custom Python3 application that handles membership for
+          Hack@UCF. It was written by
+          <a href="https://divi.sh" target="_blank">Jeffrey</a> and is currently
+          maintained by
+          <a target="_blank" href="https://jontyms.com">Jonathan.</a>
+          It was designed make it easier to get started with joining the club,
+          since historically we had ~5 different steps that had to be filled
+          out.
+        </p>
+        <p>
+          Onboard is powered by SQLite, Stripe, and the Discord API. When you
+          link your Discord with Onboard, we collect some account metadata, such
+          as your user ID, profile image, email, 2FA status, and username.
+        </p>
+        <p>
+          Every person who links their Discord, regardless if they pay dues,
+          will be given a Hack@UCF ID. This is a unique identifier that we can
+          use in place of University identifiers (such as your UCF ID) to verify
+          membership. You can access your Hack@UCF ID via the "My Membership"
+          page.
+        </p>
+        <p>
+          We also will, at the end of sign-up, ask for payment. We have a
+          third-party vendor,
+          <a href="https://stripe.com/" target="_blank">Stripe</a>, handle
+          payments securely. We do not ever get your card information.
+        </p>
+      </details>
     </div>
+  </div>
 </body>
 <script type="text/javascript" src="/static/form.js"></script>
 {% endblock %}
