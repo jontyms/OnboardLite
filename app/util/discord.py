@@ -62,7 +62,7 @@ class Discord:
         # Use res.ok()?
         return res.status_code < 400
 
-    def join_hack_server(discord_id, token):
+    def join_hack_server(self, discord_id, token):
         if not Settings().discord.enable:
             return
         # Make user join the Hack@UCF Discord, if it's their first rodeo.

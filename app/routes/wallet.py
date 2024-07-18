@@ -50,127 +50,6 @@ class GoogleWallet:
         self.client = build("walletobjects", "v1", credentials=self.credentials)
 
     # [END auth]
-    # [START createObject]
-    def update_object(
-        self, issuer_id: str, class_suffix: str, user_data: UserModel
-    ) -> str:
-        """Create an object.
-
-        Args:
-            issuer_id (str): The issuer ID being used for this request.
-            class_suffix (str): Developer-defined unique ID for the pass class.
-            object_suffix (str): Developer-defined unique ID for the pass object.
-
-        Returns:
-            The pass object ID: f"{issuer_id}.{object_suffix}"
-        """
-        user_id = str(user_data.id)
-        # Check if the object exists
-        try:
-            self.client.loyaltyobject().get(
-                resourceId=f"{issuer_id}.{user_data.id}"
-            ).execute()
-        except HttpError as e:
-            if e.status_code != 404:
-                # Something else went wrong...
-                logger.error(e.error_details)
-                return f"{issuer_id}.{user_id}"
-        else:
-            print(f"Object {issuer_id}.{user_id} already exists!")
-
-        # See link below for more information on required properties
-        # https://developers.google.com/wallet/retail/loyalty-cards/rest/v1/loyaltyobject
-        update_object = {
-            "id": f"{issuer_id}.{user_id}",
-            "classId": f"{issuer_id}.{class_suffix}",
-            "state": "ACTIVE",
-            "heroImage": {
-                "sourceUri": {"uri": "https://cdn.hackucf.org/newsletter/banner.png"},
-                "contentDescription": {
-                    "defaultValue": {
-                        "language": "en-US",
-                        "value": "Hack@UCF Banner Logo",
-                    }
-                },
-            },
-            # "textModulesData": [
-            #    {
-            #        "header": "Member Name",
-            #        "body": str(user_data.first_name) + " " + str(user_data.surname),
-            #        "id": "MEMBER_NAME",
-            #    }
-            # ],
-            #'imageModulesData': [{
-            #    'mainImage': {
-            #        'sourceUri': {
-            #            'uri':
-            #                user_data.discord.avatar
-            #        },
-            #        'contentDescription': {
-            #        'defaultValue': {
-            #                'language': 'en-US',
-            #                'value': 'Profile Picutre'
-            #            }
-            #        }
-            #    },
-            #    'id': 'PROFILE_PIC'
-            # }],
-            #'imageModulesData': [{
-            #    'mainImage': {
-            #        'sourceUri': {
-            #            'uri':
-            #                'http://farm4.staticflickr.com/3738/12440799783_3dc3c20606_b.jpg'
-            #        },
-            #        'contentDescription': {
-            #            'defaultValue': {
-            #                'language': 'en-US',
-            #                'value': 'Image module description'
-            #            }
-            #        }
-            #    },
-            #    'id': 'IMAGE_MODULE_ID'
-            # }],
-            "linksModuleData": {
-                "uris": [
-                    {
-                        "uri": "https://hackucf.org/",
-                        "description": "Hack@UCF Website",
-                        "id": "HOMEPAGE",
-                    },
-                    {
-                        "uri": "https://join.hackucf.org/profile",
-                        "description": "Profile Page",
-                        "id": "PROFILE",
-                    },
-                ]
-            },
-            "barcode": {"type": "QR_CODE", "value": user_id},
-            "locations": [
-                {"latitude": 28.60183940476708, "longitude": -81.19807063116282},
-            ],
-            "accountId": user_id,
-            "accountName": str(user_data.first_name) + " " + str(user_data.surname),
-            #'loyaltyPoints': {
-            #    'label': 'Points',
-            #    'balance': {
-            #        'int': 800
-            #    }
-            # }
-        }
-
-        # Create the object
-        response = (
-            self.client.loyaltyobject()
-            .update(resourceId=f"{issuer_id}.{user_id}", body=update_object)
-            .execute()
-        )
-
-        print("Object insert response")
-        print(response)
-
-        return f"{issuer_id}.{user_id}"
-
-    # [END createObject]
     def create_object(
         self, issuer_id: str, class_suffix: str, user_data: UserModel
     ) -> str:
@@ -193,10 +72,10 @@ class GoogleWallet:
         except HttpError as e:
             if e.status_code != 404:
                 # Something else went wrong...
-                print(e.error_details)
+                logger.error("Google Wallet" + e.error_details)
                 return f"{issuer_id}.{user_id}"
         else:
-            print(f"Object {issuer_id}.{user_id} already exists!")
+            logger.info(f"Wallet Object {issuer_id}.{user_id} already exists!")
             return f"{issuer_id}.{user_id}"
 
         # See link below for more information on required properties
@@ -214,20 +93,28 @@ class GoogleWallet:
                     }
                 },
             },
-            # "textModulesData": [
-            #    {
-            #        "header": "Member Name",
-            #        "body": str(user_data.first_name) + " " + str(user_data.surname),
-            #        "id": "MEMBER_NAME",
-            #    }
-            # ],
+            "hexBackgroundColor": "#231f20",
+            "logo": {
+                "sourceUri": {"uri": "https://cdn.hackucf.org/PFP.png"},
+                "contentDescription": {
+                    "defaultValue": {
+                        "language": "en-US",
+                        "value": "LOGO_IMAGE_DESCRIPTION",
+                    }
+                },
+            },
+            "cardTitle": {
+                "defaultValue": {"language": "en-US", "value": "Hack@UCF Membership ID"}
+            },
+            "subheader": {"defaultValue": {"language": "en-US", "value": "Name "}},
+            "header": {
+                "defaultValue": {
+                    "language": "en-US",
+                    "value": str(user_data.first_name) + " " + str(user_data.surname),
+                }
+            },
             "linksModuleData": {
                 "uris": [
-                    {
-                        "uri": "https://hackucf.org/",
-                        "description": "Hack@UCF Website",
-                        "id": "HOMEPAGE",
-                    },
                     {
                         "uri": "https://join.hackucf.org/profile",
                         "description": "Profile Page",
@@ -235,40 +122,20 @@ class GoogleWallet:
                     },
                 ]
             },
-            #'imageModulesData': [{
-            #    'mainImage': {
-            #        'sourceUri': {
-            #            'uri':
-            #                user_data.discord.avatar
-            #        },
-            #        'contentDescription': {
-            #        'defaultValue': {
-            #                'language': 'en-US',
-            #                'value': 'Profile Picutre'
-            #            }
-            #        }
-            #    },
-            #    'id': 'PROFILE_PIC'
-            # }],
-            "barcode": {"type": "QR_CODE", "value": user_id},
+            "barcode": {
+                "type": "QR_CODE",
+                "value": user_id,
+                "alternateText": user_data.discord.username,
+            },
             "locations": [
                 {"latitude": 28.60183940476708, "longitude": -81.19807063116282},
             ],
             "accountId": user_id,
             "accountName": str(user_data.first_name) + " " + str(user_data.surname),
-            #'loyaltyPoints': {
-            #    'label': 'Points',
-            #    'balance': {
-            #        'int': 800
-            #    }
-            # }
         }
 
         # Create the object
-        response = self.client.loyaltyobject().insert(body=new_object).execute()
-
-        print("Object insert response")
-        print(response)
+        response = self.client.genericobject().insert(body=new_object).execute()
 
         return f"{issuer_id}.{user_id}"
 
@@ -299,7 +166,7 @@ class GoogleWallet:
         # Note: Make sure to replace the placeholder class and object suffixes
         objects_to_add = {
             # Loyalty cards
-            "loyaltyObjects": [
+            "genericObjects": [
                 {"id": f"{issuer_id}.{user_id}", "classId": f"{issuer_id}.{class_id}"}
             ],
         }
@@ -316,9 +183,6 @@ class GoogleWallet:
         # The service account credentials are used to sign the JWT
         signer = crypt.RSASigner.from_service_account_info(self.auth_dict)
         token = jwt.encode(signer, claims).decode("utf-8")
-
-        print("Add to Google Wallet link")
-        print(f"https://pay.google.com/gp/v/save/{token}")
 
         return f"https://pay.google.com/gp/v/save/{token}"
 
@@ -576,11 +440,11 @@ async def google_gen(
     issuer_id = Settings().google_wallet.issuer_id
     class_suffix = Settings().google_wallet.class_suffix
     user_data = session.exec(statement).one_or_none()
-    object_id = google_wallet.update_object(issuer_id, class_suffix, user_data)
+    object_id = google_wallet.create_object(issuer_id, class_suffix, user_data)
     redir_url = google_wallet.create_jwt_existing_objects(
-        Settings().google_wallet.issuer_id,
+        issuer_id,
         str(user_data.id),
-        Settings().google_wallet.class_suffix,
+        class_suffix,
     )
 
     return RedirectResponse(redir_url)
