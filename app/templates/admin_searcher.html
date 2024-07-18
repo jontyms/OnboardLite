@@ -1,172 +1,179 @@
-{% extends 'base.html' %}
-{% block title %} Member Roster - Hack@UCF {% endblock %}
-{% block head %}
-    <!-- List library -->
-    <script src="//cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
+{% extends 'base.html' %} {% block title %} Member Roster - Hack@UCF {% endblock
+%} {% block head %}
+<!-- List library -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
 
-    <!-- QR library -->
-    <script src="/static/lib/qr-scanner.umd.min.js"></script>
-{% endblock %}
-{% block content %}
+<!-- QR library -->
+<script src="/static/lib/qr-scanner.umd.min.js"></script>
+{% endblock %} {% block content %}
 <body>
-    <div class="nav">
-        <div class="nav_inner">
-            <img src="/static/admin_logo.svg">
-            <div class="right">
-                Signed in as @{{name}}
-            </div>
-        </div>
+  <div class="nav">
+    <div class="nav_inner">
+      <img src="/static/admin_logo.svg" />
+      <div class="right">Signed in as @{{name}}</div>
     </div>
-    <div class="admin">
-        <div id="users">
-            <input type="text" class="search" placeholder="Search" />
-            <button id="activeFilter" class="btn searchbtn">All Status</button>
-            <button id="menteeFilter" class="btn searchbtn">All Mentee</button>
-            <button id="scannerOn" class="btn searchbtn">Scanner</button>
-            <table>
-                <thead></thead>
-                <tbody class="list"></tbody>
-            </table>
-        </div>
-        <div class="hide_default" id="user">
-            <div><button id="goBackBtn" class="btn searchbtn">Back</button></div>
-            <img id="pfp"/>
-            <h1 id="name"></h1>
-            <h2 id="discord"></h2>
-            <br>
-            <table class="data_table">
-                <tbody>
-                    <tr><td><h2 id="statusColor">Statuses</h2></td></tr>
-
-                    <tr>
-                        <td>Membership Status</td>
-                        <td id="status">Value</td>
-                    </tr>
-                    <tr>
-                        <td>Voting Status</td>
-                        <td id="voting_status">Value</td>
-                    </tr>
-                    <tr>
-                        <td>Was Dues Paid?</td>
-                        <td id="did_pay_dues">Value</td>
-                    </tr>
-                    <tr>
-                        <td>Ethics Form Completion</td>
-                        <td id="ethics_form">Value</td>
-                    </tr>
-                    <tr>
-                        <td>Is Dues-Paying Member?</td>
-                        <td id="is_full_member">Value</td>
-                    </tr>
-                    <tr>
-                        <td>T-Shirt Status</td>
-                        <td id="shirt_status">Value</td>
-                    </tr>
-                    <tr>
-                        <td>Mentorship Program</td>
-                        <td id="mentee_status">Value</td>
-                    </tr>
-
-                    <tr><td><h2>Identifiers</h2></td></tr>
-
-                    <tr>
-                        <td>Hack@UCF ID</td>
-                        <td id="id">Value</td>
-                    </tr>
-                    <tr>
-                        <td>NID</td>
-                        <td id="nid">Value</td>
-                    </tr>
-                    <tr>
-                        <td>UCF ID</td>
-                        <td id="ucfid">Value</td>
-                    </tr>
-                    <tr>
-                        <td>Preferred Email</td>
-                        <td id="email">Value</td>
-                    </tr>
-                    <tr>
-                        <td>Infra Username</td>
-                        <td id="infra_email">Value</td>
-                    </tr>
-                    <tr>
-                        <td>Minecraft Username</td>
-                        <td id="minecraft">Value</td>
-                    </tr>
-                    <tr>
-                        <td>GitHub Username</td>
-                        <td id="github">Value</td>
-                    </tr>
-                    <tr>
-                        <td>Phone Number</td>
-                        <td id="phone_number">Value</td>
-                    </tr>
-
-                    <tr><td><h2>Demography</h2></td></tr>
-
-                    <tr>
-                        <td>Class Standing</td>
-                        <td id="class_standing">Value</td>
-                    </tr>
-                    <tr>
-                        <td>Experience (out of 5)</td>
-                        <td id="experience">Value</td>
-                    </tr>
-                    <tr>
-                        <td>Meeting Interest</td>
-                        <td id="attending">Value</td>
-                    </tr>
-                    <tr>
-                        <td>Topic Interest</td>
-                        <td id="curiosity">Value</td>
-                    </tr>
-                    <tr>
-                        <td>Major</td>
-                        <td id="major">Value</td>
-                    </tr>
-                    <tr>
-                        <td>Gender</td>
-                        <td id="gender">Value</td>
-                    </tr>
-                    <tr>
-                        <td>Interested in C3?</td>
-                        <td id="c3_interest">Value</td>
-                    </tr>
-                    <tr>
-                        <td>Returning Member?</td>
-                        <td id="is_returning">Value</td>
-                    </tr>
-                    <tr>
-                        <td>Comments</td>
-                        <td id="comments">Value</td>
-                    </tr>
-                </tbody>
-            </table>
-            <details>
-                <summary><h2>Actions</h2></summary>
-                <button class="hide_default btn" id="payDues"><i class="fa-solid fa-dollar"></i> Pay Dues</button>
-                <button class="hide_default btn" id="reverify"><i class="fa-solid fa-refresh"></i> Refresh Status</button>
-                <button class="hide_default btn" id="claimShirt"><i class="fa-solid fa-shirt"></i> Claim T-Shirt</button>
-                <button class="btn" id="setAdmin"><i class="fa-solid fa-lock"></i> <span id="adminLabel">Toggle Admin</span></button>
-                <button class="btn" id="joinInfra"><i class="fa-solid fa-server"></i> <span id="infraLabel">Invite to Infra</span></button>
-                <button class="hide_default btn" id="assignMentor"><i class="fa-solid fa-user-group"></i> Assign Mentor</button>
-                <button class="btn" id="sendMessage"><i class="fa-brands fa-discord"></i> Send Discord Message</button>
-                <button class="btn" id="toggleVote"><i class="fa-solid fa-check-to-slot"></i>Toggle Vote Status</button>
-            </details>
-            <details>
-                <summary><h2>View as JSON</h2></summary>
-                <pre id="user_json">
-
-                </pre>
-            </details>
-        </div>
-        <div class="hide_default" id="scanner">
-            <h2>Present Hack@UCF ID Below</h2>
-            <button id="scannerOff" class="btn">Search Manually</button>
-            <button id="changeCamera" class="btn">Change Camera</button>
-            <video></video>
-        </div>
+  </div>
+  <div class="admin">
+    <div id="users">
+      <input type="text" class="search" placeholder="Search" />
+      <button id="activeFilter" class="btn searchbtn">All Status</button>
+      <button id="scannerOn" class="btn searchbtn">Scanner</button>
+      <table>
+        <thead></thead>
+        <tbody class="list"></tbody>
+      </table>
     </div>
+    <div class="hide_default" id="user">
+      <div><button id="goBackBtn" class="btn searchbtn">Back</button></div>
+      <img id="pfp" />
+      <h1 id="name"></h1>
+      <h2 id="discord"></h2>
+      <br />
+      <table class="data_table">
+        <tbody>
+          <tr>
+            <td><h2 id="statusColor">Statuses</h2></td>
+        </tbody>tr>
+
+          <tr>
+            <td>Membership Status</td>
+            <td id="status">Value</td>
+          </tr>
+          <tr>
+            <td>Voting Status</td>
+            <td id="voting_status">Value</td>
+          </tr>
+          <tr>
+            <td>Was Dues Paid?</td>
+            <td id="did_pay_dues">Value</td>
+          </tr>
+          <tr>
+            <td>Ethics Form Completion</td>
+            <td id="ethics_form">Value</td>
+          </tr>
+          <tr>
+            <td>Is Dues-Paying Member?</td>
+            <td id="is_full_member">Value</td>
+          </tr>
+          <tr>
+            <td>T-Shirt Status</td>
+            <td id="shirt_status">Value</td>
+          </tr>
+
+          <tr>
+            <td><h2>Identifiers</h2></td>
+      </table>tr>
+
+          <tr>
+            <td>Hack@UCF ID</td>
+            <td id="id">Value</td>
+          </tr>
+          <tr>
+            <td>NID</td>
+            <td id="nid">Value</td>
+          </tr>
+          <tr>
+            <td>UCF ID</td>
+            <td id="ucfid">Value</td>
+          </tr>
+          <tr>
+            <td>Preferred Email</td>
+            <td id="email">Value</td>
+          </tr>
+          <tr>
+            <td>Infra Username</td>
+            <td id="infra_email">Value</td>
+          </tr>
+          <tr>
+            <td>Minecraft Username</td>
+            <td id="minecraft">Value</td>
+          </tr>
+          <tr>
+            <td>GitHub Username</td>
+            <td id="github">Value</td>
+          </tr>
+          <tr>
+            <td>Phone Number</td>
+            <td id="phone_number">Value</td>
+          </tr>
+
+          <tr>
+            <td><h2>Demography</h2></td>
+          </tr>
+
+          <tr>
+            <td>Class Standing</td>
+            <td id="class_standing">Value</td>
+          </tr>
+          <tr>
+            <td>Experience (out of 5)</td>
+            <td id="experience">Value</td>
+          </tr>
+          <tr>
+            <td>Meeting Interest</td>
+            <td id="attending">Value</td>
+          </tr>
+          <tr>
+            <td>Topic Interest</td>
+            <td id="curiosity">Value</td>
+          </tr>
+          <tr>
+            <td>Major</td>
+            <td id="major">Value</td>
+          </tr>
+          <tr>
+            <td>Gender</td>
+            <td id="gender">Value</td>
+          </tr>
+          <tr>
+            <td>Interested in C3?</td>
+            <td id="c3_interest">Value</td>
+          </tr>
+          <tr>
+            <td>Returning Member?</td>
+            <td id="is_returning">Value</td>
+          </tr>
+          <tr>
+            <td>Comments</td>
+            <td id="comments">Value</td>
+          </tr>
+        </tbody>
+      </table>
+      <details>
+        <summary><h2>Actions</h2></summary>
+        <button class="hide_default btn" id="payDues">
+          <i class="fa-solid fa-dollar"></i> Pay Dues
+        </button>
+        <button class="hide_default btn" id="reverify">
+          <i class="fa-solid fa-refresh"></i> Refresh Status
+        </button>
+        <button class="hide_default btn" id="claimShirt">
+          <i class="fa-solid fa-shirt"></i> Claim T-Shirt
+        </button>
+        <button class="btn" id="setAdmin">
+          <i class="fa-solid fa-lock"></i>
+          <span id="adminLabel">Toggle Admin</span>
+        </button>
+        <button class="btn" id="joinInfra">
+          <i class="fa-solid fa-server"></i>
+          <span id="infraLabel">Invite to Infra</span>
+        </button>
+        <button class="btn" id="toggleVote">
+          <i class="fa-solid fa-check-to-slot"></i>Toggle Vote Status
+        </button>
+      </details>
+      <details>
+        <summary><h2>View as JSON</h2></summary>
+        <pre id="user_json"></pre>
+      </details>
+    </div>
+    <div class="hide_default" id="scanner">
+      <h2>Present Hack@UCF ID Below</h2>
+      <button id="scannerOff" class="btn">Search Manually</button>
+      <button id="changeCamera" class="btn">Change Camera</button>
+      <video></video>
+    </div>
+  </div>
 </body>
 <script type="text/javascript" src="/static/admin.js"></script>
 {% endblock %}
