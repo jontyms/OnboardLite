@@ -37,5 +37,3 @@ services:
         - path: ./requirements.txt
           action: rebuild
           target: /src/app/requirements.txt
-  redis:
-    image: redis:7.2
