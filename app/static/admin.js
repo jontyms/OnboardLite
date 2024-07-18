@@ -11,7 +11,6 @@ function load() {
     "Email",
     "Experience",
     "Major",
-    "Mentee",
     "Details",
   ];
   let valueItems = "<tr>";
@@ -50,7 +49,6 @@ function load() {
           id: sanitizeHTML(member.id).replaceAll("&#45;", "-"),
           name: sanitizeHTML(member.first_name + " " + member.surname),
           status: userStatus,
-          voting_status: Boolean(member.can_vote),
           discord: "@" + sanitizeHTML(member.discord.username),
           email: sanitizeHTML(member.email),
           nid: sanitizeHTML(member.nid),
@@ -58,10 +56,6 @@ function load() {
           major: sanitizeHTML(member.major),
           details: `<button class="searchbtn btn" onclick="showUser('${sickoModeSanitize(member.id)}')">Details</a>`,
           is_full_member: Boolean(member.is_full_member),
-          mentee:
-            member.mentee && member.mentee.domain_interest
-              ? member.mentee.domain_interest
-              : "Not Mentee",
         };
 
         count_all++;
@@ -158,9 +152,6 @@ function showUser(userId) {
     : "#cf565f";
 
   document.getElementById("status").innerText = user.status;
-  document.getElementById("voting_status").innerText = user.can_vote
-    ? "✔️"
-    : "❌";
   document.getElementById("did_pay_dues").innerText = user.did_pay_dues
     ? "✔️"
     : "❌";
@@ -176,8 +167,6 @@ function showUser(userId) {
     ? "Claimed"
     : `Unclaimed: Size ${user.shirt_size}`;
 
-  document.getElementById("mentee_status").innerHTML = mentee_status;
-
   // Identifiers
   document.getElementById("id").innerText = user.id;
   document.getElementById("nid").innerText = user.nid;
@@ -185,9 +174,6 @@ function showUser(userId) {
     ? user.ucfid
     : "(unknown)";
   document.getElementById("email").innerText = user.email;
-  document.getElementById("infra_email").innerText = user.infra_email
-    ? user.infra_email
-    : "Account Not Provisioned";
   document.getElementById("minecraft").innerText = user.minecraft
     ? user.minecraft
     : "Not Provided";
@@ -254,12 +240,6 @@ function showUser(userId) {
     editUser({
       id: user.id,
       did_get_shirt: true,
-    });
-  };
-  document.getElementById("toggleVote").onclick = (evt) => {
-    editUser({
-      id: user.id,
-      can_vote: !user.can_vote,
     });
   };
   document.getElementById("claimShirt").style.display = user.did_get_shirt
