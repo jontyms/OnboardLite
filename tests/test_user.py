@@ -20,7 +20,7 @@ def test_profile(mock_approve, client: TestClient, jwt: str):
 def test_openvpn(client: TestClient, jwt: str):
     response = client.get("/infra/openvpn", cookies={"token": jwt})
     assert response.status_code == 500
-    assert response.json().get('detail') == ERR_VPN_CONFIG_NOT_FOUND.detail
+    assert response.json().get("detail") == ERR_VPN_CONFIG_NOT_FOUND.detail
 
 
 def test_db(client: TestClient, session: Session, jwt: str):
