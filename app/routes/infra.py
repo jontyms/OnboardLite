@@ -15,7 +15,6 @@ from app.util.database import get_session
 from app.util.discord import Discord
 from app.util.email import Email
 from app.util.errors import Errors
-from app.util.limiter import RateLimiter
 from app.util.settings import Settings
 
 logger = logging.getLogger(__name__)

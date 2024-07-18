@@ -20,14 +20,6 @@
                 <h3>Membership ID</h3>
                 <div id="membership_id">{{ user_data.get('id', 'Not Issued (report to Execs!)') }}</div>
             </div>
-            <div class="entry">
-                <h3>Can Vote</h3>
-                <div id="membership_id">{{ user_data.get('can_vote', 'Not Issued (report to Execs!)') }}</div>
-            </div>
-            <div class="entry">
-                <h3>Hack@UCF Private Cloud Username</h3>
-                <div>{{ user_data.get('infra_email', 'Account Not Issued') }}</div>
-            </div>
             {% if user_data.get('ops_email', False) %}
                 <div class="entry">
                     <h3>Operations Email</h3>
@@ -38,9 +30,6 @@
             <a class="btn" href="/join/edit"><i class="fa-solid fa-pencil"></i> Edit</a>
             {% if user_data.get('sudo', False) %}
                 <a class="btn" href="/admin/"><i class="fa-solid fa-lock"></i> Admin</a>
-            {% endif %}
-            {% if user_data.get('infra_email', False) %}
-                <button class="btn hide_default" id="newInfraBox"><i class="fa-solid fa-server"></i> Create Infra Box</button>
             {% endif %}
             <a class="btn" href="#logoff" onclick="logoff()"><i class="fa-solid fa-key"></i> Log Out</a>
 
