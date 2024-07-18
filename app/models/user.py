@@ -60,7 +60,6 @@ class UserModel(SQLModel, table=True):
     sudo: Optional[bool] = False
     did_pay_dues: Optional[bool] = False
     join_date: Optional[int] = None
-    mentor_name: Optional[str] = None
     is_full_member: Optional[bool] = False
     can_vote: Optional[bool] = False
     experience: Optional[int] = None
