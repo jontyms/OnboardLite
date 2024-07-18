@@ -254,7 +254,7 @@ def apple_wallet(user_data):
         "barcodes": [
             {
                 "format": "PKBarcodeFormatQR",
-                "message": user_data.get("id", "Unknown_ID"),
+                "message": str(user_data.get("id", "Unknown_ID")),
                 "messageEncoding": "iso-8859-1",
                 "altText": user_data.get("discord", {}).get("username", None),
             }
