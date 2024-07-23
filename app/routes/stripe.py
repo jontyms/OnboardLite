@@ -1,4 +1,5 @@
 import logging
+import uuid
 from typing import Optional
 
 import stripe
@@ -40,7 +41,7 @@ async def get_root(
     """
     statement = (
         select(UserModel)
-        .where(UserModel.id == user_jwt["id"])
+        .where(UserModel.id == uuid.UUID(user_jwt["id"]))
         .options(selectinload(UserModel.discord))
     )
     user_data = session.exec(statement).one_or_none()
@@ -73,7 +74,7 @@ async def create_checkout_session(
         return Errors.generate(request, 503, "Payments Paused")
 
     user_data = session.exec(
-        select(UserModel).where(UserModel.id == user_jwt.get("id"))
+        select(UserModel).where(UserModel.id == uuid.UUID(user_jwt.get("id")))
     ).one_or_none()
 
     try:

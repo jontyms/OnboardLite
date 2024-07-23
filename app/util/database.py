@@ -1,7 +1,7 @@
 # Create the database
 from alembic import script
 from alembic.runtime import migration
-from sqlmodel import Session, create_engine
+from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
 
 from app.util.settings import Settings

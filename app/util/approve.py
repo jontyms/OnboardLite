@@ -1,7 +1,9 @@
 import logging
+import uuid
 
 from keycloak import KeycloakAdmin
 from sqlalchemy.orm import selectinload
+from sqlalchemy.types import UUID
 from sqlmodel import Session, select
 
 from app.models.user import UserModel
@@ -25,7 +27,7 @@ class Approve:
     def __init__(self):
         pass
 
-    def provision_infra(member_id, user_data):
+    def provision_infra(member_id: uuid.UUID, user_data):
         username = user_data.discord.username
         password = HorsePass.gen()
         admin = KeycloakAdmin(
@@ -60,9 +62,9 @@ class Approve:
         return {"username": username, "password": password}
 
     # !TODO finish the post-sign-up stuff + testing
-    def approve_member(member_id):
+    def approve_member(member_id: uuid.UUID):
         with Session(engine) as session:
-            logger.info(f"Re-running approval for {member_id}")
+            logger.info(f"Re-running approval for {str(member_id)}")
             statement = (
                 select(UserModel)
                 .where(UserModel.id == member_id)
