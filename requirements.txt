@@ -18,7 +18,7 @@ typing_extensions==4.12.2
 uvicorn==0.30.3
 python-keycloak==4.2.2
 sentry_sdk==2.10.0
-sqlmodel==0.0.19
+sqlmodel==0.0.21
 alembic==1.13.2
 google-api-python-client
 google-auth
