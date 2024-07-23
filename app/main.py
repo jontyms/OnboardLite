@@ -237,11 +237,10 @@ async def oauth_transformer_new(
     #        )
 
     if not user:
-        member_id = str(uuid.uuid4())
         infra_email = ""
         discord_id = discordData["id"]
         Discord().join_hack_server(discord_id, token)
-        user = UserModel(discord_id=discord_id, id=member_id, infra_email=infra_email)
+        user = UserModel(discord_id=discord_id, infra_email=infra_email)
         discord_data = {
             "email": discordData.get("email"),
             "mfa": discordData.get("mfa_enabled"),
@@ -300,13 +299,13 @@ async def profile(
 ):
     statement = (
         select(UserModel)
-        .where(UserModel.id == user_jwt["id"])
+        .where(UserModel.id == uuid.UUID(user_jwt["id"]))
         .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
     )
     user_data = user_to_dict(session.exec(statement).one_or_none())
 
     # Re-run approval workflow.
-    Approve.approve_member(user_jwt.get("id"))
+    Approve.approve_member(uuid.UUID(user_jwt.get("id")))
 
     return templates.TemplateResponse(
         "profile.html", {"request": request, "user_data": user_data}
@@ -343,7 +342,7 @@ async def forms(
 
     statement = (
         select(UserModel)
-        .where(UserModel.id == user_jwt.get("id"))
+        .where(UserModel.id == uuid.UUID(user_jwt.get("id")))
         .options(selectinload(UserModel.discord))
     )
     user_data = session.exec(statement).one_or_none()

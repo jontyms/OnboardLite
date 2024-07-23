@@ -38,7 +38,7 @@ class EthicsFormModel(SQLModel, table=True):
 
 
 class UserModel(SQLModel, table=True):
-    id: Optional[uuid.UUID] = Field(default_factory=uuid.uuid4, primary_key=True)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     discord_id: str = Field(unique=True)
     ucf_id: Optional[int] = Field(unique=True, default=None)
     nid: Optional[str] = Field(unique=True, default=None)

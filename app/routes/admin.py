@@ -1,10 +1,12 @@
 import logging
+import uuid
 from typing import Optional
 
 from fastapi import APIRouter, Body, Cookie, Depends, Request, Response
 from fastapi.templating import Jinja2Templates
 from jose import jwt
 from sqlalchemy.orm import selectinload
+from sqlalchemy.types import UUID
 from sqlmodel import Session, select
 
 from app.models.user import (
@@ -73,7 +75,7 @@ async def get_infra(
 
     # Get user data
     user_data = session.exec(
-        select(UserModel).where(UserModel.id == member_id)
+        select(UserModel).where(UserModel.id == uuid.UUID(member_id))
     ).one_or_none()
 
     # Send DM...
@@ -109,7 +111,7 @@ Happy Hacking,
 async def get_refresh(
     request: Request,
     token: Optional[str] = Cookie(None),
-    member_id: Optional[str] = "FAIL",
+    member_id: Optional[uuid.UUID] = "FAIL",
     session: Session = Depends(get_session),
 ):
     """
@@ -118,10 +120,10 @@ async def get_refresh(
     if member_id == "FAIL":
         return {"data": {}, "error": "Missing ?member_id"}
 
-    Approve.approve_member(member_id)
+    Approve.approve_member(uuid.UUID(member_id))
 
     user_data = session.exec(
-        select(UserModel).where(UserModel.id == member_id)
+        select(UserModel).where(UserModel.id == uuid.UUID(member_id))
     ).one_or_none()
 
     if not user_data:
@@ -146,7 +148,7 @@ async def admin_get_single(
 
     statement = (
         select(UserModel)
-        .where(UserModel.id == user_jwt["id"])
+        .where(UserModel.id == uuid.UUID(user_jwt["id"]))
         .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
     )
     user_data = user_to_dict(session.exec(statement).one_or_none())
@@ -208,7 +210,7 @@ async def admin_post_discord_message(
         return {"data": {}, "error": "Missing ?member_id"}
 
     data = session.exec(
-        select(UserModel).where(UserModel.id == member_id)
+        select(UserModel).where(UserModel.id == uuid.UUID(member_id))
     ).one_or_none()
 
     if not data:
@@ -239,7 +241,7 @@ async def admin_edit(
 
     statement = (
         select(UserModel)
-        .where(UserModel.id == member_id)
+        .where(UserModel.id == uuid.UUID(member_id))
         .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
     )
     member_data = session.exec(statement).one_or_none()
