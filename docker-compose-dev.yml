@@ -3,6 +3,7 @@ services:
     build: .
     environment:
       - BWS_ACCESS_TOKEN={$BWS_ACCESS_TOKEN}
+      - ONBOARD_FORWARDED_ALLOW_IPS=
     ports:
       - 8000:8000
     volumes:
