@@ -7,6 +7,9 @@ import sys
 def run_uvicorn():
     host = os.getenv("ONBOARD_HOST", "0.0.0.0")
     port = os.getenv("ONBOARD_PORT", "8000")
+    proxy_headers = os.getenv("ONBOARD_PROXY_HEADERS")
+    forwarded_allow_ips = os.getenv("ONBOARD_FORWARDED_ALLOW_IPS")
+
     command = [
         "uvicorn",
         "app.main:app",
@@ -17,6 +20,11 @@ def run_uvicorn():
         "--workers",
         "2",
     ]
+
+    if forwarded_allow_ips is not None:
+        command.extend(["--forwarded-allow-ips", forwarded_allow_ips])
+        command.append("--proxy-headers")
+
     subprocess.run(command)
 
 
