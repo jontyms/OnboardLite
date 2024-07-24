@@ -76,7 +76,8 @@ async def create_checkout_session(
     user_data = session.exec(
         select(UserModel).where(UserModel.id == uuid.UUID(user_jwt.get("id")))
     ).one_or_none()
-
+    if user_data.email == None:
+        return Errors.generate(request, 400, "No email associated with account")
     try:
         stripe_email = user_data.email
         checkout_session = stripe.checkout.Session.create(

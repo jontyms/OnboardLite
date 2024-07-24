@@ -1,8 +1,10 @@
 import json
 import logging
+import uuid
 from typing import Optional
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Request
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
@@ -155,7 +157,7 @@ async def post_form(
 
     statement = (
         select(UserModel)
-        .where(UserModel.id == user_jwt["id"])
+        .where(UserModel.id == uuid.UUID(user_jwt["id"]))
         .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
     )
     result = session.exec(statement)
@@ -168,7 +170,14 @@ async def post_form(
 
     # Save the updated model back to the database
     session.add(user)
-    session.commit()
+    try:
+        session.commit()
+    except IntegrityError as e:
+        logger.error(e)
+        session.rollback()
+        raise HTTPException(
+            status_code=422, detail=("Integrity Error. " + str(e).split("\n")[0])
+        )
     session.refresh(user)
 
     return user.model_dump()
