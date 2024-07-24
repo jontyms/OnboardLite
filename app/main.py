@@ -348,7 +348,6 @@ async def forms(
     user_data = session.exec(statement).one_or_none()
     # Have Kennelish parse the data.
     user_data = user_to_dict(user_data)
-    logger.info("Parsing form data" + str(user_data))
     body = Kennelish.parse(data, user_data)
 
     # return num
