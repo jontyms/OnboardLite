@@ -16,7 +16,7 @@ requests-oauthlib==2.0.0
 stripe==10.4.0
 typing_extensions==4.12.2
 uvicorn==0.30.3
-python-keycloak==4.2.2
+python-keycloak==4.2.3
 sentry_sdk==2.10.0
 sqlmodel==0.0.21
 alembic==1.13.2
