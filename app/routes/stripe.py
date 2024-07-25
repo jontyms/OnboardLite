@@ -62,7 +62,7 @@ async def get_root(
     )
 
 
-@router.post("/checkout")
+@router.api_route("/checkout", methods=["GET", "POST"])
 @Authentication.member
 async def create_checkout_session(
     request: Request,
