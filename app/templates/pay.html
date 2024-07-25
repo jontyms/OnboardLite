@@ -39,7 +39,7 @@
                     {% if paused_payments and not did_pay_dues %}
                     <h1>Dues Payment Paused</h1>
                     {% elif not paused_payments and not did_pay_dues %}
-                    <form action="/pay/checkout/" method="POST">
+                    <form action="/pay/checkout/" method="GET">
                         <button type="submit" id="checkout-button" class="btn wide">Pay Dues</button>
                     </form>
                     {% elif did_pay_dues %}
