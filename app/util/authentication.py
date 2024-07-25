@@ -13,6 +13,9 @@ from app.models.user import UserModel
 from app.util.errors import Errors
 from app.util.settings import Settings
 
+if Settings().telemetry.enable:
+    from sentry_sdk import set_user
+
 
 class Authentication:
     def __init__(self):
@@ -111,6 +114,8 @@ class Authentication:
                     "Session expired.",
                     essay="Sessions last for about fifteen weeks. You need to re-log-in between semesters.",
                 )
+            if Settings().telemetry.enable:
+                set_user({"id": user_jwt["id"]})
             return await func(request, token, user_jwt, *args, **kwargs)
 
         return wrapper_member
