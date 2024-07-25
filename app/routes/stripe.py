@@ -76,7 +76,7 @@ async def create_checkout_session(
     user_data = session.exec(
         select(UserModel).where(UserModel.id == uuid.UUID(user_jwt.get("id")))
     ).one_or_none()
-    if user_data.email == None:
+    if not user_data.email:
         return Errors.generate(request, 400, "No email associated with account")
     try:
         stripe_email = user_data.email
@@ -94,7 +94,7 @@ async def create_checkout_session(
             cancel_url=Settings().stripe.url_failure,
         )
     except Exception as e:
-        logger.exeption("Error creating checkout session in stripe.py", e)
+        logger.exception("Error creating checkout session in stripe.py", e)
         return HTTPException(status_code=500, detail="Error creating checkout session.")
 
     return RedirectResponse(checkout_session.url, status_code=303)
