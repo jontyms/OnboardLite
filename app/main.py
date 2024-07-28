@@ -161,7 +161,7 @@ async def oauth_transformer(redir: str = "/join/2"):
 
     rr = RedirectResponse(authorization_url, status_code=302)
 
-    rr.set_cookie(key="redir_endpoint", value=redir)
+    rr.set_cookie(key="redir_endpoint", value=redir, max_age=300)
 
     return rr
 
@@ -254,11 +254,31 @@ async def oauth_transformer_new(
     # Create JWT. This should be the only way to issue JWTs.
     bearer = Authentication.create_jwt(user)
     rr = RedirectResponse(redir, status_code=status.HTTP_302_FOUND)
-    rr.set_cookie(key="token", value=bearer)
-
+    if user.sudo:
+        max_age = Settings().jwt.lifetime_sudo
+    else:
+        max_age = Settings().jwt.lifetime_user
+    if Settings().env == "dev":
+        rr.set_cookie(
+            key="token",
+            value=bearer,
+            httponly=True,
+            samesite="lax",
+            secure=False,
+            max_age=max_age,
+        )
+    else:
+        rr.set_cookie(
+            key="token",
+            value=bearer,
+            httponly=True,
+            samesite="lax",
+            secure=True,
+            max_age=max_age,
+        )
     # Clear redirect cookie.
     rr.delete_cookie("redir_endpoint")
-
+    rr.delete_cookie("captcha")
     return rr
 
 
