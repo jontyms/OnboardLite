@@ -137,3 +137,32 @@ class Authentication:
             algorithm=Settings().jwt.algorithm,
         )
         return bearer
+
+    def create_captcha_jwt():
+        jwtData = {
+            "captcha": True,
+            "issued": time.time(),
+        }
+        bearer = jwt.encode(
+            jwtData,
+            Settings().jwt.secret.get_secret_value(),
+            algorithm=Settings().jwt.algorithm,
+        )
+        return bearer
+
+    def validate_captcha(token: Optional[str]):
+        try:
+            user_jwt = jwt.decode(
+                token,
+                Settings().jwt.secret.get_secret_value(),
+                algorithms=Settings().jwt.algorithm,
+            )
+            creation_date: float = user_jwt.get("issued", -1)
+        except Exception as e:
+            if isinstance(e, jwt.JWTError) or isinstance(e, jwt.JWTClaimsError):
+                return False
+            else:
+                raise
+        if time.time() > creation_date + 120:
+            return False
+        return True

@@ -1,15 +1,16 @@
-{% extends 'base.html' %}
-{% block title %} Error {{code}} - Hack@UCF {% endblock %}
-{% block content %}
+{% extends 'base.html' %} {% block title %} Error {{code}} - Hack@UCF {%
+endblock %} {% block content %}
 <body>
-    <div class="app" id="1">
-        <h1>Error {{code}}</h1>
-        <h2>{{reason}}</h2>
+  <div class="app" id="1">
+    <h1>Error {{code}}</h1>
+    <h2>{{reason}}</h2>
 
-        <a class="btn" href="/"><i class="fa-solid fa-house"></i> Go Home</a>
+    <a class="btn" href="{{return_url}}"
+      ><i class="fa-solid fa-house"></i> {{return_text}}</a
+    >
 
-        <h6>{{essay}}</h6>
-    </div>
+    <h6>{{essay}}</h6>
+  </div>
 </body>
 <script type="text/javascript" src="/static/form.js"></script>
 {% endblock %}

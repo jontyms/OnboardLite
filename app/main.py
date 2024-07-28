@@ -3,6 +3,8 @@ import uuid
 from typing import Optional
 from urllib.parse import urlparse
 
+import requests
+
 # FastAPI
 from fastapi import Cookie, Depends, FastAPI, Request, Response, status
 from fastapi.responses import FileResponse, RedirectResponse
@@ -144,7 +146,34 @@ This is what is linked to by Onboard.
 
 
 @app.get("/discord/new/")
-async def oauth_transformer(redir: str = "/join/2"):
+async def oauth_transformer(request: Request, redir: str = "/join/2"):
+    if not Settings().env == "dev":
+        hcaptcha_response = request.query_params.get("h-captcha-response")
+
+        if not hcaptcha_response:
+            return Errors.generate(
+                request,
+                403,
+                "Captcha failed. Please try again.",
+                return_url="/join",
+                return_text="Try Again",
+            )
+
+        hcaptcha_secret = Settings().captcha.secret.get_secret_value
+        verify_url = "https://hcaptcha.com/siteverify"
+        payload = {"secret": hcaptcha_secret, "response": hcaptcha_response}
+
+        response = requests.post(verify_url, data=payload)
+        result = response.json()
+
+        if not result.get("success"):
+            return Errors.generate(
+                request,
+                403,
+                "Captcha failed. Please try again.",
+                return_url="/join",
+                return_text="Try Again",
+            )
     # Open redirect check
     hostname = urlparse(redir).netloc
     if hostname != "" and hostname != Settings().http.domain:
@@ -162,6 +191,8 @@ async def oauth_transformer(redir: str = "/join/2"):
     rr = RedirectResponse(authorization_url, status_code=302)
 
     rr.set_cookie(key="redir_endpoint", value=redir, max_age=300)
+    captcha_cookie = Authentication.create_captcha_jwt()
+    rr.set_cookie(key="captcha", value=captcha_cookie, max_age=300)
 
     return rr
 
@@ -220,7 +251,17 @@ async def oauth_transformer_new(
     statement = select(UserModel).where(UserModel.discord_id == discordData["id"])
     user = session.exec(statement).one_or_none()
 
+    captcha = request.cookies.get("captcha")
     if not user:
+        if Settings().env != "dev":
+            if not Authentication.validate_captcha(token=captcha) or not captcha:
+                return Errors.generate(
+                    request,
+                    403,
+                    "Captcha failed. Please try again. Or timed out.",
+                    return_url="/join",
+                    return_text="Try Again",
+                )
         if not discordData.get("verified"):
             tr = Errors.generate(
                 request,
@@ -290,7 +331,9 @@ Renders the landing page for the sign-up flow.
 @app.get("/join/")
 async def join(request: Request, token: Optional[str] = Cookie(None)):
     if token is None:
-        return templates.TemplateResponse("signup.html", {"request": request})
+        return templates.TemplateResponse(
+            "signup.html", {"request": request, "site_key": Settings().captcha.site_key}
+        )
     else:
         return RedirectResponse("/join/2/", status_code=status.HTTP_302_FOUND)
 

@@ -7,10 +7,24 @@ class Errors:
     def __init__(self):
         super(Errors, self).__init__
 
-    def generate(request, num=404, msg="Page not found.", essay=""):
+    def generate(
+        request,
+        num=404,
+        msg="Page not found.",
+        essay="",
+        return_url="/",
+        return_text="Return to home",
+    ):
         return templates.TemplateResponse(
             "error.html",
-            {"request": request, "code": num, "reason": msg, "essay": essay},
+            {
+                "request": request,
+                "code": num,
+                "reason": msg,
+                "essay": essay,
+                "return_url": return_url,
+                "return_text": return_text,
+            },
             status_code=num,
         )
 

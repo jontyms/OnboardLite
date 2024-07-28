@@ -335,6 +335,32 @@ else:
     logger.warn("Missing Keycloak Config")
 
 
+class CaptchaConfig(BaseModel):
+    sitekey: Optional[SecretStr] = Field(None)
+    secret: Optional[SecretStr] = Field(None)
+    enable: Optional[bool] = Field(True)
+
+    @model_validator(mode="after")
+    def check_required_fields(cls, values):
+        enable = values.enable
+        if enable:
+            required_fields = ["sitekey", "secret"]
+            for field in required_fields:
+                if getattr(values, field) is None:
+                    raise ValueError(
+                        f"Keycloak {field} is required when enable is True"
+                    )
+        return values
+
+
+if settings.get("captcha"):
+    captcha_config = KeycloakConfig(**settings["captcha"])
+elif onboard_env == "dev":
+    captcha = CaptchaConfig(enable=False)
+else:
+    logger.warn("Missing Captcha Config")
+
+
 class TelemetryConfig(BaseModel):
     url: Optional[str] = None
     enable: Optional[bool] = False
@@ -388,4 +414,5 @@ class Settings(BaseSettings, metaclass=SingletonBaseSettingsMeta):
     keycloak: KeycloakConfig = keycloak_config
     google_wallet: GoogleWalletConfig = google_wallet_config
     telemetry: Optional[TelemetryConfig] = telemetry_config
+    captcha: Optional[CaptchaConfig] = captcha_config
     env: Optional[str] = onboard_env

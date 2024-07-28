@@ -5,9 +5,14 @@ block content %}
     <h1>Welcome to Hack@UCF!</h1>
     <h2>This wizard will help you join Hack@UCF as a dues-paying member.</h2>
 
-    <a class="btn" href="/discord/new/"
-      ><i class="fa-brands fa-discord"></i> Link Discord</a
-    >
+    <form id="captcha-form" action="/discord/new/" method="GET">
+      {% if site_key %}
+      <div class="h-captcha" data-sitekey="{{ site_key }}"></div>
+      {% endif %}
+      <button class="btn" type="submit">
+        <i class="fa-brands fa-discord"></i> Link Discord
+      </button>
+    </form>
 
     <div class="unfocus">
       <h3>Use of Discord Account</h3>
@@ -53,6 +58,7 @@ block content %}
       </details>
     </div>
   </div>
+  <script src="https://hcaptcha.com/1/api.js" async defer></script>
 </body>
 <script type="text/javascript" src="/static/form.js"></script>
 {% endblock %}
