@@ -1,3 +1,5 @@
+import logging
+
 # Create the database
 from alembic import script
 from alembic.runtime import migration
@@ -7,13 +9,18 @@ from sqlmodel.pool import StaticPool
 from app.util.settings import Settings
 
 DATABASE_URL = Settings().database.url
-# TODO remove echo=True
+logger = logging.getLogger(__name__)
+
 engine = create_engine(
     DATABASE_URL,
     # echo=True,
     connect_args={"check_same_thread": False},
     poolclass=StaticPool,
 )
+
+if "sqlite:///:memory:" in DATABASE_URL:
+    SQLModel.metadata.create_all(engine)
+    logger.info("Tables created in SQLite in-memory database.")
 
 
 def init_db():
