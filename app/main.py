@@ -219,24 +219,15 @@ async def oauth_transformer_new(
     # Generate a new user ID or reuse an existing one.
     statement = select(UserModel).where(UserModel.discord_id == discordData["id"])
     user = session.exec(statement).one_or_none()
-    # TODO: Discuss removing
-    # BACKPORT: I didn't realize that Snowflakes were strings because of an integer overflow bug.
-    # So this will do a query for the "mistaken" value and then fix its data.
-    # if not query_for_id:
-    #    logger.info("Beginning Discord ID attribute migration...")
-    #    query_for_id = table.scan(
-    #        FilterExpression=Attr("discord_id").eq(int(discordData["id"]))
-    #    )
-    #    query_for_id = query_for_id.get("Items")
-    #
-    #    if query_for_id:
-    #        table.update_item(
-    #            Key={"id": query_for_id[0].get("id")},
-    #            UpdateExpression="SET discord_id = :discord_id",
-    #            ExpressionAttributeValues={":discord_id": str(discordData["id"])},
-    #        )
 
     if not user:
+        if not discordData.get("verified"):
+            tr = Errors.generate(
+                request,
+                403,
+                "Discord email not verfied please try again",
+            )
+            return tr
         infra_email = ""
         discord_id = discordData["id"]
         Discord().join_hack_server(discord_id, token)
