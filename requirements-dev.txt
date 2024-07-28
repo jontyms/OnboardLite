@@ -1,4 +1,4 @@
-pre-commit==3.7.1
+pre-commit==3.8.0
 semgrep==1.78.0
 virtualenv==20.26.3
 httpx
