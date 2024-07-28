@@ -388,3 +388,4 @@ class Settings(BaseSettings, metaclass=SingletonBaseSettingsMeta):
     keycloak: KeycloakConfig = keycloak_config
     google_wallet: GoogleWalletConfig = google_wallet_config
     telemetry: Optional[TelemetryConfig] = telemetry_config
+    env: Optional[str] = onboard_env
