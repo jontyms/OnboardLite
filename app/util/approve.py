@@ -34,7 +34,7 @@ class Approve:
             server_url=Settings().keycloak.url,
             username=Settings().keycloak.username,
             password=Settings().keycloak.password.get_secret_value(),
-            realm_name=Settings().keycloak.relam,
+            realm_name=Settings().keycloak.realm,
             verify=True,
         )
         try:
