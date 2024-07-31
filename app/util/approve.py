@@ -48,8 +48,8 @@ class Approve:
                     "attributes": {"onboard-membership-id": str(user_data.id)},
                     "credentials": [
                         {
-                            "value": "secret",
-                            "type": password,
+                            "value": password,
+                            "type": "secret",
                         }
                     ],
                 },

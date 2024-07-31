@@ -111,7 +111,7 @@ Happy Hacking,
 async def get_refresh(
     request: Request,
     token: Optional[str] = Cookie(None),
-    member_id: Optional[uuid.UUID] = "FAIL",
+    member_id: Optional[str] = "FAIL",
     session: Session = Depends(get_session),
 ):
     """
