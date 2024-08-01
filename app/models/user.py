@@ -102,7 +102,7 @@ class UserModel(SQLModel, table=True):
 # What admins can edit.
 class UserModelMutable(BaseModel):
     # Identifiers
-    id: Optional[str] = None
+    id: Optional[uuid.UUID] = None
     discord_id: Optional[str] = None
     ucf_id: Optional[int] = None
     nid: Optional[str] = None

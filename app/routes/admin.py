@@ -241,7 +241,7 @@ async def admin_edit(
 
     statement = (
         select(UserModel)
-        .where(UserModel.id == uuid.UUID(member_id))
+        .where(UserModel.id == member_id)
         .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
     )
     member_data = session.exec(statement).one_or_none()
