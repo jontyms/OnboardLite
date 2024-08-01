@@ -105,7 +105,10 @@ class Approve:
                     creds = {"username": None, "password": None}
 
                 # Assign the Dues-Paying Member role
-                Discord.assign_role(discord_id, Settings().discord.member_role)
+                try:
+                    Discord.assign_role(discord_id, Settings().discord.member_role)
+                except:
+                    logger.exception("Failed to assign role")
 
                 # Send Discord message saying they are a member
                 welcome_msg = f"""Hello {user_data.first_name}, and welcome to Hack@UCF!
@@ -126,9 +129,13 @@ By using the Hack@UCF Infrastructure, you agree to the Acceptable Use Policy loc
 Happy Hacking,
   - Hack@UCF Bot
             """
-
-                Discord.send_message(discord_id, welcome_msg)
-                Email.send_email("Welcome to Hack@UCF", welcome_msg, user_data.email)
+                try:
+                    Discord.send_message(discord_id, welcome_msg)
+                    Email.send_email(
+                        "Welcome to Hack@UCF", welcome_msg, user_data.email
+                    )
+                except Exception:
+                    logger.exception("Failed to send welcome message")
                 # Set member as a "full" member.
                 user_data.is_full_member = True
                 session.add(user_data)
