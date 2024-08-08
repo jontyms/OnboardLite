@@ -408,7 +408,7 @@ async def aapl_gen(
 ):
     statement = (
         select(UserModel)
-        .where(UserModel.id == user_jwt["id"])
+        .where(UserModel.id == uuid.UUID(user_jwt["id"]))
         .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
     )
     user_data = user_to_dict(session.exec(statement).one_or_none())
@@ -434,7 +434,7 @@ async def google_gen(
         return Errors.generate()
     statement = (
         select(UserModel)
-        .where(UserModel.id == user_jwt["id"])
+        .where(UserModel.id == uuid.UUID(user_jwt["id"]))
         .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
     )
     issuer_id = Settings().google_wallet.issuer_id
