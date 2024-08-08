@@ -127,24 +127,6 @@
                 </div>
             {% endif %}
 
-            {% if user_data.get('mentee', {}).get('time_in_cyber', None) %}
-                <div class="entry">
-                    <div>
-                        <h3>Your Mentor</h3>
-                        <div>You have applied to our mentorship program. If you have a mentor assigned, they will be listed below.</div>
-                    </div>
-                    <div>{{ user_data.get('mentor_name', "Not Assigned") }}</div>
-                </div>
-            {% elif user_data.get('is_full_member', False) %}
-            <div class="entry">
-                    <div>
-                        <h3>Mentorship Program</h3>
-                        <div>You did not apply to our mentorship program. If you wish to, click the link to join.</div>
-                    </div>
-                    <div><a target="_blank" href="/join/mentee/">Join Mentorship Program</a></div>
-                </div>
-            {% endif %}
-
             <h1>Demography</h1>
             <div class="entry">
                 <h3>Gender</h3>
