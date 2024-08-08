@@ -53,6 +53,18 @@ logger = logging.getLogger(__name__)
 # Initiate FastAPI.
 app = FastAPI()
 templates = Jinja2Templates(directory="app/templates")
+
+
+def global_context(request: Request):
+    return {
+        "sentry_url": Settings().telemetry.url if Settings().telemetry.enable else None,
+        "request": request,
+    }
+
+
+# Register the context processor with Jinja2
+templates.env.globals.update(global_context=global_context)
+
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 if Settings().telemetry.enable:
@@ -60,11 +72,11 @@ if Settings().telemetry.enable:
         dsn=Settings().telemetry.url,
         # Set traces_sample_rate to 1.0 to capture 100%
         # of transactions for performance monitoring.
-        traces_sample_rate=1.0,
+        traces_sample_rate=0.3,
         # Set profiles_sample_rate to 1.0 to profile 100%
         # of sampled transactions.
         # We recommend adjusting this value in production.
-        profiles_sample_rate=1.0,
+        profiles_sample_rate=0.3,
         environment=Settings().telemetry.env,
     )
 

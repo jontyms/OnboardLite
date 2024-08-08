@@ -229,6 +229,10 @@ function submit_and_nav(target_url) {
     });
 }
 
+function nav_to(target_url) {
+  window.location.href = target_url;
+}
+
 function resetInfra() {
   var confirmation = confirm(
     "Are you sure you want to delete your account? If you just need a password reset create a thread in #infra-helpdesk on Discord. THIS WILL DELETE ALL THE DATA ASSOCIATED WITH YOUR ACCOUNT.",
