@@ -1,5 +1,5 @@
 pre-commit==3.8.0
-semgrep==1.78.0
+semgrep==1.84.1
 virtualenv==20.26.3
 httpx
 pytest
