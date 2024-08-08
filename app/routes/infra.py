@@ -53,9 +53,12 @@ async def download_file(
     An endpoint to Download OpenVPN profile
     """
     # Replace 'path/to/your/file.txt' with the actual path to your file
-    file_path = "../HackUCF.ovpn"
+    file_path = "./HackUCF.ovpn"
     if not Path(file_path).exists():
         ## Return 500 ISE
+        logger.error(
+            "HackUCF OpenVPN Config Not Found at " + str(Path(file_path).resolve())
+        )
         raise ERR_VPN_CONFIG_NOT_FOUND
     else:
         return FileResponse(
