@@ -78,6 +78,7 @@ async def create_checkout_session(
     ).one_or_none()
     if not user_data.email:
         return Errors.generate(request, 400, "No email associated with account")
+    user_id = user_data.id
     try:
         stripe_email = user_data.email
         checkout_session = stripe.checkout.Session.create(
@@ -92,6 +93,7 @@ async def create_checkout_session(
             mode="payment",
             success_url=Settings().stripe.url_success,
             cancel_url=Settings().stripe.url_failure,
+            metadata={"user_id": str(user_id)},
         )
     except Exception as e:
         logger.exception("Error creating checkout session in stripe.py", e)
