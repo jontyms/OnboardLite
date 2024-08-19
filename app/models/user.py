@@ -44,6 +44,7 @@ class UserModel(SQLModel, table=True):
     nid: Optional[str] = Field(unique=True, default=None)
     ops_email: Optional[str] = None
     infra_email: Optional[str] = None
+    ucf_student: Optional[bool] = True
     minecraft: Optional[str] = ""
     github: Optional[str] = ""
     first_name: Optional[str] = ""

@@ -63,19 +63,23 @@
                 <h3>NID</h3>
                 <div>{{ user_data.get('nid', 'Unknown') }}</div>
             </div>
+            {% if user_data.get('ucf_id', False) %}
             <div class="entry">
                 <h3>UCF ID</h3>
                 <div>{{ user_data.get('ucf_id') if user_data.get('ucf_id', False) else 'Not Collected' }}</div>
             </div>
+            {% endif %}
             <div class="entry">
                 <h3>Minecraft Username</h3>
                 <div>{{ user_data.get('minecraft', 'Not Collected') }}</div>
             </div>
-
+            {% if user_data.get('github', False) %}
             <div class="entry">
                 <h3>GitHub Username</h3>
                 <div>{{ user_data.get('github', 'Not Collected') }}</div>
             </div>
+            {% endif %}
+
 
             <h1>Membership Status</h1>
             <div class="entry">

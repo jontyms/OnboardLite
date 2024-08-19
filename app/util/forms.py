@@ -43,6 +43,8 @@ def fuzzy_parse_value(value):
             return False
         if "i promise not" in value_test:
             return True
+        if "i have read the terms and agree to them" in value_test:
+            return True
 
     # Convert other types as needed
 
