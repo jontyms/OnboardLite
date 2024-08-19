@@ -1,116 +1,125 @@
 [
-    {
-        "label": "Your Personal Information",
-        "input": "h1",
-        "elements": [
-            {
-                "label": "First Name",
-                "caption": "Your (preferred) first name.",
-                "input": "text",
-                "key": "first_name",
-                "required": true
-            },
-            {
-                "label": "Surname",
-                "caption": "The rest of your name, including middle name if you have one.",
-                "input": "text",
-                "key": "surname"
-            },
-            {
-                "label": "Preferred Email",
-                "caption": "We’ll use this to reach out to you if we need to.",
-                "input": "email",
-                "key": "email",
-                "required": true
-            },
-            {
-                "label": "NID",
-                "caption": "This is the UCF identifier with two letters and six numbers. It's in your school email!",
-                "input": "nid",
-                "key": "nid",
-                "required": true
-            },
-            {
-                "label": "Are You Returning?",
-                "caption": "If so, welcome back! If not, welcome to Hack@UCF!",
-                "input": "radio",
-                "options": ["Yes", "No"],
-                "key": "is_returning",
-                "required": true
-            },
-            {
-                "label": "Minecraft username",
-                "caption": "If you have a Minecraft account, put your username here to join our members-only Minecraft server.",
-                "input": "text",
-                "key": "minecraft",
-                "required": false
-            }
-        ]
-    },
-    {
-        "label": "Demography",
-        "input": "h2",
-        "elements": [
-            {
-                "label": "Gender",
-                "input": "radio",
-                "options": ["Male", "Female", "Other / Prefer Not To Answer"],
-                "key": "gender",
-                "required": true
-            },
-            {
-                "label": "Major",
-                "input": "dropdown",
-                "other": true,
-                "options": [
-                    "Computer Science",
-                    "Information Technology",
-                    "Computer Engineering",
-                    "Electrical Engineering",
-                    "Digital Forensics",
-                    "Cybersecurity and Privacy"
-                ],
-                "key": "major",
-                "required": true
-            },
-            {
-                "label": "Class Standing",
-                "caption": "(by credit hours)",
-                "input": "dropdown",
-                "other": true,
-                "options": [
-                    "Freshman (0-29 credits)",
-                    "Sophomore (30-59 credits)",
-                    "Junior (60-89 credits)",
-                    "Senior (> 90 credits)",
-                    "Post-Bacc (secondary Bachelors)",
-                    "Master’s",
-                    "PhD"
-                ],
-                "key": "class_standing",
-                "required": true
-            },
-            {
-                "label": "Shirt Size",
-                "caption": "Members get a free Hack@UCF t-shirt thanks to our sponsors!",
-                "input": "radio",
-                "options": ["S", "M", "L", "XL", "2XL", "3XL"],
-                "key": "shirt_size",
-                "required": true
-            },
-            {
-                "label": "Cybersecurity Experience",
-                "caption": "How much do you know about computer security?",
-                "input": "slider",
-                "novice_label": "whats a computer?",
-                "expert_label": "I plead the 5th",
-                "key": "experience"
-            },
-            {
-                "input": "navigation",
-                "next": "/profile/",
-                "next_label": "Save"
-            }
-        ]
-    }
+  {
+    "label": "Your Personal Information",
+    "input": "h1",
+    "elements": [
+      {
+        "label": "First Name",
+        "caption": "Your (preferred) first name.",
+        "input": "text",
+        "key": "first_name",
+        "required": true
+      },
+      {
+        "label": "Surname",
+        "caption": "The rest of your name, including middle name if you have one.",
+        "input": "text",
+        "key": "surname",
+        "required": true
+      },
+      {
+        "label": "Preferred Email",
+        "caption": "We’ll use this to reach out to you if we need to.",
+        "input": "email",
+        "key": "email",
+        "required": true
+      },
+      {
+        "label": "NID",
+        "caption": "This is the UCF identifier with two letters and six numbers. It's in your school email!",
+        "input": "nid",
+        "key": "nid",
+        "required": true
+      },
+      {
+        "label": "Are you a UCF student?",
+        "caption": "Are you currently enrolled at UCF?",
+        "input": "radio",
+        "options": ["Yes", "No"],
+        "key": "ucf_student",
+        "required": true
+      },
+      {
+        "label": "Are You Returning?",
+        "caption": "If so, welcome back! If not, welcome to Hack@UCF!",
+        "input": "radio",
+        "options": ["Yes", "No"],
+        "key": "is_returning",
+        "required": true
+      },
+      {
+        "label": "Minecraft username",
+        "caption": "If you have a Minecraft account, put your username here to join our members-only Minecraft server.",
+        "input": "text",
+        "key": "minecraft",
+        "required": false
+      }
+    ]
+  },
+  {
+    "label": "Demography",
+    "input": "h2",
+    "elements": [
+      {
+        "label": "Gender",
+        "input": "radio",
+        "options": ["Male", "Female", "Other / Prefer Not To Answer"],
+        "key": "gender",
+        "required": true
+      },
+      {
+        "label": "Major",
+        "input": "dropdown",
+        "other": true,
+        "options": [
+          "Computer Science",
+          "Information Technology",
+          "Computer Engineering",
+          "Electrical Engineering",
+          "Digital Forensics",
+          "Cybersecurity and Privacy"
+        ],
+        "key": "major",
+        "required": true
+      },
+      {
+        "label": "Class Standing",
+        "caption": "(by credit hours)",
+        "input": "dropdown",
+        "other": true,
+        "options": [
+          "Freshman (0-29 credits)",
+          "Sophomore (30-59 credits)",
+          "Junior (60-89 credits)",
+          "Senior (> 90 credits)",
+          "Post-Bacc (secondary Bachelors)",
+          "Master’s",
+          "PhD"
+        ],
+        "key": "class_standing",
+        "required": true
+      },
+      {
+        "label": "Shirt Size",
+        "caption": "Members get a free Hack@UCF t-shirt thanks to our sponsors!",
+        "input": "radio",
+        "options": ["S", "M", "L", "XL", "2XL", "3XL"],
+        "key": "shirt_size",
+        "required": true
+      },
+      {
+        "label": "Cybersecurity Experience",
+        "caption": "How much do you know about computer security?",
+        "input": "slider",
+        "novice_label": "whats a computer?",
+        "expert_label": "I plead the 5th",
+        "key": "experience"
+      },
+      {
+        "input": "navigation",
+        "next": "/profile/",
+        "next_label": "Save"
+      }
+    ]
+  }
 ]
