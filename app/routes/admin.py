@@ -63,10 +63,15 @@ async def get_infra(
     """
     API endpoint to FORCE-provision Infra credentials (even without membership!!!)
     """
+
     if member_id == None:
         return {"username": "", "password": "", "error": "Missing ?member_id"}
 
-    creds = Approve.provision_infra(member_id)
+    user_data = session.exec(
+        select(UserModel).where(UserModel.id == member_id)
+    ).one_or_none()
+
+    creds = Approve.provision_infra(member_id, user_data)
     if creds is None:
         creds = {}
 
@@ -74,9 +79,6 @@ async def get_infra(
         return Errors.generate(request, 404, "User Not Found")
 
     # Get user data
-    user_data = session.exec(
-        select(UserModel).where(UserModel.id == uuid.UUID(member_id))
-    ).one_or_none()
 
     # Send DM...
     new_creds_msg = f"""Hello {user_data.first_name},
@@ -111,19 +113,19 @@ Happy Hacking,
 async def get_refresh(
     request: Request,
     token: Optional[str] = Cookie(None),
-    member_id: Optional[str] = "FAIL",
+    member_id: Optional[uuid.UUID] = None,
     session: Session = Depends(get_session),
 ):
     """
     API endpoint that re-runs the member verification workflow
     """
-    if member_id == "FAIL":
+    if member_id == None:
         return {"data": {}, "error": "Missing ?member_id"}
 
-    Approve.approve_member(uuid.UUID(member_id))
+    Approve.approve_member(member_id)
 
     user_data = session.exec(
-        select(UserModel).where(UserModel.id == uuid.UUID(member_id))
+        select(UserModel).where(UserModel.id == member_id)
     ).one_or_none()
 
     if not user_data:
@@ -137,18 +139,18 @@ async def get_refresh(
 async def admin_get_single(
     request: Request,
     token: Optional[str] = Cookie(None),
-    member_id: Optional[str] = "FAIL",
+    member_id: Optional[uuid.UUID] = None,
     session: Session = Depends(get_session),
 ):
     """
     API endpoint that gets a specific user's data as JSON
     """
-    if member_id == "FAIL":
+    if member_id == None:
         return {"data": {}, "error": "Missing ?member_id"}
 
     statement = (
         select(UserModel)
-        .where(UserModel.id == uuid.UUID(user_jwt["id"]))
+        .where(UserModel.id == member_id)
         .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
     )
     user_data = user_to_dict(session.exec(statement).one_or_none())
@@ -199,7 +201,7 @@ async def admin_get_snowflake(
 async def admin_post_discord_message(
     request: Request,
     token: Optional[str] = Cookie(None),
-    member_id: Optional[str] = "FAIL",
+    member_id: Optional[uuid.UUID] = None,
     user_jwt: dict = Body(None),
     session: Session = Depends(get_session),
 ):
@@ -210,7 +212,7 @@ async def admin_post_discord_message(
         return {"data": {}, "error": "Missing ?member_id"}
 
     data = session.exec(
-        select(UserModel).where(UserModel.id == uuid.UUID(member_id))
+        select(UserModel).where(UserModel.id == member_id)
     ).one_or_none()
 
     if not data:
