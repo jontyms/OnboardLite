@@ -364,11 +364,22 @@ def apple_wallet(user_data):
     p.add_to_pass_package(("pass.json", pass_data))
 
     # Add locally stored credentials
-    with open(
-        os.path.join(os.path.dirname(__file__), "..", "config/pki/hackucf.key"), "rb"
-    ) as key, open(
-        os.path.join(os.path.dirname(__file__), "..", "config/pki/hackucf.pem"), "rb"
-    ) as cert:
+    key_path = Settings().apple_wallet.pki_dir / "hackucf.key"
+    cert_path = (
+        Settings().apple_wallet.pki_dir / "hackucf.pem"
+    )  # Assuming a different cert file
+
+    # Check if files exist before opening them
+    if not key_path.exists():
+        logger.error(f"File not found: {key_path}")
+        raise FileNotFoundError(f"File not found: {key_path}")
+
+    if not cert_path.exists():
+        logger.error(f"File not found: {cert_path}")
+        raise FileNotFoundError(f"File not found: {cert_path}")
+
+    # Open the files
+    with key_path.open("rb") as key, cert_path.open("rb") as cert:
         # Add credentials to pass package
         p.key = key.read()
         p.cert = cert.read()

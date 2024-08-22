@@ -344,6 +344,13 @@ class TelemetryConfig(BaseModel):
 telemetry_config = TelemetryConfig(**settings.get("telemetry", {}))
 
 
+class AppleWalletConfig(BaseModel):
+    pki_dir: Optional[pathlib.Path] = Field(None)
+
+
+apple_wallet_config = AppleWalletConfig(**settings.get("apple_wallet", {}))
+
+
 class DatabaseConfig(BaseModel):
     url: str
 
@@ -388,4 +395,5 @@ class Settings(BaseSettings, metaclass=SingletonBaseSettingsMeta):
     keycloak: KeycloakConfig = keycloak_config
     google_wallet: GoogleWalletConfig = google_wallet_config
     telemetry: Optional[TelemetryConfig] = telemetry_config
+    apple_wallet: AppleWalletConfig = apple_wallet_config
     env: Optional[str] = onboard_env
