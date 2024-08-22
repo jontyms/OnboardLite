@@ -23,4 +23,4 @@ jobs:
         run: docker build . --target prod -t onboardlite
 
       - name: Verify Docker image
-        run: docker run --rm onboardlite echo "Docker image built successfully!"
+        run: docker run -e ONBOARD_ENV=dev --rm onboardlite echo "Docker image built successfully!"
