@@ -56,14 +56,14 @@ async def admin(request: Request, token: Optional[str] = Cookie(None)):
 @Authentication.admin
 async def get_infra(
     request: Request,
-    user_jwt: Optional[str] = Cookie(None),
-    member_id: Optional[str] = "FAIL",
+    token: Optional[str] = Cookie(None),
+    member_id: Optional[uuid.UUID] = None,
     session: Session = Depends(get_session),
 ):
     """
     API endpoint to FORCE-provision Infra credentials (even without membership!!!)
     """
-    if member_id == "FAIL":
+    if member_id == None:
         return {"username": "", "password": "", "error": "Missing ?member_id"}
 
     creds = Approve.provision_infra(member_id)
@@ -136,7 +136,7 @@ async def get_refresh(
 @Authentication.admin
 async def admin_get_single(
     request: Request,
-    user_jwt: Optional[str] = Cookie(None),
+    token: Optional[str] = Cookie(None),
     member_id: Optional[str] = "FAIL",
     session: Session = Depends(get_session),
 ):
