@@ -28,7 +28,7 @@ class Approve:
         pass
 
     def provision_infra(member_id: uuid.UUID, user_data):
-        username = user_data.discord.username
+        username = user_data.discord.username[:20]
         password = HorsePass.gen()
         admin = KeycloakAdmin(
             server_url=Settings().keycloak.url,
@@ -160,7 +160,7 @@ If you think you have completed all of these, please reach out to an Exec on the
 We hope to see you soon,
   - Hack@UCF Bot
 """
-                Discord.send_message(discord_id, fail_msg)
+                Discord.send_message(user_data.discord_id, fail_msg)
 
             else:
                 logger.info("\tDid not pay dues yet.")
