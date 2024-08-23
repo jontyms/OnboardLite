@@ -28,7 +28,7 @@ class Approve:
         pass
 
     def provision_infra(member_id: uuid.UUID, user_data):
-        username = user_data.discord.username[:20]
+        username = user_data.discord.username[:20].rstrip(".")
         password = HorsePass.gen()
         admin = KeycloakAdmin(
             server_url=Settings().keycloak.url,
