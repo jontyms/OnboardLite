@@ -188,8 +188,8 @@ async def admin_get_snowflake(
     #        "Items"
     #    )
     #
-    #    if not data:
-    #        return Errors.generate(request, 404, "User Not Found")
+    if not data:
+        return Errors.generate(request, 404, "User Not Found")
 
     # data = data[0]
 
