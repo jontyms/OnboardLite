@@ -39,6 +39,7 @@ class Authentication:
                 )
                 is_admin: bool = user_jwt.get("sudo", False)
                 creation_date: float = user_jwt.get("issued", -1)
+                api_key: bool = user_jwt.get("api_key", False)
             except Exception as e:
                 if isinstance(e, jwt.JWTError) or isinstance(e, jwt.JWTClaimsError):
                     tr = Errors.generate(
@@ -58,15 +59,15 @@ class Authentication:
                     "You are not a sudoer.",
                     essay="If you think this is an error, please try logging in again.",
                 )
-
-            if time.time() > creation_date + Settings().jwt.lifetime_sudo:
-                return Errors.generate(
-                    request,
-                    403,
-                    "Session not new enough to verify sudo status.",
-                    essay="Unlike normal log-in, non-bot sudoer sessions only last a day. This is to ensure the security of Hack@UCF member PII. "
-                    "Simply re-log into Onboard to continue.",
-                )
+            if not api_key:
+                if time.time() > creation_date + Settings().jwt.lifetime_sudo:
+                    return Errors.generate(
+                        request,
+                        403,
+                        "Session not new enough to verify sudo status.",
+                        essay="Unlike normal log-in, non-bot sudoer sessions only last a day. This is to ensure the security of Hack@UCF member PII. "
+                        "Simply re-log into Onboard to continue.",
+                    )
 
             return await func(request, token, *args, **kwargs)
 
