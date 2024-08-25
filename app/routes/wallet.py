@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2024 Collegiate Cyber Defense Club
 import json
 import logging
 import os
@@ -24,16 +26,12 @@ from app.util.settings import Settings
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(
-    prefix="/wallet", tags=["API", "MobileWallet"], responses=Errors.basic_http()
-)
+router = APIRouter(prefix="/wallet", tags=["API", "MobileWallet"], responses=Errors.basic_http())
 
 
 class GoogleWallet:
     def __init__(self):
-        self.auth_dict = json.loads(
-            Settings().google_wallet.auth_json.get_secret_value()
-        )
+        self.auth_dict = json.loads(Settings().google_wallet.auth_json.get_secret_value())
         # Set up authenticated client
         self.auth()
 
@@ -50,9 +48,7 @@ class GoogleWallet:
         self.client = build("walletobjects", "v1", credentials=self.credentials)
 
     # [END auth]
-    def create_object(
-        self, issuer_id: str, class_suffix: str, user_data: UserModel
-    ) -> str:
+    def create_object(self, issuer_id: str, class_suffix: str, user_data: UserModel) -> str:
         """Create an object.
 
         Args:
@@ -66,9 +62,7 @@ class GoogleWallet:
         user_id = str(user_data.id)
         # Check if the object exists
         try:
-            self.client.loyaltyobject().get(
-                resourceId=f"{issuer_id}.{user_data.id}"
-            ).execute()
+            self.client.loyaltyobject().get(resourceId=f"{issuer_id}.{user_data.id}").execute()
         except HttpError as e:
             if e.status_code != 404:
                 # Something else went wrong...
@@ -103,9 +97,7 @@ class GoogleWallet:
                     }
                 },
             },
-            "cardTitle": {
-                "defaultValue": {"language": "en-US", "value": "Hack@UCF Membership ID"}
-            },
+            "cardTitle": {"defaultValue": {"language": "en-US", "value": "Hack@UCF Membership ID"}},
             "subheader": {"defaultValue": {"language": "en-US", "value": "Name "}},
             "header": {
                 "defaultValue": {
@@ -166,9 +158,7 @@ class GoogleWallet:
         # Note: Make sure to replace the placeholder class and object suffixes
         objects_to_add = {
             # Loyalty cards
-            "genericObjects": [
-                {"id": f"{issuer_id}.{user_id}", "classId": f"{issuer_id}.{class_id}"}
-            ],
+            "genericObjects": [{"id": f"{issuer_id}.{user_id}", "classId": f"{issuer_id}.{class_id}"}],
         }
 
         # Create the JWT claims
@@ -216,18 +206,14 @@ def apple_wallet(user_data):
 
     # Add locally stored assets
     with open(
-        os.path.join(
-            os.path.dirname(__file__), "..", "static", "apple_wallet", "icon.png"
-        ),
+        os.path.join(os.path.dirname(__file__), "..", "static", "apple_wallet", "icon.png"),
         "rb",
     ) as file:
         ico_data = file.read()
         p.add_to_pass_package(("icon.png", ico_data))
 
     with open(
-        os.path.join(
-            os.path.dirname(__file__), "..", "static", "apple_wallet", "icon@2x.png"
-        ),
+        os.path.join(os.path.dirname(__file__), "..", "static", "apple_wallet", "icon@2x.png"),
         "rb",
     ) as file:
         ico_data = file.read()
@@ -264,9 +250,7 @@ def apple_wallet(user_data):
                 {
                     "label": "Name",
                     "key": "name",
-                    "value": user_data.get("first_name", "")
-                    + " "
-                    + user_data.get("surname", ""),
+                    "value": user_data.get("first_name", "") + " " + user_data.get("surname", ""),
                 }
             ],
             "secondaryFields": [
@@ -365,9 +349,7 @@ def apple_wallet(user_data):
 
     # Add locally stored credentials
     key_path = Settings().apple_wallet.pki_dir / "hackucf.key"
-    cert_path = (
-        Settings().apple_wallet.pki_dir / "hackucf.pem"
-    )  # Assuming a different cert file
+    cert_path = Settings().apple_wallet.pki_dir / "hackucf.pem"  # Assuming a different cert file
 
     # Check if files exist before opening them
     if not key_path.exists():
@@ -417,11 +399,7 @@ async def aapl_gen(
     user_jwt: Optional[object] = {},
     session=Depends(get_session),
 ):
-    statement = (
-        select(UserModel)
-        .where(UserModel.id == uuid.UUID(user_jwt["id"]))
-        .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
-    )
+    statement = select(UserModel).where(UserModel.id == uuid.UUID(user_jwt["id"])).options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
     user_data = user_to_dict(session.exec(statement).one_or_none())
 
     p = apple_wallet(user_data)
@@ -443,11 +421,7 @@ async def google_gen(
 ):
     if not Settings().google_wallet.enable:
         return Errors.generate()
-    statement = (
-        select(UserModel)
-        .where(UserModel.id == uuid.UUID(user_jwt["id"]))
-        .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
-    )
+    statement = select(UserModel).where(UserModel.id == uuid.UUID(user_jwt["id"])).options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
     issuer_id = Settings().google_wallet.issuer_id
     class_suffix = Settings().google_wallet.class_suffix
     user_data = session.exec(statement).one_or_none()

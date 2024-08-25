@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2024 Collegiate Cyber Defense Club
 import json
 import logging
 
@@ -26,9 +28,7 @@ class Discord:
     def assign_role(discord_id, role_id):
         if not Settings().discord.enable:
             return
-        logger.info(
-            f"Assigning role {role_id} to {discord_id}, on guild {Settings().discord.guild_id}"
-        )
+        logger.info(f"Assigning role {role_id} to {discord_id}, on guild {Settings().discord.guild_id}")
         discord_id = str(discord_id)
 
         req = requests.put(

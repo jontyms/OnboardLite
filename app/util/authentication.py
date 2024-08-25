@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2024 Collegiate Cyber Defense Club
 import time
 import uuid
 from functools import wraps
@@ -65,8 +67,7 @@ class Authentication:
                         request,
                         403,
                         "Session not new enough to verify sudo status.",
-                        essay="Unlike normal log-in, non-bot sudoer sessions only last a day. This is to ensure the security of Hack@UCF member PII. "
-                        "Simply re-log into Onboard to continue.",
+                        essay="Unlike normal log-in, non-bot sudoer sessions only last a day. This is to ensure the security of Hack@UCF member PII. " "Simply re-log into Onboard to continue.",
                     )
 
             return await func(request, token, *args, **kwargs)

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2024 Collegiate Cyber Defense Club
 import logging
 from pathlib import Path
 from typing import Optional
@@ -37,9 +39,7 @@ async def get_root():
     )
 
 
-ERR_VPN_CONFIG_NOT_FOUND = HTTPException(
-    status_code=500, detail="HackUCF OpenVPN Config Not Found"
-)
+ERR_VPN_CONFIG_NOT_FOUND = HTTPException(status_code=500, detail="HackUCF OpenVPN Config Not Found")
 
 
 @router.get("/openvpn")
@@ -56,11 +56,7 @@ async def download_file(
     file_path = "./HackUCF.ovpn"
     if not Path(file_path).exists():
         ## Return 500 ISE
-        logger.error(
-            "HackUCF OpenVPN Config Not Found at " + str(Path(file_path).resolve())
-        )
+        logger.error("HackUCF OpenVPN Config Not Found at " + str(Path(file_path).resolve()))
         raise ERR_VPN_CONFIG_NOT_FOUND
     else:
-        return FileResponse(
-            file_path, filename="HackUCF.ovpn", media_type="application/octet-stream"
-        )
+        return FileResponse(file_path, filename="HackUCF.ovpn", media_type="application/octet-stream")

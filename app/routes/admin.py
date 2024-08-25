@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2024 Collegiate Cyber Defense Club
 import logging
 import uuid
 from typing import Optional
@@ -67,9 +69,7 @@ async def get_infra(
     if member_id == None:
         return {"username": "", "password": "", "error": "Missing ?member_id"}
 
-    user_data = session.exec(
-        select(UserModel).where(UserModel.id == member_id)
-    ).one_or_none()
+    user_data = session.exec(select(UserModel).where(UserModel.id == member_id)).one_or_none()
 
     creds = Approve.provision_infra(member_id, user_data)
     if creds is None:
@@ -102,9 +102,7 @@ Happy Hacking,
 
     # Send Discord message
     # Discord.send_message(user_data.get("discord_id"), new_creds_msg)
-    Email.send_email(
-        "Hack@UCF Private Cloud Credentials", new_creds_msg, user_data.email
-    )
+    Email.send_email("Hack@UCF Private Cloud Credentials", new_creds_msg, user_data.email)
     return {"username": creds.get("username"), "password": creds.get("password")}
 
 
@@ -124,9 +122,7 @@ async def get_refresh(
 
     Approve.approve_member(member_id)
 
-    user_data = session.exec(
-        select(UserModel).where(UserModel.id == member_id)
-    ).one_or_none()
+    user_data = session.exec(select(UserModel).where(UserModel.id == member_id)).one_or_none()
 
     if not user_data:
         return Errors.generate(request, 404, "User Not Found")
@@ -148,11 +144,7 @@ async def admin_get_single(
     if member_id == None:
         return {"data": {}, "error": "Missing ?member_id"}
 
-    statement = (
-        select(UserModel)
-        .where(UserModel.id == member_id)
-        .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
-    )
+    statement = select(UserModel).where(UserModel.id == member_id).options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
     user_data = user_to_dict(session.exec(statement).one_or_none())
 
     if not user_data:
@@ -176,11 +168,7 @@ async def admin_get_snowflake(
     if discord_id == "FAIL":
         return {"data": {}, "error": "Missing ?discord_id"}
 
-    statement = (
-        select(UserModel)
-        .where(UserModel.discord_id == discord_id)
-        .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
-    )
+    statement = select(UserModel).where(UserModel.discord_id == discord_id).options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
     data = user_to_dict(session.exec(statement).one_or_none())
     # if not data:
     #    # Try a legacy-user-ID search (deprecated, but still neccesary)
@@ -211,9 +199,7 @@ async def admin_post_discord_message(
     if member_id == "FAIL":
         return {"data": {}, "error": "Missing ?member_id"}
 
-    data = session.exec(
-        select(UserModel).where(UserModel.id == member_id)
-    ).one_or_none()
+    data = session.exec(select(UserModel).where(UserModel.id == member_id)).one_or_none()
 
     if not data:
         return Errors.generate(request, 404, "User Not Found")
@@ -241,11 +227,7 @@ async def admin_edit(
     """
     member_id = input_data.id
 
-    statement = (
-        select(UserModel)
-        .where(UserModel.id == member_id)
-        .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
-    )
+    statement = select(UserModel).where(UserModel.id == member_id).options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
     member_data = session.exec(statement).one_or_none()
 
     if not member_data:
@@ -268,9 +250,7 @@ async def admin_list(
     """
     API endpoint that dumps all users as JSON.
     """
-    statement = select(UserModel).options(
-        selectinload(UserModel.discord), selectinload(UserModel.ethics_form)
-    )
+    statement = select(UserModel).options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
     users = session.exec(statement)
     data = []
     for user in users:
@@ -290,12 +270,10 @@ async def admin_list_csv(
     """
     API endpoint that dumps all users as CSV.
     """
-    statement = select(UserModel).options(
-        selectinload(UserModel.discord), selectinload(UserModel.ethics_form)
-    )
+    statement = select(UserModel).options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
     data = user_to_dict(session.exec(statement))
 
-    output = "Membership ID, First Name, Last Name, NID, Is Returning, Gender, Major, Class Standing, Shirt Size, Discord Username, Experience, Cyber Interests, Event Interest, Is C3 Interest, Comments, Ethics Form Timestamp, Minecraft, Infra Email\n"
+    output = "Membership ID, First Name, Last Name, NID, Is Returning, Gender, Major, Class Standing, Shirt Size, Discord Username, Experience, Cyber Interests, Event Interest, Is C3 Interest, Comments, Ethics Form Timestamp, Minecraft, Infra Email"
     for user in data:
         output += f'"{user.get("id")}", '
         output += f'"{user.get("first_name")}", '
@@ -316,6 +294,6 @@ async def admin_list_csv(
 
         output += f'"{user.get("ethics_form", {}).get("signtime")}", '
         output += f'"{user.get("minecraft")}", '
-        output += f'"{user.get("infra_email")}"\n'
+        output += f'"{user.get("infra_email")}"'
 
     return Response(content=output, headers={"Content-Type": "text/csv"})

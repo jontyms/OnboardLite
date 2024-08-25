@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2024 Collegiate Cyber Defense Club
 import re
 import uuid
 from typing import Any, Optional
@@ -163,11 +165,7 @@ def user_to_dict(model):
         for key, value in model.__dict__.items():
             if isinstance(value, (SQLModel, BaseModel)):
                 data[key] = user_to_dict(value)
-            elif (
-                isinstance(value, list)
-                and value
-                and isinstance(value[0], (SQLModel, BaseModel))
-            ):
+            elif isinstance(value, list) and value and isinstance(value[0], (SQLModel, BaseModel)):
                 data[key] = user_to_dict(value)
         return data
 

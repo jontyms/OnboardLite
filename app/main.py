@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2024 Collegiate Cyber Defense Club
 import logging
 import uuid
 from typing import Optional
@@ -167,9 +169,7 @@ async def oauth_transformer(redir: str = "/join/2"):
         redirect_uri=Settings().discord.redirect_base + "_redir",
         scope=Settings().discord.scope,
     )
-    authorization_url, state = oauth.authorization_url(
-        "https://discord.com/api/oauth2/authorize"
-    )
+    authorization_url, state = oauth.authorization_url("https://discord.com/api/oauth2/authorize")
 
     rr = RedirectResponse(authorization_url, status_code=302)
 
@@ -320,19 +320,13 @@ async def profile(
     user_jwt: Optional[object] = {},
     session: Session = Depends(get_session),
 ):
-    statement = (
-        select(UserModel)
-        .where(UserModel.id == uuid.UUID(user_jwt["id"]))
-        .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
-    )
+    statement = select(UserModel).where(UserModel.id == uuid.UUID(user_jwt["id"])).options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
     user_data = user_to_dict(session.exec(statement).one_or_none())
 
     # Re-run approval workflow.
     Approve.approve_member(uuid.UUID(user_jwt.get("id")))
 
-    return templates.TemplateResponse(
-        "profile.html", {"request": request, "user_data": user_data}
-    )
+    return templates.TemplateResponse("profile.html", {"request": request, "user_data": user_data})
 
 
 """
@@ -363,11 +357,7 @@ async def forms(
 
     # Get data from SqlModel
 
-    statement = (
-        select(UserModel)
-        .where(UserModel.id == uuid.UUID(user_jwt.get("id")))
-        .options(selectinload(UserModel.discord))
-    )
+    statement = select(UserModel).where(UserModel.id == uuid.UUID(user_jwt.get("id"))).options(selectinload(UserModel.discord))
     user_data = session.exec(statement).one_or_none()
     # Have Kennelish parse the data.
     user_data = user_to_dict(user_data)

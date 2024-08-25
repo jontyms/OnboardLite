@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2024 Collegiate Cyber Defense Club
 import logging
 import uuid
 
@@ -65,13 +67,7 @@ class Approve:
     def approve_member(member_id: uuid.UUID):
         with Session(engine) as session:
             logger.info(f"Re-running approval for {str(member_id)}")
-            statement = (
-                select(UserModel)
-                .where(UserModel.id == member_id)
-                .options(
-                    selectinload(UserModel.discord), selectinload(UserModel.ethics_form)
-                )
-            )
+            statement = select(UserModel).where(UserModel.id == member_id).options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
 
             result = session.exec(statement)
             user_data = result.one_or_none()
@@ -79,7 +75,7 @@ class Approve:
                 raise Exception("User not found.")
             # If a member was already approved, kill process.
             if user_data.is_full_member:
-                logger.info("\tAlready full member.")
+                logger.info("	Already full member.")
                 return True
 
             # Sorry for the long if statement. But we consider someone a "member" iff:
@@ -87,13 +83,8 @@ class Approve:
             # - We have their Discord snowflake
             # - They paid dues
             # - They signed their ethics form
-            if (
-                user_data.first_name
-                and user_data.discord_id
-                and user_data.did_pay_dues
-                and user_data.ethics_form.signtime != 0
-            ):
-                logger.info("\tNewly-promoted full member!")
+            if user_data.first_name and user_data.discord_id and user_data.did_pay_dues and user_data.ethics_form.signtime != 0:
+                logger.info("	Newly-promoted full member!")
 
                 discord_id = user_data.discord_id
 
@@ -131,9 +122,7 @@ Happy Hacking,
             """
                 try:
                     Discord.send_message(discord_id, welcome_msg)
-                    Email.send_email(
-                        "Welcome to Hack@UCF", welcome_msg, user_data.email
-                    )
+                    Email.send_email("Welcome to Hack@UCF", welcome_msg, user_data.email)
                 except Exception:
                     logger.exception("Failed to send welcome message")
                 # Set member as a "full" member.
@@ -143,7 +132,7 @@ Happy Hacking,
                 session.refresh(user_data)
 
             elif user_data.did_pay_dues:
-                logger.info("\tPaid dues but did not do other step!")
+                logger.info("	Paid dues but did not do other step!")
                 # Send a message on why this check failed.
                 fail_msg = f"""Hello {user_data.first_name},
 
@@ -163,6 +152,6 @@ We hope to see you soon,
                 Discord.send_message(user_data.discord_id, fail_msg)
 
             else:
-                logger.info("\tDid not pay dues yet.")
+                logger.info("	Did not pay dues yet.")
 
         return False

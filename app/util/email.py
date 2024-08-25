@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2024 Collegiate Cyber Defense Club
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText

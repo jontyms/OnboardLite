@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2024 Collegiate Cyber Defense Club
 import json
 import logging
 import os
@@ -33,9 +35,7 @@ def BitwardenConfig(settings: dict):
             raise ValueError("Invalid project id")
         command = ["bws", "secret", "list", project_id, "--output", "json"]
         env_vars = os.environ.copy()
-        bitwarden_raw = subprocess.run(
-            command, text=True, env=env_vars, capture_output=True
-        ).stdout
+        bitwarden_raw = subprocess.run(command, text=True, env=env_vars, capture_output=True).stdout
     except Exception as e:
         logger.exception(e)
         raise e
@@ -178,9 +178,7 @@ class StripeConfig(BaseModel):
             ]
             for field in required_fields:
                 if getattr(values, field) is None:
-                    raise ValueError(
-                        f"Stripe {field} is required when pause_payments is True"
-                    )
+                    raise ValueError(f"Stripe {field} is required when pause_payments is True")
         return values
 
 
@@ -213,9 +211,7 @@ class GoogleWalletConfig(BaseModel):
             ]
             for field in required_fields:
                 if getattr(values, field) is None:
-                    raise ValueError(
-                        f"Google Wallet {field} is required when pause_payments is True"
-                    )
+                    raise ValueError(f"Google Wallet {field} is required when pause_payments is True")
         return values
 
 
@@ -321,9 +317,7 @@ class KeycloakConfig(BaseModel):
             required_fields = ["username", "password", "url", "realm"]
             for field in required_fields:
                 if getattr(values, field) is None:
-                    raise ValueError(
-                        f"Keycloak {field} is required when enable is True"
-                    )
+                    raise ValueError(f"Keycloak {field} is required when enable is True")
         return values
 
 

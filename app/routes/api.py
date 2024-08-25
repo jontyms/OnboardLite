@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2024 Collegiate Cyber Defense Club
 import json
 import logging
 import uuid
@@ -155,11 +157,7 @@ async def post_form(
     # Transform the dictionary
     validated_data = transform_dict(validated_data)
 
-    statement = (
-        select(UserModel)
-        .where(UserModel.id == uuid.UUID(user_jwt["id"]))
-        .options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
-    )
+    statement = select(UserModel).where(UserModel.id == uuid.UUID(user_jwt["id"])).options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
     result = session.exec(statement)
     user = result.one_or_none()
 
@@ -175,9 +173,7 @@ async def post_form(
     except IntegrityError as e:
         logger.error(e)
         session.rollback()
-        raise HTTPException(
-            status_code=422, detail=("Integrity Error. " + str(e).split("\n")[0])
-        )
+        raise HTTPException(status_code=422, detail=("Integrity Error. " + str(e).split("")[0]))
     session.refresh(user)
 
     return user.model_dump()

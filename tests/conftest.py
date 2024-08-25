@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2024 Collegiate Cyber Defense Club
 import os
 import uuid
 
@@ -14,9 +16,7 @@ from app.util.authentication import Authentication
 @pytest.fixture(name="engine")
 def engine_fixture():
     url = f"sqlite://"
-    engine = create_engine(
-        url, connect_args={"check_same_thread": False}, poolclass=StaticPool
-    )
+    engine = create_engine(url, connect_args={"check_same_thread": False}, poolclass=StaticPool)
     SQLModel.metadata.create_all(engine)
     return engine
 

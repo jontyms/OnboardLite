@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2024 Collegiate Cyber Defense Club
 import logging
 from typing import Literal
 
@@ -93,9 +95,7 @@ class Kennelish:
         if inp_type == "email" and entry.get("domain", False):
             regex_pattern = ' pattern="([A-Za-z0-9.-_+]+)@' + entry.get("domain") + '"'
         elif inp_type == "email":
-            regex_pattern = (
-                ' pattern="([A-Za-z0-9.-_+]+)@[A-Za-z0-9-]+(.[A-Za-z-]{2,})"'
-            )
+            regex_pattern = ' pattern="([A-Za-z0-9.-_+]+)@[A-Za-z0-9-]+(.[A-Za-z-]{2,})"'
         elif inp_type == "nid":
             regex_pattern = ' pattern="^([a-z]{2}[0-9]{6})$"'
 
@@ -218,9 +218,7 @@ class Transformer:
                 obj = {**obj, **Transformer.kennelish_to_form(el.get("elements"))}
 
             # For when a choice is REQUIRED.
-            elif element_type == "radio" or (
-                element_type == "dropdown" and not el.get("other", True)
-            ):
+            elif element_type == "radio" or (element_type == "dropdown" and not el.get("other", True)):
                 obj[el.get("key")] = (Literal[tuple(el.get("options"))], None)
 
             # For emails (specified domain)
@@ -231,9 +229,7 @@ class Transformer:
 
             # For emails (any domain)
             elif element_type == "email":
-                regex_constr = constr(
-                    pattern=r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
-                )
+                regex_constr = constr(pattern=r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$")
                 obj[el.get("key")] = (regex_constr, None)
 
             # For NIDs

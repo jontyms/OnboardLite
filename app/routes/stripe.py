@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2024 Collegiate Cyber Defense Club
 import logging
 import uuid
 from typing import Optional
@@ -39,11 +41,7 @@ async def get_root(
     """
     Get API information.
     """
-    statement = (
-        select(UserModel)
-        .where(UserModel.id == uuid.UUID(user_jwt["id"]))
-        .options(selectinload(UserModel.discord))
-    )
+    statement = select(UserModel).where(UserModel.id == uuid.UUID(user_jwt["id"])).options(selectinload(UserModel.discord))
     user_data = session.exec(statement).one_or_none()
     did_pay_dues = user_data.did_pay_dues
 
@@ -73,9 +71,7 @@ async def create_checkout_session(
     if Settings().stripe.pause_payments:
         return Errors.generate(request, 503, "Payments Paused")
 
-    user_data = session.exec(
-        select(UserModel).where(UserModel.id == uuid.UUID(user_jwt.get("id")))
-    ).one_or_none()
+    user_data = session.exec(select(UserModel).where(UserModel.id == uuid.UUID(user_jwt.get("id")))).one_or_none()
     if not user_data.email:
         return Errors.generate(request, 400, "No email associated with account")
     user_id = user_data.id
@@ -140,9 +136,7 @@ async def webhook(request: Request, session: Session = Depends(get_session)):
 def pay_dues(checkout_session, db_session):
     customer_email = checkout_session.get("customer_email")
 
-    user_data = db_session.exec(
-        select(UserModel).where(UserModel.email == customer_email)
-    ).one_or_none()
+    user_data = db_session.exec(select(UserModel).where(UserModel.email == customer_email)).one_or_none()
 
     member_id = user_data.id
 

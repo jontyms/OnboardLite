@@ -40,9 +40,7 @@ def upgrade() -> None:
         sa.Column("class_standing", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column("shirt_size", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column("did_get_shirt", sa.Boolean(), nullable=True),
-        sa.Column(
-            "time_availability", sqlmodel.sql.sqltypes.AutoString(), nullable=True
-        ),
+        sa.Column("time_availability", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column("phone_number", sa.Integer(), nullable=True),
         sa.Column("sudo", sa.Boolean(), nullable=True),
         sa.Column("did_pay_dues", sa.Boolean(), nullable=True),
