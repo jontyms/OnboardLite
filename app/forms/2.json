@@ -30,7 +30,7 @@
       },
       {
         "label": "Are you a UCF student?",
-        "caption": "If you are not a student fill out this form instead <a href='https://hackucf.org/join/non_ucf'>here</a>.",
+        "caption": "If you are not a student fill out this form instead <a href='https://join.hackucf.org/join/non_ucf'>here</a>.",
         "input": "radio",
         "options": ["Yes", "No"],
         "key": "ucf_student",
