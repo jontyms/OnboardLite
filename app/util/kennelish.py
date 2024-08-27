@@ -71,7 +71,7 @@ class Kennelish:
         return output
 
     def signature(entry, user_data=None):
-        output = f"<div name='{entry.get('key')}' class='signature'>By submitting this form, you, {user_data.get('first_name', 'HackUCF Member #' + str(user_data.get('id')))} {user_data.get('surname', '')}, agree to the above terms. This form will be time-stamped.</div>"
+        output = f"<div name='{entry.get('key')}' class='signature'>By submitting this form, you, {user_data.get('first_name', 'HackUCF Member #' + str(user_data.get('id')))} {user_data.get('surname', '')}, agree to the above terms. This form will be time-stamped. By submitting this form, you acknowledge that your submission constitutes a digital signature, which is legally binding and has the same effect as your handwritten signature. This digital signature confirms your consent to the terms and conditions outlined in this document and your agreement to conduct this transaction electronically.</div>"
         return output
 
     def text(entry, user_data=None, inp_type="text"):
