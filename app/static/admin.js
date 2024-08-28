@@ -286,7 +286,9 @@ function editUser(payload) {
     },
   };
   const user_id = payload.id;
-  fetch("/admin/get", options)
+  fetch("/admin/get", options);
+
+  fetch("/admin/get?member_id=" + payload.id)
     .then((data) => {
       return data.json();
     })
