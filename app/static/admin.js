@@ -220,10 +220,12 @@ function showUser(userId) {
 
   // Set buttons up
   document.getElementById("payDues").onclick = (evt) => {
-    editUser({
-      id: user.id,
-      did_pay_dues: true,
-    });
+    if (window.confirm("Are you sure you want to mark this user as paid?")) {
+      editUser({
+        id: user.id,
+        did_pay_dues: true,
+      });
+    }
     setTimeout((evt) => {
       verifyUser(user.id);
     }, 2000);
@@ -250,10 +252,12 @@ function showUser(userId) {
     : "inline-block";
 
   document.getElementById("setAdmin").onclick = (evt) => {
-    editUser({
-      id: user.id,
-      sudo: !user.sudo,
-    });
+    if (window.confirm("Make User Admin?")) {
+      editUser({
+        id: user.id,
+        sudo: !user.sudo,
+      });
+    }
   };
   document.getElementById("adminLabel").innerText = user.sudo
     ? "Revoke Admin"
