@@ -6,7 +6,7 @@ fastapi[standard]==0.112.2
 Jinja2==3.1.4
 passwordgenerator==1.5.1
 pyOpenSSL==22.1.0
-pydantic==2.8.2
+pydantic==2.9.2
 pydantic_settings==2.4.0
 python-dateutil==2.9.0.post0
 python-jose==3.3.0
