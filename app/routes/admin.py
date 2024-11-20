@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2024 Collegiate Cyber Defense Club
+import csv
 import logging
 import uuid
-from typing import Optional
-import csv
 from io import StringIO
+from typing import Optional
 
 from fastapi import APIRouter, Body, Cookie, Depends, Request, Response
 from fastapi.templating import Jinja2Templates
@@ -105,7 +105,10 @@ Happy Hacking,
     # Send Discord message
     # Discord.send_message(user_data.get("discord_id"), new_creds_msg)
     Email.send_email("Hack@UCF Private Cloud Credentials", new_creds_msg, user_data.email)
-    return {"username": creds.get("username"), "password": creds.get("password")}
+    return {
+        "username": creds.get("username"),
+        "password": creds.get("password"),
+    }
 
 
 @router.get("/refresh/")
@@ -261,6 +264,7 @@ async def admin_list(
 
     return {"data": data}
 
+
 @router.get("/csv")
 @Authentication.admin
 async def admin_list_csv(
@@ -271,9 +275,7 @@ async def admin_list_csv(
     """
     API endpoint that dumps all users as CSV.
     """
-    statement = select(UserModel).options(
-        selectinload(UserModel.discord), selectinload(UserModel.ethics_form)
-    )
+    statement = select(UserModel).options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
     data = session.exec(statement)
 
     # Initialize a StringIO object to write CSV data into memory
@@ -288,6 +290,7 @@ async def admin_list_csv(
         "NID",
         "Email",
         "Is Returning",
+        "Is Member",
         "Gender",
         "Major",
         "Class Standing",
@@ -313,6 +316,7 @@ async def admin_list_csv(
             user_dict.get("nid"),
             user_dict.get("email"),
             user_dict.get("is_returning"),
+            user_dict.get("is_full_member"),
             user_dict.get("gender"),
             user_dict.get("major"),
             user_dict.get("class_standing"),
