@@ -3,6 +3,8 @@
 import logging
 import uuid
 from typing import Optional
+import csv
+from io import StringIO
 
 from fastapi import APIRouter, Body, Cookie, Depends, Request, Response
 from fastapi.templating import Jinja2Templates
@@ -259,7 +261,6 @@ async def admin_list(
 
     return {"data": data}
 
-
 @router.get("/csv")
 @Authentication.admin
 async def admin_list_csv(
@@ -270,30 +271,65 @@ async def admin_list_csv(
     """
     API endpoint that dumps all users as CSV.
     """
-    statement = select(UserModel).options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))
-    data = user_to_dict(session.exec(statement))
+    statement = select(UserModel).options(
+        selectinload(UserModel.discord), selectinload(UserModel.ethics_form)
+    )
+    data = session.exec(statement)
 
-    output = "Membership ID, First Name, Last Name, NID, Is Returning, Gender, Major, Class Standing, Shirt Size, Discord Username, Experience, Cyber Interests, Event Interest, Is C3 Interest, Comments, Ethics Form Timestamp, Minecraft, Infra Email"
+    # Initialize a StringIO object to write CSV data into memory
+    output = StringIO()
+    csv_writer = csv.writer(output)
+
+    # Write the header row
+    headers = [
+        "Membership ID",
+        "First Name",
+        "Last Name",
+        "NID",
+        "Email",
+        "Is Returning",
+        "Gender",
+        "Major",
+        "Class Standing",
+        "Shirt Size",
+        "Discord Username",
+        "Experience",
+        "Cyber Interests",
+        "Event Interest",
+        "Is C3 Interest",
+        "Comments",
+        "Ethics Form Timestamp",
+        "Minecraft",
+    ]
+    csv_writer.writerow(headers)
+
+    # Write user data rows
     for user in data:
-        output += f'"{user.get("id")}", '
-        output += f'"{user.get("first_name")}", '
-        output += f'"{user.get("surname")}", '
-        output += f'"{user.get("nid")}", '
-        output += f'"{user.get("is_returning")}", '
-        output += f'"{user.get("gender")}", '
-        output += f'"{user.get("major")}", '
-        output += f'"{user.get("class_standing")}", '
-        output += f'"{user.get("shirt_size")}", '
-        output += f'"{user.get("discord", {}).get("username")}", '
-        output += f'"{user.get("experience")}", '
-        output += f'"{user.get("curiosity")}", '
-        output += f'"{user.get("attending")}", '
-        output += f'"{user.get("c3_interest")}", '
+        user_dict = user_to_dict(user)
+        row = [
+            user_dict.get("id"),
+            user_dict.get("first_name"),
+            user_dict.get("surname"),
+            user_dict.get("nid"),
+            user_dict.get("email"),
+            user_dict.get("is_returning"),
+            user_dict.get("gender"),
+            user_dict.get("major"),
+            user_dict.get("class_standing"),
+            user_dict.get("shirt_size"),
+            user_dict.get("discord", {}).get("username"),
+            user_dict.get("experience"),
+            user_dict.get("curiosity"),
+            user_dict.get("attending"),
+            user_dict.get("c3_interest"),
+            user_dict.get("comments"),
+            user_dict.get("ethics_form", {}).get("signtime"),
+            user_dict.get("minecraft"),
+        ]
+        csv_writer.writerow(row)
 
-        output += f'"{user.get("comments")}", '
+    # Retrieve CSV content from StringIO and return as response
+    csv_content = output.getvalue()
+    output.close()
 
-        output += f'"{user.get("ethics_form", {}).get("signtime")}", '
-        output += f'"{user.get("minecraft")}", '
-        output += f'"{user.get("infra_email")}"'
-
-    return Response(content=output, headers={"Content-Type": "text/csv"})
+    return Response(content=csv_content, headers={"Content-Type": "text/csv"})
