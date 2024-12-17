@@ -17,7 +17,7 @@ stripe==11.3.0
 typing_extensions==4.12.2
 uvicorn==0.34.0
 python-keycloak==4.7.2
-sentry_sdk==2.18.0
+sentry_sdk==2.19.2
 sqlmodel==0.0.22
 alembic==1.14.0
 google-api-python-client
