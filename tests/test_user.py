@@ -2,7 +2,6 @@
 # Copyright (c) 2024 Collegiate Cyber Defense Club
 from unittest.mock import patch
 
-import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 

@@ -5,7 +5,6 @@ import uuid
 
 from keycloak import KeycloakAdmin
 from sqlalchemy.orm import selectinload
-from sqlalchemy.types import UUID
 from sqlmodel import Session, select
 
 from app.models.user import UserModel

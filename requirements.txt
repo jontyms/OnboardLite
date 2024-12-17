@@ -7,7 +7,7 @@ passwordgenerator==1.5.1
 pydantic==2.10.3
 pydantic_settings==2.6.1
 python-dateutil==2.9.0.post0
-python-jose==3.3.0
+joserfc==1.0.1
 PyYAML==6.0.2
 requests==2.32.3
 requests-oauthlib==2.0.0
@@ -18,5 +18,5 @@ python-keycloak==4.7.3
 sentry_sdk==2.19.2
 sqlmodel==0.0.22
 alembic==1.14.0
-google-api-python-client
-google-auth
+google-api-python-client==2.155.0
+google-auth==2.37.0

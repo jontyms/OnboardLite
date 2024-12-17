@@ -8,9 +8,8 @@ from typing import Optional
 
 from fastapi import APIRouter, Body, Cookie, Depends, Request, Response
 from fastapi.templating import Jinja2Templates
-from jose import jwt
+from joserfc import jwt
 from sqlalchemy.orm import selectinload
-from sqlalchemy.types import UUID
 from sqlmodel import Session, select
 
 from app.models.user import (
@@ -45,6 +44,7 @@ async def admin(request: Request, token: Optional[str] = Cookie(None)):
         Settings().jwt.secret.get_secret_value(),
         algorithms=Settings().jwt.algorithm,
     )
+    payload = payload.claims
     return templates.TemplateResponse(
         "admin_searcher.html",
         {

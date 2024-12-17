@@ -10,13 +10,18 @@ from fastapi import Cookie, Depends, FastAPI, Request, Response, status
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from jose import jwt
+from joserfc import jwt
 from requests_oauthlib import OAuth2Session
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
 # Import data types
-from app.models.user import DiscordModel, EthicsFormModel, UserModel, user_to_dict
+from app.models.user import (
+    DiscordModel,
+    EthicsFormModel,
+    UserModel,
+    user_to_dict,
+)
 
 # Import routes
 from app.routes import admin, api, infra, stripe, wallet

@@ -1,13 +1,12 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2024 Collegiate Cyber Defense Club
 import time
-import uuid
 from functools import wraps
 from typing import Optional
 
 from fastapi import Request, status
 from fastapi.responses import RedirectResponse
-from jose import jwt
+from joserfc import errors, jwt
 
 from app.models.user import UserModel
 
@@ -39,11 +38,12 @@ class Authentication:
                     Settings().jwt.secret.get_secret_value(),
                     algorithms=Settings().jwt.algorithm,
                 )
+                user_jwt = user_jwt.claims
                 is_admin: bool = user_jwt.get("sudo", False)
                 creation_date: float = user_jwt.get("issued", -1)
                 api_key: bool = user_jwt.get("api_key", False)
             except Exception as e:
-                if isinstance(e, jwt.JWTError) or isinstance(e, jwt.JWTClaimsError):
+                if isinstance(e, errors.BadSignatureError):
                     tr = Errors.generate(
                         request,
                         403,
@@ -96,9 +96,10 @@ class Authentication:
                     Settings().jwt.secret.get_secret_value(),
                     algorithms=Settings().jwt.algorithm,
                 )
+                user_jwt = user_jwt.claims
                 creation_date: float = user_jwt.get("issued", -1)
             except Exception as e:
-                if isinstance(e, jwt.JWTError) or isinstance(e, jwt.JWTClaimsError):
+                if isinstance(e, errors.BadSignatureError):
                     tr = Errors.generate(
                         request,
                         403,
@@ -134,8 +135,8 @@ class Authentication:
             "infra_email": user.infra_email,
         }
         bearer = jwt.encode(
+            {"alg": Settings().jwt.algorithm},
             jwtData,
             Settings().jwt.secret.get_secret_value(),
-            algorithm=Settings().jwt.algorithm,
         )
         return bearer

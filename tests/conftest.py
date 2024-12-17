@@ -1,11 +1,10 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2024 Collegiate Cyber Defense Club
-import os
 import uuid
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session, SQLModel, create_engine, inspect
+from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
 
 from app.main import app, get_session
@@ -15,7 +14,7 @@ from app.util.authentication import Authentication
 
 @pytest.fixture(name="engine")
 def engine_fixture():
-    url = f"sqlite://"
+    url = "sqlite://"
     engine = create_engine(url, connect_args={"check_same_thread": False}, poolclass=StaticPool)
     SQLModel.metadata.create_all(engine)
     return engine
