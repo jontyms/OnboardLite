@@ -5,7 +5,7 @@ fastapi[standard]==0.115.6
 Jinja2==3.1.4
 passwordgenerator==1.5.1
 pydantic==2.10.3
-pydantic_settings==2.6.1
+pydantic_settings==2.7.0
 python-dateutil==2.9.0.post0
 joserfc==1.0.1
 PyYAML==6.0.2
