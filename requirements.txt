@@ -18,5 +18,5 @@ python-keycloak==5.1.1
 sentry_sdk==2.19.2
 sqlmodel==0.0.22
 alembic==1.14.0
-google-api-python-client==2.155.0
+google-api-python-client==2.156.0
 google-auth==2.37.0
