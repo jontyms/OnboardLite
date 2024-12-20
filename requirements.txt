@@ -11,7 +11,7 @@ joserfc==1.0.1
 PyYAML==6.0.2
 requests==2.32.3
 requests-oauthlib==2.0.0
-stripe==11.3.0
+stripe==11.4.1
 typing_extensions==4.12.2
 uvicorn==0.34.0
 python-keycloak==5.1.1
