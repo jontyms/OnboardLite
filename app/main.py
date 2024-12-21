@@ -136,6 +136,7 @@ async def index(request: Request, token: Optional[str] = Cookie(None)):
                 Settings().jwt.secret.get_secret_value(),
                 algorithms=Settings().jwt.algorithm,
             )
+            user_jwt = user_jwt.claims
             is_full_member: bool = user_jwt.get("is_full_member", False)
             is_admin: bool = user_jwt.get("sudo", False)
             user_id: bool = user_jwt.get("id", None)
