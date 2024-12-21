@@ -99,14 +99,14 @@
             <div class="entry">
                 <div>
                     <h3>Membership Status?</h3>
-                    <span>Dues-paying members are those who have completed all the neccesary steps to join Hack@UCF.</span>
+                    <span>Dues-paying members are those who have completed all the necessary steps to join Hack@UCF.</span>
                 </div>
                 <div>{{ "Dues-Paying Member" if user_data.get('is_full_member', False) else "Inactive" }}</div>
             </div>
             <div class="entry">
                 <div>
                     <h3>Did Receive T-Shirt?</h3>
-                    <span>If you are a dues-paying member, you are elgible to claim a free t-shirt.</span>
+                    <span>If you are a dues-paying member, you are eligible to claim a free t-shirt.</span>
                 </div>
                 <div>{{ "Yes" if user_data.get('did_get_shirt', False) else "No" }}</div>
             </div>
