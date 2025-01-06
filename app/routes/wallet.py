@@ -26,7 +26,11 @@ from app.util.settings import Settings
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/wallet", tags=["API", "MobileWallet"], responses=Errors.basic_http())
+router = APIRouter(
+    prefix="/wallet",
+    tags=["API", "MobileWallet"],
+    responses=Errors.basic_http(),
+)
 
 
 class GoogleWallet:
@@ -66,7 +70,7 @@ class GoogleWallet:
         except HttpError as e:
             if e.status_code != 404:
                 # Something else went wrong...
-                logger.error("Google Wallet" + e.error_details)
+                logger.error("Google Wallet" + str(e.error_details))
                 return f"{issuer_id}.{user_id}"
         else:
             logger.info(f"Wallet Object {issuer_id}.{user_id} already exists!")
@@ -97,7 +101,12 @@ class GoogleWallet:
                     }
                 },
             },
-            "cardTitle": {"defaultValue": {"language": "en-US", "value": "Hack@UCF Membership ID"}},
+            "cardTitle": {
+                "defaultValue": {
+                    "language": "en-US",
+                    "value": "Hack@UCF Membership ID",
+                }
+            },
             "subheader": {"defaultValue": {"language": "en-US", "value": "Name "}},
             "header": {
                 "defaultValue": {
@@ -120,7 +129,10 @@ class GoogleWallet:
                 "alternateText": user_data.discord.username,
             },
             "locations": [
-                {"latitude": 28.60183940476708, "longitude": -81.19807063116282},
+                {
+                    "latitude": 28.60183940476708,
+                    "longitude": -81.19807063116282,
+                },
             ],
             "accountId": user_id,
             "accountName": str(user_data.first_name) + " " + str(user_data.surname),
@@ -158,7 +170,12 @@ class GoogleWallet:
         # Note: Make sure to replace the placeholder class and object suffixes
         objects_to_add = {
             # Loyalty cards
-            "genericObjects": [{"id": f"{issuer_id}.{user_id}", "classId": f"{issuer_id}.{class_id}"}],
+            "genericObjects": [
+                {
+                    "id": f"{issuer_id}.{user_id}",
+                    "classId": f"{issuer_id}.{class_id}",
+                }
+            ],
         }
 
         # Create the JWT claims
@@ -206,14 +223,26 @@ def apple_wallet(user_data):
 
     # Add locally stored assets
     with open(
-        os.path.join(os.path.dirname(__file__), "..", "static", "apple_wallet", "icon.png"),
+        os.path.join(
+            os.path.dirname(__file__),
+            "..",
+            "static",
+            "apple_wallet",
+            "icon.png",
+        ),
         "rb",
     ) as file:
         ico_data = file.read()
         p.add_to_pass_package(("icon.png", ico_data))
 
     with open(
-        os.path.join(os.path.dirname(__file__), "..", "static", "apple_wallet", "icon@2x.png"),
+        os.path.join(
+            os.path.dirname(__file__),
+            "..",
+            "static",
+            "apple_wallet",
+            "icon@2x.png",
+        ),
         "rb",
     ) as file:
         ico_data = file.read()
