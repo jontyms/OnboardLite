@@ -7,13 +7,13 @@ import uuid
 from typing import Optional
 
 import requests
-from airpress import PKPass
 from fastapi import APIRouter, Cookie, Depends, Request, Response
 from fastapi.responses import RedirectResponse
 from google.auth import crypt, jwt
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from neo_airpress import PKPass
 from sqlalchemy.orm import selectinload
 from sqlmodel import select
 
@@ -378,7 +378,8 @@ def apple_wallet(user_data):
 
     # Add locally stored credentials
     key_path = Settings().apple_wallet.pki_dir / "hackucf.key"
-    cert_path = Settings().apple_wallet.pki_dir / "hackucf.pem"  # Assuming a different cert file
+    cert_path = Settings().apple_wallet.pki_dir / "hackucf.pem"
+    wwdr_path = Settings().apple_wallet.pki_dir / "wwdr.pem"
 
     # Check if files exist before opening them
     if not key_path.exists():
@@ -389,15 +390,19 @@ def apple_wallet(user_data):
         logger.error(f"File not found: {cert_path}")
         raise FileNotFoundError(f"File not found: {cert_path}")
 
+    if not wwdr_path.exists():
+        logger.error(f"File not found: {cert_path}")
+        raise FileNotFoundError(f"File not found: {cert_path}")
+
     # Open the files
-    with key_path.open("rb") as key, cert_path.open("rb") as cert:
+    with key_path.open("rb") as key, cert_path.open("rb") as cert, wwdr_path.open("rb") as wwdr:
         # Add credentials to pass package
         p.key = key.read()
         p.cert = cert.read()
+        p.sign(wwdr=wwdr.read())
 
     # As we've added credentials to pass package earlier we don't need to supply them to `.sign()`
     # This is an alternative to calling .sign() method with credentials as arguments.
-    p.sign()
 
     return p
 
