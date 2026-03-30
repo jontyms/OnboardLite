@@ -1,5 +1,8 @@
-{% extends 'base.html' %} {% block title %} Member Roster - Hack@UCF {% endblock
-%} {% block head %}
+{% extends 'base.html' %}
+
+{% block title %} Member Roster - Hack@UCF {% endblock %}
+
+{% block head %}
 <!-- List library -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
 
@@ -18,34 +21,65 @@
     background: rgba(0, 0, 0, 0.65);
     backdrop-filter: blur(2px);
   }
+
   .modal-content {
     margin: auto;
     max-height: 85vh;
     overflow-y: auto;
     box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
   }
+
   .modal-content h2 {
     margin-top: 0;
   }
+
   @media (max-width: 640px) {
     .modal {
       padding: 20px 5px;
     }
+
     .modal-content {
       width: 100%;
     }
   }
 
-  /* Admin scanner video sizing (match dues scanner behavior on iPhone) */
-  #scanner video {
+  /* iPhone scanner formatting fix */
+  #scanner {
+    position: relative;
     width: 100%;
-    max-width: 100%;
+    min-height: 100dvh;
+    box-sizing: border-box;
+    padding: 1rem 1rem calc(env(safe-area-inset-bottom) + 1rem);
+    text-align: center;
+  }
+
+  #scanner h2 {
+    margin-top: 0;
+  }
+
+  #scanner .btn {
+    margin: 0.25rem;
+  }
+
+  #scanner video {
+    display: block;
+    width: 100%;
+    max-width: 420px;
     height: auto;
+    margin: 1rem auto 0;
     border-radius: 12px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    background: #111;
+  }
+
+  footer,
+  .footer {
+    display: none !important;
   }
 </style>
-{% endblock %} {% block content %}
+{% endblock %}
+
+{% block content %}
 <div class="nav">
   <div class="nav_inner">
     <img src="/static/admin_logo.svg" />
@@ -65,6 +99,7 @@
       <tbody class="list"></tbody>
     </table>
   </div>
+
   <div class="hide_default" id="user">
     <div><button id="goBackBtn" class="btn searchbtn">Back</button></div>
     <img id="pfp" />
@@ -168,6 +203,7 @@
         </tr>
       </tbody>
     </table>
+
     <details>
       <summary><h2>Actions</h2></summary>
       <button class="hide_default btn" id="payDues">
@@ -198,22 +234,25 @@
         <i class="fa-solid fa-exchange-alt"></i> Migrate Discord Account
       </button>
     </details>
+
     <details>
       <summary><h2>Membership History</h2></summary>
       <div id="membership_history">
         <p>Loading membership history...</p>
       </div>
     </details>
+
     <details>
       <summary><h2>View as JSON</h2></summary>
       <pre id="user_json"></pre>
     </details>
   </div>
+
   <div class="hide_default" id="scanner">
     <h2>Present Hack@UCF ID Below</h2>
     <button id="scannerOff" class="btn">Search Manually</button>
     <button id="changeCamera" class="btn">Change Camera</button>
-    <video></video>
+    <video autoplay playsinline muted webkit-playsinline></video>
   </div>
 </div>
 
@@ -284,5 +323,8 @@
     <div id="migrationResults"></div>
   </div>
 </div>
+
 <script type="text/javascript" src="/static/admin.js"></script>
 {% endblock %}
+
+{% block footer %}{% endblock %}
