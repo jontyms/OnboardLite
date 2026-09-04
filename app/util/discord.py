@@ -18,6 +18,14 @@ if Settings().discord.enable:
     }
 
 
+def _api_error(req) -> str:
+    """Discord's JSON error body, or the raw text when it isn't JSON (e.g. a proxy error page)."""
+    try:
+        return str(req.json())
+    except ValueError:
+        return req.text[:200]
+
+
 class Discord:
     """
     This function handles Discord API interactions, including sending messages.
@@ -38,8 +46,11 @@ class Discord:
             headers=headers,
         )
         if req.status_code >= 400:
-            raise Exception(f"Discord api error: {req.json()}")
-            logger.exception(f"Failed to assign role {role_id} to {discord_id}")
+            # %s args rather than an f-string: Sentry groups log events on the
+            # message template, so every failure lands in one issue instead of
+            # a separate issue per member.
+            logger.error("Failed to assign role %s to %s: %s %s", role_id, discord_id, req.status_code, _api_error(req))
+            raise Exception(f"Discord api error: {_api_error(req)}")
         return req.status_code < 400
 
     @staticmethod
@@ -76,7 +87,7 @@ class Discord:
 
     def join_hack_server(self, discord_id, token):
         if not Settings().discord.enable:
-            return
+            return True
         # Make user join the Hack@UCF Discord, if it's their first rodeo.
         logger.info(f"Joining {discord_id} to Hack@UCF Discord")
         headers = {
@@ -85,8 +96,19 @@ class Discord:
             "X-Audit-Log-Reason": "Hack@UCF OnboardLite Bot",
         }
         put_join_guild = {"access_token": token["access_token"]}
-        requests.put(
+        req = requests.put(
             f"https://discordapp.com/api/guilds/{Settings().discord.guild_id}/members/{discord_id}",
             headers=headers,
             data=json.dumps(put_join_guild),
         )
+        # Deliberately does not raise: this runs inside the OAuth callback,
+        # before the user row is committed, so a member who cannot be
+        # auto-joined (guild cap, ban, missing bot permission) must still be
+        # able to finish signing up. Log loudly instead — until now this
+        # response was discarded, so a failure here stayed invisible until the
+        # dues role assignment 404'd with Unknown Member months later.
+        if req.status_code >= 400:
+            logger.error("Failed to join %s to guild %s: %s %s", discord_id, Settings().discord.guild_id, req.status_code, _api_error(req))
+            return False
+        # 201 = joined, 204 = already a member.
+        return True
