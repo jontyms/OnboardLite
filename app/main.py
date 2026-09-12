@@ -26,7 +26,7 @@ from app.models.user import (
 )
 
 # Import routes
-from app.routes import admin, api, infra, stripe, wallet
+from app.routes import admin, api, discord_bot, infra, stripe, wallet
 from app.util.approve import Approve
 
 # Import middleware
@@ -188,6 +188,7 @@ app.include_router(stripe.router)
 app.include_router(admin.router)
 app.include_router(wallet.router)
 app.include_router(infra.router)
+app.include_router(discord_bot.router)
 
 if os.getenv("ENV") == "development":
     from app.routes import dev_auth

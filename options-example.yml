@@ -23,6 +23,8 @@ discord:
   bot_token: "1"
   guild_id: "1"
   member_role: "1"
+  # Application public key from the Discord developer portal; needed for the /onboard-qr slash command
+  public_key: "your_discord_public_key_here"
   enable: false
 stripe:
   api_key: "your_stripe_api_key_here"
