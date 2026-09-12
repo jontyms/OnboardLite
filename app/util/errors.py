@@ -10,11 +10,17 @@ class Errors:
         super(Errors, self).__init__
 
     @staticmethod
-    def generate(request, num=404, msg="Page not found.", essay=""):
+    def generate(request, num=404, msg="Page not found.", essay="", links=None):
+        """
+        Render the error page.
+
+        links: optional list of (label, url, icon_class) tuples rendered as buttons
+        below the explanation, e.g. a help article or a Discord invite.
+        """
         return templates.TemplateResponse(
             request,
             "error.html",
-            {"code": num, "reason": msg, "essay": essay},
+            {"code": num, "reason": msg, "essay": essay, "links": links or []},
             status_code=num,
         )
 

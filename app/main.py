@@ -360,12 +360,25 @@ async def oauth_transformer_new(
 
     if not user:
         if not discordData.get("verified"):
-            tr = Errors.generate(
+            return Errors.generate(
                 request,
                 403,
-                "Discord email not verfied please try again",
+                "Your Discord email isn't verified",
+                essay=(
+                    "Discord reported that the email on your account hasn't been verified yet. "
+                    "Open Discord's User Settings > My Account, resend the verification email, click the link Discord sends you, "
+                    "then come back here and log in again. If you're still stuck, ask for help in the Hack@UCF Discord."
+                ),
+                links=[
+                    (
+                        "How to verify your Discord email",
+                        "https://support.discord.com/hc/en-us/articles/213219267-Resending-Verification-Email",
+                        "fa-solid fa-circle-question",
+                    ),
+                    ("Join the Hack@UCF Discord", "https://discord.com/invite/dqFtKgMqkJ", "fa-brands fa-discord"),
+                    ("Try logging in again", "/discord/new", "fa-solid fa-rotate-right"),
+                ],
             )
-            return tr
         infra_email = ""
         discord_id = discordData["id"]
         Discord().join_hack_server(discord_id, token)
