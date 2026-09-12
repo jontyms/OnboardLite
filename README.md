@@ -212,10 +212,12 @@ Members can run `/onboard-qr` in the Hack@UCF Discord to get their membership QR
 1. In the [Discord developer portal](https://discord.com/developers/applications), copy the application's **Public Key** into `discord.public_key`.
 2. Make sure the bot was invited to the guild with the `applications.commands` scope.
 3. Set the application's **Interactions Endpoint URL** to `https://join.hackucf.org/discord/interactions`. Discord only saves it if the app answers its PING and rejects bad signatures, so the app must be deployed with the key first.
-4. Register the commands with the guild:
+4. Register the commands with the guild. This runs inside the container so it uses the same config and secrets as the app:
 
 ```bash
-uv run python scripts/register_discord_commands.py
+docker compose run --rm onboardlite register-discord-commands
+# or locally:
+uv run app/entry.py register-discord-commands
 ```
 
 ## Kennelish Forms

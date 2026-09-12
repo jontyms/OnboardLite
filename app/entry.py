@@ -47,10 +47,25 @@ def run_migrate():
     subprocess.run(command)
 
 
+# Register the slash commands (/onboard-qr) with the Discord guild. Runs inside
+# the container so it sees the same config and Bitwarden secrets as the app:
+#   docker compose run --rm onboardlite register-discord-commands
+def run_register_discord_commands():
+    # Run as a script, this file's directory is on sys.path, not the project root.
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from app.routes.discord_bot import COMMANDS
+    from app.util.discord import Discord
+
+    for command in Discord.register_commands(COMMANDS):
+        print(f"registered /{command['name']} (id {command['id']})")
+
+
 # Entry point
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "migrate":
         run_migrate()
+    elif len(sys.argv) > 1 and sys.argv[1] == "register-discord-commands":
+        run_register_discord_commands()
     elif len(sys.argv) > 1 and sys.argv[1] == "dev":
         run_dev()
     else:
