@@ -95,6 +95,7 @@ discord:
   client_id: your_client_id
   secret: your_secret
   redirect_base: http://localhost:8000/api/oauth/
+  public_key: your_application_public_key  # for the /onboard-qr slash command
 
 # JWT Authentication
 jwt:
@@ -202,6 +203,19 @@ The first admin must be set manually:
 
 ```sql
 UPDATE usermodel SET sudo = true WHERE discord_id = 'YOUR_DISCORD_ID';
+```
+
+## Discord Slash Commands
+
+Members can run `/onboard-qr` in the Hack@UCF Discord to get their membership QR code (the same code as on `/profile` and in the wallet passes) as an ephemeral message. Slash commands are served by the app itself at `POST /discord/interactions` — no bot process runs. To set it up:
+
+1. In the [Discord developer portal](https://discord.com/developers/applications), copy the application's **Public Key** into `discord.public_key`.
+2. Make sure the bot was invited to the guild with the `applications.commands` scope.
+3. Set the application's **Interactions Endpoint URL** to `https://join.hackucf.org/discord/interactions`. Discord only saves it if the app answers its PING and rejects bad signatures, so the app must be deployed with the key first.
+4. Register the commands with the guild:
+
+```bash
+uv run python scripts/register_discord_commands.py
 ```
 
 ## Kennelish Forms

@@ -45,6 +45,7 @@ def BitwardenConfig(settings: dict):
         "discord_bot_token": ("discord", "bot_token"),
         "discord_client_id": ("discord", "client_id"),
         "discord_secret": ("discord", "secret"),
+        "discord_public_key": ("discord", "public_key"),
         "stripe_api_key": ("stripe", "api_key"),
         "stripe_webhook_secret": ("stripe", "webhook_secret"),
         "stripe_price_id": ("stripe", "price_id"),
@@ -107,6 +108,7 @@ class DiscordConfig(BaseModel):
         redirect_base (str): The base URL for redirecting after authentication.
         scope (str): The scope of permissions required for the Discord integration.
         secret (SecretStr): The secret key for the Discord oauth.
+        public_key (str): The application public key from the Discord developer portal, used to verify slash-command interaction signatures.
         enable (Optional[bool]): A flag indicating whether Discord integration is enabled.
     """
 
@@ -117,6 +119,7 @@ class DiscordConfig(BaseModel):
     redirect_base: Optional[str] = Field(None)
     scope: Optional[str] = Field(None)
     secret: Optional[SecretStr] = Field(None)
+    public_key: Optional[str] = Field(None)
     enable: Optional[bool] = Field(True)
 
     @model_validator(mode="after")
