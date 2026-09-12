@@ -12,6 +12,7 @@ from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from joserfc import jwt
+from oauthlib.oauth2 import InvalidGrantError
 from requests_oauthlib import OAuth2Session
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
@@ -343,13 +344,25 @@ async def oauth_transformer_new(
         scope=Settings().discord.scope,
     )
 
-    token = oauth.fetch_token(
-        "https://discord.com/api/oauth2/token",
-        client_id=Settings().discord.client_id,
-        client_secret=Settings().discord.secret.get_secret_value(),  # type: ignore[attribute-error]
-        # authorization_response=code
-        code=code,
-    )
+    try:
+        token = oauth.fetch_token(
+            "https://discord.com/api/oauth2/token",
+            client_id=Settings().discord.client_id,
+            client_secret=Settings().discord.secret.get_secret_value(),  # type: ignore[attribute-error]
+            # authorization_response=code
+            code=code,
+        )
+    except InvalidGrantError:
+        # Discord authorization codes are single-use and short-lived. This is
+        # reached when the member refreshes or re-opens the callback URL, or
+        # sits on the Discord consent page too long. Not a server fault.
+        return Errors.generate(
+            request,
+            400,
+            "Discord log-in expired",
+            essay="That Discord log-in link was already used or has expired. Please try logging in again.",
+            links=[("Try logging in again", "/discord/new", "fa-solid fa-rotate-right")],
+        )
 
     r = oauth.get("https://discord.com/api/users/@me")
     discordData = r.json()
