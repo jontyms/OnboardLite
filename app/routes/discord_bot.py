@@ -36,6 +36,10 @@ INTERACTION_APPLICATION_COMMAND = 2
 CALLBACK_PONG = 1
 CALLBACK_CHANNEL_MESSAGE = 4
 FLAG_EPHEMERAL = 1 << 6
+# Discord rejects an interaction response with "Missing Permissions" when the
+# app lacks these in the channel the command was run from.
+PERMISSION_EMBED_LINKS = 1 << 14
+PERMISSION_ATTACH_FILES = 1 << 15
 
 # Every command we register with Discord. `entry.py register-discord-commands`
 # reads this so the endpoint and the portal can't drift apart.
@@ -126,5 +130,10 @@ async def interactions(request: Request, session=Depends(get_session)):
     user = session.exec(select(UserModel).where(UserModel.discord_id == str(discord_id))).one_or_none()
     if not user:
         return ephemeral_message("You haven't onboarded yet! Sign up at https://join.hackucf.org and then try again.")
+
+    needed = PERMISSION_EMBED_LINKS | PERMISSION_ATTACH_FILES
+    if int(interaction.get("app_permissions", 0)) & needed != needed:
+        logger.warning("Bot lacks Embed Links / Attach Files in channel %s; cannot send the QR", interaction.get("channel_id"))
+        return ephemeral_message("I can't attach images in this channel. You can find your QR code at https://join.hackucf.org/profile")
 
     return onboard_qr_response(user)

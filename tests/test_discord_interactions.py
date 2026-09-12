@@ -54,9 +54,13 @@ def signed_post(client: TestClient, key: Ed25519PrivateKey, interaction: dict, *
     )
 
 
-def onboard_qr_interaction(discord_id: str, *, in_guild: bool = True) -> dict:
+# Embed Links | Attach Files: what the bot needs in the channel to send the QR.
+ALL_NEEDED_PERMISSIONS = str((1 << 14) | (1 << 15))
+
+
+def onboard_qr_interaction(discord_id: str, *, in_guild: bool = True, app_permissions: str = ALL_NEEDED_PERMISSIONS) -> dict:
     user = {"id": discord_id, "username": "someone"}
-    interaction = {"type": 2, "data": {"name": "onboard-qr", "type": 1}}
+    interaction = {"type": 2, "data": {"name": "onboard-qr", "type": 1}, "app_permissions": app_permissions}
     if in_guild:
         interaction["member"] = {"user": user}
     else:
@@ -141,6 +145,16 @@ def test_onboard_qr_shows_not_full_member(client: TestClient, signing_key, sessi
     response = signed_post(client, signing_key, onboard_qr_interaction(test_user.discord_id))
     payload, _ = parse_multipart(response)
     assert "Full member: No" in payload["data"]["embeds"][0]["description"]
+
+
+def test_onboard_qr_without_attach_files_permission_falls_back_to_link(client: TestClient, signing_key, test_user: UserModel):
+    """Discord would reject the attachment with "Missing Permissions"; point at the profile page instead."""
+    embed_links_only = str(1 << 14)
+    response = signed_post(client, signing_key, onboard_qr_interaction(test_user.discord_id, app_permissions=embed_links_only))
+    assert response.status_code == 200
+    body = response.json()
+    assert body["data"]["flags"] & 64
+    assert "join.hackucf.org/profile" in body["data"]["content"]
 
 
 def test_onboard_qr_unknown_user(client: TestClient, signing_key):
