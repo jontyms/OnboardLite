@@ -125,6 +125,36 @@ Allows updating the user's database using a schema assumed by the Kennelish file
 #    return user.ethics_form.dict()
 #
 #
+# Human-readable names for the unique columns a member can collide on when
+# filling in the form. Anything else falls through to a generic message.
+_UNIQUE_FIELD_LABELS = {
+    "usermodel.email": "email",
+    "uq_usermodel_email": "email",
+    "usermodel.nid": "NID",
+    "usermodel.ucf_id": "UCF ID",
+}
+
+
+def _integrity_error_message(e: IntegrityError) -> str:
+    """
+    Turn a UNIQUE-constraint failure into a message we can show the member.
+
+    The overwhelmingly common cause is a returning member who signed in with a
+    *different* Discord account and re-entered the email/NID already on their
+    original account. That is a user-flow, not a crash, so log at warning and
+    keep the raw SQL (which carries their name, email and NID) out of the
+    response.
+    """
+    raw = str(e.orig) if e.orig is not None else str(e)
+    logger.warning("Form submit rejected by unique constraint: %s", raw.splitlines()[0])
+
+    for key, label in _UNIQUE_FIELD_LABELS.items():
+        if key in raw:
+            return f"That {label} is already registered to another account. If it's yours, you may have signed in with a different Discord account than before - create a thread in #infra-helpdesk on Discord so we can migrate it."
+
+    return "Something you entered is already registered to another account. Create a thread in #infra-helpdesk on Discord for help."
+
+
 @router.post("/form/{num}")
 async def post_form(
     request: Request,
@@ -167,9 +197,8 @@ async def post_form(
     try:
         session.commit()
     except IntegrityError as e:
-        logger.error(e)
         session.rollback()
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=("Integrity Error. " + str(e).split("")[0]))
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=_integrity_error_message(e)) from e
     session.refresh(user)
 
     return user.model_dump()
