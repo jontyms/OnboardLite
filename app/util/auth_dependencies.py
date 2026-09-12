@@ -158,7 +158,7 @@ def get_current_user(request: Request, token: Optional[str] = Cookie(None), sess
         except ValueError:
             user_id = None
         if user_id is None or session.get(UserModel, user_id) is None:
-            logger.info("Rejecting JWT for user %s: no such user in the database", user_jwt.get("id"))
+            logger.info("Rejecting JWT: its user no longer exists in the database")
             raise _reject(request, "Account no longer exists", clear_cookie=True)
 
     # Set Sentry user context if enabled
