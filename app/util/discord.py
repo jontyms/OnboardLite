@@ -54,6 +54,29 @@ class Discord:
         return req.status_code < 400
 
     @staticmethod
+    def register_commands(commands: list[dict]) -> list[dict]:
+        """
+        Bulk-overwrite the guild's slash commands with `commands`, so a command
+        removed from the list disappears from Discord on the next run.
+
+        Guild-scoped rather than global: guild commands show up instantly, global
+        ones take up to an hour, and membership only matters in the Hack@UCF guild.
+        Registration alone does nothing until the "Interactions Endpoint URL" in
+        the developer portal points at /discord/interactions.
+        """
+        if not Settings().discord.enable:
+            raise Exception("Discord integration is disabled")
+        req = requests.put(
+            f"https://discord.com/api/v10/applications/{Settings().discord.client_id}/guilds/{Settings().discord.guild_id}/commands",
+            headers=headers,
+            data=json.dumps(commands),
+        )
+        if req.status_code >= 400:
+            logger.error("Failed to register Discord commands: %s %s", req.status_code, _api_error(req))
+            raise Exception(f"Discord api error: {_api_error(req)}")
+        return req.json()
+
+    @staticmethod
     def get_dm_channel_id(discord_id):
         discord_id = str(discord_id)
 

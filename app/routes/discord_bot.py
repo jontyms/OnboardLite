@@ -6,7 +6,7 @@ Discord slash commands, served as an Interactions endpoint.
 Discord POSTs each interaction here and expects an answer in the same
 response, so there is no gateway connection or bot process. Set the
 "Interactions Endpoint URL" in the developer portal to /discord/interactions
-and register the commands with scripts/register_discord_commands.py.
+and register the commands with `app/entry.py register-discord-commands`.
 """
 
 import json
@@ -37,8 +37,8 @@ CALLBACK_PONG = 1
 CALLBACK_CHANNEL_MESSAGE = 4
 FLAG_EPHEMERAL = 1 << 6
 
-# Every command we register with Discord. The registration script reads this
-# so the endpoint and the portal can't drift apart.
+# Every command we register with Discord. `entry.py register-discord-commands`
+# reads this so the endpoint and the portal can't drift apart.
 COMMANDS = [
     {
         "name": "onboard-qr",
