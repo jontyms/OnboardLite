@@ -76,3 +76,32 @@ def test_duplicate_nid_is_a_friendly_422(client: TestClient, session: Session, t
     assert response.status_code == 422
     assert response.json()["detail"].startswith("That NID is already registered")
 
+
+def test_jwt_for_deleted_user_is_bounced_to_login(client: TestClient, session: Session, test_user: UserModel, jwt: str):
+    # Mirrors the admin Discord-migration tool: the temp account is deleted but
+    # the member's browser still holds a valid JWT for it.
+    session.delete(test_user.discord)
+    session.delete(test_user)
+    session.commit()
+
+    response = client.get("/join/2/", cookies={"token": jwt}, follow_redirects=False)
+
+    assert response.status_code == 302
+    assert response.headers["location"].startswith("/discord/new?redir=")
+    assert 'token=""' in response.headers["set-cookie"]
+    assert "Max-Age=0" in response.headers["set-cookie"]
+
+
+def test_jwt_for_deleted_user_is_401_for_api_callers(client: TestClient, session: Session, test_user: UserModel, jwt: str):
+    session.delete(test_user.discord)
+    session.delete(test_user)
+    session.commit()
+
+    response = client.get("/profile/", cookies={"token": jwt}, headers={"Authorization": "Bearer nonsense"})
+
+    assert response.status_code == 401
+
+
+def test_live_jwt_still_works(client: TestClient, jwt: str):
+    response = client.get("/join/2/", cookies={"token": jwt})
+    assert response.status_code == 200
