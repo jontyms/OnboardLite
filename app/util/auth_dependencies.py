@@ -7,7 +7,10 @@ from typing import Annotated, Optional
 
 from fastapi import Cookie, Depends, HTTPException, Request, status
 from joserfc import errors, jwt
+from sqlmodel import Session
 
+from app.models.user import UserModel
+from app.util.database import get_session
 from app.util.settings import Settings
 
 # Handle optional sentry import
@@ -108,7 +111,27 @@ def _authenticate_jwt_cookie(token: str) -> dict:
             raise AuthenticationError(f"Token validation failed: {e}")
 
 
-def get_current_user(request: Request, token: Optional[str] = Cookie(None)) -> dict:
+# Header value that tells the browser to drop the session cookie. Mirrors what
+# RedirectResponse.delete_cookie(key="token") emits on /logout.
+_CLEAR_TOKEN_COOKIE = 'token=""; Max-Age=0; Path=/; HttpOnly; SameSite=lax'
+
+
+def _reject(request: Request, detail: str, clear_cookie: bool = False) -> HTTPException:
+    """
+    Build the auth-failure response: 401 for API callers, otherwise a 302 back
+    through Discord that returns the member to the page they asked for.
+    """
+    if request.headers.get("Authorization"):
+        return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail)
+
+    redir_jwt = sign_redirect_url(request.url.path)
+    headers = {"Location": f"/discord/new?redir={redir_jwt}"}
+    if clear_cookie:
+        headers["Set-Cookie"] = _CLEAR_TOKEN_COOKIE
+    return HTTPException(status_code=status.HTTP_302_FOUND, detail=detail, headers=headers)
+
+
+def get_current_user(request: Request, token: Optional[str] = Cookie(None), session: Session = Depends(get_session)) -> dict:
     """
     FastAPI dependency to get current authenticated user
     Raises HTTPException on auth failure for web requests
@@ -116,23 +139,27 @@ def get_current_user(request: Request, token: Optional[str] = Cookie(None)) -> d
     try:
         user_jwt = authenticate_request(request, token)
     except AuthenticationError as e:
-        # For API requests (with Authorization header), return 401
-        if request.headers.get("Authorization"):
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
-
-        # For web requests, redirect to Discord OAuth
-        redir_jwt = sign_redirect_url(request.url.path)
-        raise HTTPException(status_code=status.HTTP_302_FOUND, detail="Authentication required", headers={"Location": f"/discord/new?redir={redir_jwt}"})
+        # API callers get a 401 with the reason; browsers get sent through Discord.
+        raise _reject(request, str(e) if request.headers.get("Authorization") else "Authentication required")
 
     # Session timeout check (skip for API keys)
     if not user_jwt.get("api_key", False):
         creation_date = user_jwt.get("issued", -1)
         if time.time() > creation_date + Settings().jwt.lifetime_user:
-            if request.headers.get("Authorization"):
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session expired")
-            else:
-                redir_jwt = sign_redirect_url(request.url.path)
-                raise HTTPException(status_code=status.HTTP_302_FOUND, detail="Session expired", headers={"Location": f"/discord/new?redir={redir_jwt}"})
+            raise _reject(request, "Session expired")
+
+        # A signed JWT can outlive its user: the admin Discord-migration tool
+        # deletes the temporary account it merges away, but the member's browser
+        # keeps the cookie for that id for up to jwt.lifetime_user. Bounce them
+        # through Discord so they land in the surviving account instead of
+        # hitting a None user on every page.
+        try:
+            user_id = uuid.UUID(str(user_jwt.get("id")))
+        except ValueError:
+            user_id = None
+        if user_id is None or session.get(UserModel, user_id) is None:
+            logger.info("Rejecting JWT for user %s: no such user in the database", user_jwt.get("id"))
+            raise _reject(request, "Account no longer exists", clear_cookie=True)
 
     # Set Sentry user context if enabled
     if Settings().telemetry.enable and set_user is not None:

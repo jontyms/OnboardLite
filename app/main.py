@@ -477,6 +477,8 @@ async def profile(
 ):
     statement = select(UserModel).where(UserModel.id == uuid.UUID(current_user["id"])).options(selectinload(UserModel.discord), selectinload(UserModel.ethics_form))  # type: ignore[bad-argument-type]
     user_data = user_to_dict(session.exec(statement).one_or_none())
+    if user_data is None:
+        return Errors.generate(request, 404, "Account not found", essay="Your session points at an account that no longer exists. Please log out and log in again.")
 
     # Re-run approval workflow in background.
     background_tasks.add_task(Approve.approve_member, uuid.UUID(current_user.get("id")))
@@ -512,6 +514,8 @@ async def forms(
 
     statement = select(UserModel).where(UserModel.id == uuid.UUID(current_user.get("id"))).options(selectinload(UserModel.discord))  # type: ignore[bad-argument-type]
     user_data = session.exec(statement).one_or_none()
+    if user_data is None:
+        return Errors.generate(request, 404, "Account not found", essay="Your session points at an account that no longer exists. Please log out and log in again.")
     # Have Kennelish parse the data.
     user_data = user_to_dict(user_data)
     body = Kennelish.parse(data, user_data)
