@@ -103,7 +103,7 @@ class Approve:
                     "credentials": [
                         {
                             "value": password,
-                            "type": "secret",
+                            "type": "password",
                         }
                     ],
                 },
